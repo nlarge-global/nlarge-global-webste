@@ -17,8 +17,8 @@ export default function LoadingScreen() {
           transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="mb-8"
         >
-          <h1 className="font-display text-4xl md:text-6xl font-light tracking-wider text-foreground">NLarge Global</h1>
-          <p className="font-sans text-sm tracking-[0.2em] text-foreground/60 mt-2 uppercase">Crafting Excellence</p>
+          <h1 className="font-display text-4xl md:text-6xl  tracking-wider text-foreground">NLarge Global</h1>
+          <p className=" text-sm tracking-[0.2em] text-foreground/60 mt-2 uppercase">Crafting Excellence</p>
         </motion.div>
 
         <motion.div

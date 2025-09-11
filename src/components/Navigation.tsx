@@ -1,87 +1,97 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
-import Link from "next/link"
+// import { motion } from "framer-motion"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "nextjs-toploader/app";
 
 export default function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
+    const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({
         behavior: "smooth",
         block: "start",
-      })
+      });
+    }else{
+      router.push(`/#${sectionId}`)
     }
-  }
+  };
 
   return (
-    <motion.nav
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        isScrolled ? "bg-background/90 backdrop-blur-md border-b border-foreground/10" : ""
+    <nav
+      className={`fixed top-0 w-full z-50 transition-all duration-500 nav-animate ${
+        isScrolled
+          ? "bg-background/90 backdrop-blur-md border-b border-foreground/10"
+          : ""
       }`}
+      aria-label="Main Navigation"
     >
-      <div className="max-w-7xl mx-auto px-8 py-6">
+      <div className="max-w-7xl mx-auto px-8 py-4">
         <div className="flex items-center justify-between">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="font-serif text-2xl font-light text-foreground cursor-pointer"
-          >
-            <Link href="/">N</Link>
-          </motion.div>
+          <div className="cursor-pointer nav-logo focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 size-16">
+            <Link href="/" aria-label="NLarge Home">
+              <Image
+                src={"/logo.png"}
+                alt="logo"
+                height={500}
+                width={500}
+                quality={100}
+                className=" bg-blend-multiply"
+              />
+            </Link>
+          </div>
 
           <div className="hidden md:flex items-center space-x-12">
-            <motion.button
+            <button
               onClick={() => scrollToSection("about")}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              whileHover={{ y: -2 }}
-              className="font-sans text-sm tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors"
+              className=" text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="Scroll to About section"
             >
-              About
-            </motion.button>
+              About us
+            </button>
 
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              whileHover={{ y: -2 }}
-            >
+            <div className="nav-animate">
+              <Link
+                href="/services"
+                className=" text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+                aria-label="View Services"
+              >
+                Services
+              </Link>
+            </div>
+            <div className="nav-animate">
               <Link
                 href="/products"
-                className="font-sans text-sm tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors"
+                className=" text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+                aria-label="View Products"
               >
                 Products
               </Link>
-            </motion.div>
+            </div>
 
-            <motion.button
+            <button
               onClick={() => scrollToSection("contact")}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              whileHover={{ y: -2 }}
-              className="font-sans text-sm tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors"
+              className=" text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="Scroll to Contact section"
             >
               Contact
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>
-    </motion.nav>
-  )
+    </nav>
+  );
 }
