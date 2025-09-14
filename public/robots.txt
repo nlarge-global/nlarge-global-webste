@@ -1,0 +1,22 @@
+# Robots.txt for NLarge Global
+User-agent: *
+Allow: /
+
+# Block access to admin areas if any exist
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+
+# Allow specific crawling of important pages
+Allow: /products
+Allow: /services
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+# Sitemap location
+Sitemap: https://nlarge.com/sitemap.xml
+
+# Crawl delay (optional - adjust based on server capacity)
+Crawl-delay: 1

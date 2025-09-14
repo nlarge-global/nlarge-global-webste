@@ -59,9 +59,27 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-foreground/40 text-sm">
-            © {new Date().getFullYear()} NLarge Global. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <p className="text-foreground/40 text-sm">
+              © {new Date().getFullYear()} NLarge Global. All rights reserved.
+            </p>
+            <div className="flex gap-4 text-sm">
+              <Link
+                href="/privacy-policy"
+                className="text-foreground/40 hover:text-foreground/70 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50"
+                aria-label="View Privacy Policy"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms-of-service"
+                className="text-foreground/40 hover:text-foreground/70 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50"
+                aria-label="View Terms of Service"
+              >
+                Terms of Service
+              </Link>
+            </div>
+          </div>
           <p className="text-foreground/40 text-sm mt-4 md:mt-0">
             Crafted with precision and care.
           </p>

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
+import StructuredData from "@/components/StructuredData";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,9 +19,74 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "NLarge Global - Crafting Excellence",
+  title: {
+    template: "%s | NLarge Global",
+    default: "NLarge Global - Crafting Excellence in Software Solutions",
+  },
   description:
-    "NLarge Global - Crafting exceptional software solutions with timeless elegance and precision.",
+    "NLarge Global crafts exceptional software solutions with timeless elegance and precision. Specialized in web development, mobile apps, and digital innovation.",
+  keywords: [
+    "software development",
+    "web development",
+    "mobile app development",
+    "digital solutions",
+    "technology consulting",
+    "custom software",
+    "NLarge Global",
+  ],
+  authors: [{ name: "NLarge Global" }],
+  creator: "NLarge Global",
+  publisher: "NLarge Global",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://nlarge.com"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "NLarge Global - Crafting Excellence in Software Solutions",
+    description:
+      "NLarge Global crafts exceptional software solutions with timeless elegance and precision.",
+    url: "https://nlarge.com",
+    siteName: "NLarge Global",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "NLarge Global Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NLarge Global - Crafting Excellence in Software Solutions",
+    description:
+      "NLarge Global crafts exceptional software solutions with timeless elegance and precision.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -33,40 +99,12 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${cormorant.variable} scroll-smooth`}
     >
-      <head>
-        
-        <title>NLarge Global | Vintage Elegance & Innovation</title>
-        <meta
-          name="description"
-          content="NLarge Global crafts elegant, classic, and innovative products for a timeless experience."
-        />
-        <meta name="apple-mobile-web-app-title" content="NLarge Global" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#ffffff" />
-        <meta property="og:title" content="NLarge Global" />
-        <meta
-          property="og:description"
-          content="Vintage, classic, and elegant products for a timeless experience."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://nlarge.com" />
-        <meta property="og:image" content="/public/globe.svg" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="NLarge Global" />
-        <meta
-          name="twitter:description"
-          content="Vintage, classic, and elegant products for a timeless experience."
-        />
-        <meta name="twitter:image" content="/public/globe.svg" />
-        <link rel="icon" href="/favicon.ico" />
-      </head>
       <body
-        className=" antialiased bg-white text-foreground overflow-x-hidden"
+        className="antialiased bg-white text-foreground overflow-x-hidden"
         role="main"
       >
-        <NextTopLoader
-          color="#000000"
-         />
+        <StructuredData />
+        <NextTopLoader color="#000000" />
         {children}
       </body>
     </html>
