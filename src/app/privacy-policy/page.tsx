@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "Privacy Policy - NLarge Global",
     description:
       "Privacy Policy for NLarge Global. Learn how we collect, use, and protect your personal information.",
-    url: "https://nlarge.com/privacy-policy",
+  url: "https://nlargecorp.com/privacy-policy",
     siteName: "NLarge Global",
     type: "website",
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://nlarge.com/privacy-policy",
+    canonical: "https://nlargecorp.com/privacy-policy",
   },
 };
 
@@ -191,7 +191,7 @@ export default function PrivacyPolicyPage() {
                 <br />
                 Email: privacy@nlarge.com
                 <br />
-                Website: https://nlarge.com/contact
+                Website: https://nlargecorp.com/contact
               </p>
             </div>
           </section>

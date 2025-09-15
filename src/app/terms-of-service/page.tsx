@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "Terms of Service - NLarge Global",
     description:
       "Terms of Service for NLarge Global. Read our terms and conditions for using our services and website.",
-    url: "https://nlarge.com/terms-of-service",
+  url: "https://nlargecorp.com/terms-of-service",
     siteName: "NLarge Global",
     type: "website",
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://nlarge.com/terms-of-service",
+    canonical: "https://nlargecorp.com/terms-of-service",
   },
 };
 
@@ -237,7 +237,7 @@ export default function TermsOfServicePage() {
                 <br />
                 Email: legal@nlarge.com
                 <br />
-                Website: https://nlarge.com/contact
+                Website: https://nlargecorp.com/contact
               </p>
             </div>
           </section>

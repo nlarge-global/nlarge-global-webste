@@ -1,4 +1,5 @@
 export default function StructuredData() {
+  // Organization Schema
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -6,16 +7,16 @@ export default function StructuredData() {
     alternateName: "NLarge",
     description:
       "Professional software development company specializing in web development, mobile applications, and digital solutions with timeless elegance and precision.",
-    url: "https://nlarge.com",
+    url: "https://nlargecorp.com",
     logo: {
       "@type": "ImageObject",
-      url: "https://nlarge.com/logo.png",
+      url: "https://nlargecorp.com/logo.png",
       width: 500,
       height: 500,
     },
-    image: "https://nlarge.com/logo.png",
-    email: "info@nlarge.com",
-    sameAs: ["https://nlarge.com"],
+    image: "https://nlargecorp.com/logo.png",
+    email: "info@nlargecorp.com",
+    sameAs: ["https://nlargecorp.com"],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Remote",
@@ -72,11 +73,12 @@ export default function StructuredData() {
     },
   };
 
+  // Website Schema
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "NLarge Global",
-    url: "https://nlarge.com",
+    url: "https://nlargecorp.com",
     description:
       "Professional software development services with timeless elegance and precision",
     publisher: {
@@ -87,12 +89,13 @@ export default function StructuredData() {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://nlarge.com/search?q={search_term_string}",
+        urlTemplate: "https://nlargecorp.com/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
   };
 
+  // Breadcrumb Schema (only for existing routes)
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -101,49 +104,36 @@ export default function StructuredData() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://nlarge.com",
+        item: "https://nlargecorp.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Services",
-        item: "https://nlarge.com/services",
+        item: "https://nlargecorp.com/services",
       },
+      // Remove non-existent routes if any
       {
         "@type": "ListItem",
         position: 3,
-        name: "Products",
-        item: "https://nlarge.com/products",
-      },
-      {
-        "@type": "ListItem",
-        position: 4,
         name: "Contact",
-        item: "https://nlarge.com/contact",
+        item: "https://nlargecorp.com/contact",
       },
     ],
   };
 
+  // Direct script tag insertion (no dangerouslySetInnerHTML)
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
-        }}
-      />
+      <script type="application/ld+json">
+        {JSON.stringify(organizationSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
+      </script>
     </>
   );
 }

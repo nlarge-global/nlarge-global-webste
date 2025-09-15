@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: "Contact Us - NLarge Global",
     description:
       "Contact NLarge Global for your software development needs. Get in touch with our team for custom solutions, consultations, and project inquiries.",
-    url: "https://nlarge.com/contact",
+  url: "https://nlargecorp.com/contact",
     siteName: "NLarge Global",
     images: [
       {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://nlarge.com/contact",
+    canonical: "https://nlargecorp.com/contact",
   },
 };
 

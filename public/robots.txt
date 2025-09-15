@@ -16,7 +16,7 @@ Allow: /privacy-policy
 Allow: /terms-of-service
 
 # Sitemap location
-Sitemap: https://nlarge.com/sitemap.xml
+Sitemap: https://nlargecorp.com/sitemap.xml
 
 # Crawl delay (optional - adjust based on server capacity)
 Crawl-delay: 1

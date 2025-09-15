@@ -18,7 +18,7 @@ export function generateSEOMetadata({
   keywords?: string[];
   type?: "website" | "article";
 }): Metadata {
-  const baseUrl = "https://nlarge.com";
+  const baseUrl = "https://nlargecorp.com";
   const url = `${baseUrl}${path}`;
 
   return {

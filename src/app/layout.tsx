@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://nlarge.com"),
+  metadataBase: new URL("https://nlargecorp.com"),
   alternates: {
     canonical: "/",
   },
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: "NLarge Global - Crafting Excellence in Software Solutions",
     description:
       "NLarge Global crafts exceptional software solutions with timeless elegance and precision.",
-    url: "https://nlarge.com",
+  url: "https://nlargecorp.com",
     siteName: "NLarge Global",
     images: [
       {

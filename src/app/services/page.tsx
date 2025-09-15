@@ -2,7 +2,10 @@ import { Metadata } from "next";
 import ServicesClient from "./ServicesClient";
 
 export const metadata: Metadata = {
-  title: "Services - Professional Software Development",
+  title: {
+    template: "%s | NLarge Global",
+    default: "Services | NLarge Global",
+  },
   description:
     "Discover our comprehensive software development services including web development, mobile apps, cloud solutions, and digital transformation consulting.",
   keywords: [
@@ -15,10 +18,10 @@ export const metadata: Metadata = {
     "custom software development",
   ],
   openGraph: {
-    title: "Services - NLarge Global",
+    title: "Services | NLarge Global",
     description:
       "Discover our comprehensive software development services including web development, mobile apps, cloud solutions, and digital transformation consulting.",
-    url: "https://nlarge.com/services",
+  url: "https://nlargecorp.com/services",
     siteName: "NLarge Global",
     images: [
       {
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Services - NLarge Global",
+    title: "Services | NLarge Global",
     description:
       "Discover our comprehensive software development services including web development, mobile apps, cloud solutions, and digital transformation consulting.",
     images: ["/logo.png"],
@@ -42,7 +45,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://nlarge.com/services",
+    canonical: "https://nlargecorp.com/services",
   },
 };
 
