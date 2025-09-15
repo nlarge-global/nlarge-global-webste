@@ -6,7 +6,7 @@ export default function ProductsSection() {
   return (
     <>
       <HeroProductSection />
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center mb-16 md:mb-32 max-w-7xl mx-auto">
+  <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12 md:gap-24 items-center mb-8 sm:mb-16 md:mb-32 max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -16,10 +16,10 @@ export default function ProductsSection() {
             ease: [0.25, 0.1, 0.25, 1],
           }}
         >
-          <h2 className="font-serif text-6xl  text-foreground mb-8">
+          <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl text-foreground mb-6 sm:mb-8">
             Pravli
           </h2>
-          <p className="font-sans text-base text-foreground/70 leading-relaxed mb-8">
+          <p className="font-sans text-sm sm:text-base text-foreground/70 leading-relaxed mb-6 sm:mb-8">
             A revolutionary restaurant management system that transforms how
             culinary establishments operate. Pravli combines intuitive design
             with powerful functionality, creating an experience that feels as
@@ -29,7 +29,7 @@ export default function ProductsSection() {
           <motion.ul
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="list-disc list-inside mb-8 space-y-2"
+            className="list-disc list-inside mb-6 sm:mb-8 space-y-2"
           >
             {[
               "Elegant Interface Design",
@@ -48,7 +48,7 @@ export default function ProductsSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className=" text-sm tracking-wide uppercase border border-foreground px-8 py-3 text-foreground transition-all duration-200 cursor-pointer hover:bg-black hover:text-white flex items-center gap-2"
+            className=" text-xs sm:text-sm tracking-wide uppercase border border-foreground px-4 sm:px-8 py-2 sm:py-3 text-foreground transition-all duration-200 cursor-pointer hover:bg-black hover:text-white flex items-center gap-2"
           >
             Visit
             <FiExternalLink />
@@ -63,9 +63,9 @@ export default function ProductsSection() {
             delay: 0.5,
             ease: [0.25, 0.1, 0.25, 1],
           }}
-          className="relative group"
+          className="relative group mt-6 sm:mt-0"
         >
-          <div className="aspect-[4/3] bg-background border border-foreground/20 overflow-hidden">
+          <div className="aspect-[4/3] bg-background border border-foreground/20 overflow-hidden max-w-xs sm:max-w-md mx-auto">
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
@@ -87,13 +87,13 @@ export default function ProductsSection() {
           delay: 0.8,
           ease: [0.25, 0.1, 0.25, 1],
         }}
-        className="text-center min-h-screen flex flex-col items-center justify-center "
+  className="text-center min-h-[60vh] sm:min-h-screen flex flex-col items-center justify-center px-4 "
       >
-        <h3 className=" text-4xl  text-foreground mb-12">
+  <h3 className=" text-2xl sm:text-4xl text-foreground mb-8 sm:mb-12">
           Future Innovations
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-16 max-w-4xl mx-auto">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-16 max-w-4xl mx-auto">
           {[
             {
               title: "Atelier",
@@ -138,9 +138,9 @@ function HeroProductSection() {
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-      className="text-center h-screen flex flex-col items-center justify-center mb-32 md:mb-48 relative"
+  className="text-center min-h-[60vh] sm:h-screen flex flex-col items-center justify-center mb-12 sm:mb-32 md:mb-48 relative px-4"
     >
-      <motion.h1 className="font-serif text-8xl md:text-[10rem]  text-foreground mb-8 leading-none">
+  <motion.h1 className="font-serif text-4xl sm:text-7xl md:text-8xl lg:text-[10rem] text-foreground mb-6 sm:mb-8 leading-none">
         <motion.span
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -169,7 +169,7 @@ function HeroProductSection() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        className=" text-lg tracking-wide uppercase text-foreground/70 max-w-2xl mx-auto"
+        className=" text-xs sm:text-base md:text-lg tracking-wide uppercase text-foreground/70 max-w-2xl mx-auto"
       >
         Sophisticated solutions designed with precision and elegance
       </motion.p>
