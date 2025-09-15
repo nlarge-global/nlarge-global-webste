@@ -54,11 +54,11 @@ export default function ServicesClient() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen  relative overflow-hidden scroll-snap-main"
+  className="min-h-screen relative overflow-hidden scroll-snap-main"
     >
       <Navigation />
       <motion.section
-        className="relative text-center min-h-screen flex flex-col justify-center"
+        className="relative text-center min-h-[70vh] sm:min-h-screen flex flex-col justify-center px-4"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.77, 0, 0.175, 1] }}
@@ -69,16 +69,16 @@ export default function ServicesClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <h1 className="font-serif text-6xl md:text-8xl font-light   mb-6 tracking-tight">
+          <h1 className="font-serif text-3xl sm:text-6xl md:text-8xl font-light mb-4 sm:mb-6 tracking-tight mt-16 sm:mt-24">
             Our Services
           </h1>
           <div className="w-24 h-px  mx-auto mb-8" />
-          <p className=" text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto">
+          <p className=" text-base sm:text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto">
             Elevating businesses through meticulously crafted digital solutions
           </p>
         </motion.div>
 
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
+  <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ export default function ServicesClient() {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="mt-2 text-xs text-[#2c2c2c]/60 ">Scroll Down</span>
+            <span className="mt-1 sm:mt-2 text-xs text-[#2c2c2c]/60 ">Scroll Down</span>
           </motion.div>
         </div>
       </motion.section>
@@ -115,7 +115,7 @@ export default function ServicesClient() {
         return (
           <motion.section
             key={service.title}
-            className="relative py-24 md:py-32 px-4 border-t border-[#2c2c2c]/10"
+            className="relative py-10 sm:py-24 md:py-32 px-2 sm:px-4 border-t border-[#2c2c2c]/10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -123,12 +123,12 @@ export default function ServicesClient() {
           >
             <div className="max-w-7xl mx-auto">
               <div
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center ${
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 lg:gap-24 items-center ${
                   isEven ? "" : "lg:grid-flow-col-dense"
                 }`}
               >
                 <motion.div
-                  className={`space-y-8 ${isEven ? "" : "lg:col-start-2"}`}
+                  className={`space-y-4 sm:space-y-8 ${isEven ? "" : "lg:col-start-2"}`}
                   initial={{ opacity: 0, x: isEven ? -40 : 40 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.5 }}
@@ -140,7 +140,7 @@ export default function ServicesClient() {
                 >
                   <div className="space-y-4">
                     <motion.span
-                      className=" text-[#2c2c2c]/40 text-lg tracking-widest"
+                      className=" text-[#2c2c2c]/40 text-base sm:text-lg tracking-widest"
                       initial={{ opacity: 0, y: 10 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
@@ -150,7 +150,7 @@ export default function ServicesClient() {
                     </motion.span>
 
                     <motion.h2
-                      className=" text-4xl md:text-6xl font-serif  text-[#2c2c2c] leading-tight"
+                      className=" text-2xl sm:text-4xl md:text-6xl font-serif text-[#2c2c2c] leading-tight"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
@@ -160,7 +160,7 @@ export default function ServicesClient() {
                     </motion.h2>
 
                     <motion.h3
-                      className="font-light text-xl md:text-2xl  "
+                      className="font-light text-base sm:text-xl md:text-2xl"
                       initial={{ opacity: 0, y: 15 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
@@ -179,7 +179,7 @@ export default function ServicesClient() {
                   />
 
                   <motion.p
-                    className=" text-lg md:text-xl leading-relaxed"
+                    className=" text-base sm:text-lg md:text-xl leading-relaxed"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -198,7 +198,7 @@ export default function ServicesClient() {
                     {service.features.map((feature, featureIdx) => (
                       <li
                         key={feature}
-                        className=" text-base md:text-lg list-item"
+                        className=" text-sm sm:text-base md:text-lg list-item"
                       >
                         {feature}
                       </li>
@@ -207,7 +207,7 @@ export default function ServicesClient() {
                 </motion.div>
 
                 <motion.div
-                  className={`relative ${
+                  className={`relative mt-6 sm:mt-0 ${
                     isEven ? "" : "lg:col-start-1 lg:row-start-1"
                   }`}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -219,7 +219,7 @@ export default function ServicesClient() {
                     ease: [0.77, 0, 0.175, 1],
                   }}
                 >
-                  <div className="relative aspect-square max-w-md mx-auto">
+                  <div className="relative aspect-square max-w-xs sm:max-w-md mx-auto">
                     {/* Elegant geometric background */}
                     <div className="absolute inset-0 border border-[#2c2c2c]/20 rounded-full" />
                     <div className="absolute inset-4 border border-[#2c2c2c]/10 rounded-full" />

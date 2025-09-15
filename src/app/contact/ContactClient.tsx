@@ -87,23 +87,23 @@ export default function ContactClient() {
   };
 
   return (
-    <div className="min-h-screen">
+  <div className="min-h-screen">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-6">
+      <section className="relative pt-20 sm:pt-32 pb-10 sm:pb-20 overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-center mb-16"
           >
-            <h1 className="font-serif text-5xl md:text-7xl  mb-6 tracking-tight">
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl mb-4 sm:mb-6 tracking-tight">
               Contact Us
             </h1>
             <div className="w-24 h-px bg-current mx-auto mb-8 opacity-60" />
-            <p className=" text-lg md:text-xl opacity-70 max-w-2xl mx-auto leading-relaxed">
+            <p className=" text-base sm:text-lg md:text-xl opacity-70 max-w-2xl mx-auto leading-relaxed">
               Begin a conversation with our team. We're here to discuss your
               vision and explore how we can craft excellence together.
             </p>
@@ -112,9 +112,9 @@ export default function ContactClient() {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-20 items-start">
+      <section className="py-10 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-20 items-start">
             {/* Contact Information */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -123,10 +123,10 @@ export default function ContactClient() {
               className="space-y-12"
             >
               <div>
-                <h2 className="font-serif text-4xl font-light  mb-8">
+                <h2 className="font-serif text-2xl sm:text-4xl font-light mb-4 sm:mb-8">
                   Get in Touch
                 </h2>
-                <p className=" opacity-70 leading-relaxed text-lg mb-12">
+                <p className=" opacity-70 leading-relaxed text-base sm:text-lg mb-6 sm:mb-12">
                   Whether you're seeking innovative solutions, technical
                   support, or exploring partnership opportunities, our dedicated
                   team is ready to assist you with the utmost care and
@@ -141,10 +141,10 @@ export default function ContactClient() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                    className="border-l border-current border-opacity-20 pl-8"
+                    className="border-l border-current border-opacity-20 pl-4 sm:pl-8"
                   >
-                    <h3 className=" font-medium mb-2 text-lg">{type.label}</h3>
-                    <p className=" text-sm opacity-60">{type.email}</p>
+                    <h3 className=" font-medium mb-1 sm:mb-2 text-base sm:text-lg">{type.label}</h3>
+                    <p className=" text-xs sm:text-sm opacity-60">{type.email}</p>
                   </motion.div>
                 ))}
               </div>
@@ -156,20 +156,20 @@ export default function ContactClient() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
                 {/* Name Field */}
                 <div>
                   <div className="relative">
                     <motion.input
                       type="text"
                       {...register("name")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
+                      className="w-full py-2 sm:py-3 bg-transparent border-0 border-b border-current border-opacity-20 text-base sm:text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
                       placeholder="Full Name"
                       id="name"
                     />
                     <motion.label
                       htmlFor="name"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
+                      className="absolute left-0 top-2 sm:top-4 text-base sm:text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:sm:top-4 peer-placeholder-shown:sm:text-lg peer-focus:-top-6 peer-focus:text-xs sm:peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-xs sm:peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
                     >
                       Full Name
                     </motion.label>
@@ -185,7 +185,7 @@ export default function ContactClient() {
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70 text-red-600"
+                      className="mt-1 sm:mt-2 text-xs sm:text-sm opacity-70 text-red-600"
                     >
                       {errors.name.message}
                     </motion.p>
@@ -197,13 +197,13 @@ export default function ContactClient() {
                     <motion.input
                       type="email"
                       {...register("email")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
+                      className="w-full py-2 sm:py-3 bg-transparent border-0 border-b border-current border-opacity-20 text-base sm:text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
                       placeholder="Email Address"
                       id="email"
                     />
                     <motion.label
                       htmlFor="email"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
+                      className="absolute left-0 top-2 sm:top-4 text-base sm:text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:sm:top-4 peer-placeholder-shown:sm:text-lg peer-focus:-top-6 peer-focus:text-xs sm:peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-xs sm:peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
                     >
                       Email Address
                     </motion.label>
@@ -219,7 +219,7 @@ export default function ContactClient() {
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
+                      className="mt-1 sm:mt-2 text-xs sm:text-sm opacity-70  text-red-600"
                     >
                       {errors.email.message}
                     </motion.p>
@@ -231,7 +231,7 @@ export default function ContactClient() {
                   <div className="relative">
                     <select
                       {...register("queryType")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg focus:outline-none focus:border-opacity-60 transition-all duration-500 appearance-none cursor-pointer"
+                      className="w-full py-2 sm:py-3 bg-transparent border-0 border-b border-current border-opacity-20 text-base sm:text-lg focus:outline-none focus:border-opacity-60 transition-all duration-500 appearance-none cursor-pointer"
                       id="queryType"
                     >
                       <option value="">Select Query Type</option>
@@ -257,7 +257,7 @@ export default function ContactClient() {
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
+                      className="mt-1 sm:mt-2 text-xs sm:text-sm opacity-70  text-red-600"
                     >
                       {errors.queryType.message}
                     </motion.p>
@@ -270,13 +270,13 @@ export default function ContactClient() {
                     <motion.input
                       type="text"
                       {...register("subject")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
+                      className="w-full py-2 sm:py-3 bg-transparent border-0 border-b border-current border-opacity-20 text-base sm:text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
                       placeholder="Subject"
                       id="subject"
                     />
                     <motion.label
                       htmlFor="subject"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
+                      className="absolute left-0 top-2 sm:top-4 text-base sm:text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:sm:top-4 peer-placeholder-shown:sm:text-lg peer-focus:-top-6 peer-focus:text-xs sm:peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-xs sm:peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
                     >
                       Subject
                     </motion.label>
@@ -292,7 +292,7 @@ export default function ContactClient() {
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
+                      className="mt-1 sm:mt-2 text-xs sm:text-sm opacity-70  text-red-600"
                     >
                       {errors.subject.message}
                     </motion.p>
@@ -305,13 +305,13 @@ export default function ContactClient() {
                     <motion.textarea
                       {...register("message")}
                       rows={2}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 resize-none peer"
+                      className="w-full py-2 sm:py-3 bg-transparent border-0 border-b border-current border-opacity-20 text-base sm:text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 resize-none peer"
                       placeholder="Message"
                       id="message"
                     />
                     <motion.label
                       htmlFor="message"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
+                      className="absolute left-0 top-2 sm:top-4 text-base sm:text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:sm:top-4 peer-placeholder-shown:sm:text-lg peer-focus:-top-6 peer-focus:text-xs sm:peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-xs sm:peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
                     >
                       Message
                     </motion.label>
@@ -327,7 +327,7 @@ export default function ContactClient() {
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
+                      className="mt-1 sm:mt-2 text-xs sm:text-sm opacity-70  text-red-600"
                     >
                       {errors.message.message}
                     </motion.p>
@@ -366,7 +366,7 @@ export default function ContactClient() {
                   type="submit"
                   disabled={isSubmitting}
                   whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                  className="w-full py-4 px-6 border border-current border-opacity-20  font-medium text-lg transition-all duration-200 hover:border-opacity-60 hover:bg-black focus:outline-none focus:border-opacity-60 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white cursor-pointer "
+                  className="w-full py-3 sm:py-4 px-4 sm:px-6 border border-current border-opacity-20 font-medium text-base sm:text-lg transition-all duration-200 hover:border-opacity-60 hover:bg-black focus:outline-none focus:border-opacity-60 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white cursor-pointer "
                 >
                   {isSubmitting ? "Sending Message..." : "Send Message"}
                 </motion.button>

@@ -20,7 +20,7 @@ export default function ContactSection() {
     <section
       id="contact"
       ref={ref}
-      className="min-h-screen flex items-center py-32 relative overflow-hidden"
+  className="min-h-[70vh] sm:min-h-screen flex items-center py-16 sm:py-32 relative overflow-hidden"
     >
       <motion.div
         className="absolute top-1/3 left-8 w-24 h-px bg-foreground/5"
@@ -30,14 +30,14 @@ export default function ContactSection() {
         transition={{ duration: 1.5, delay: 0.5 }}
       />
 
-      <div className="max-w-4xl mx-auto px-8 text-center">
+  <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
         <motion.div
           style={{ y }}
           initial={{ opacity: 0, y: 100 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <motion.h2 className="font-serif text-6xl md:text-8xl  text-foreground mb-16">
+          <motion.h2 className="font-serif text-4xl sm:text-6xl md:text-8xl text-foreground mb-10 sm:mb-16">
             <motion.span
               initial={{ opacity: 0, y: 50 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -76,7 +76,7 @@ export default function ContactSection() {
                   duration: 0.3,
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
-                className=" text-sm tracking-[0.2em] uppercase border border-foreground px-12 py-4 text-foreground transition-all duration-200 relative overflow-hidden group cursor-pointer hover:bg-black hover:text-white"
+                className=" text-xs sm:text-sm tracking-[0.2em] uppercase border border-foreground px-6 sm:px-12 py-3 sm:py-4 text-foreground transition-all duration-200 relative overflow-hidden group cursor-pointer hover:bg-black hover:text-white"
               >
                 Get in Touch
               </motion.button>

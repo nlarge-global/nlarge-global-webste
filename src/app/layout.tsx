@@ -97,10 +97,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorant.variable} scroll-smooth`}
+      className={`${inter.variable} ${cormorant.variable} scroll-smooth min-h-full`}
     >
       <body
-        className="antialiased bg-white text-foreground overflow-x-hidden"
+        className="antialiased bg-white text-foreground overflow-x-hidden min-h-screen sm:min-h-full"
         role="main"
       >
         <StructuredData />

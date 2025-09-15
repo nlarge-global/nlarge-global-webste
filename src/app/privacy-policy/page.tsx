@@ -33,9 +33,9 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-      <main className="max-w-4xl mx-auto px-6 py-20">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-20">
         <div className="prose max-w-none">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-16 sm:mt-24">
             Privacy Policy
           </h1>
           <p className="text-gray-600 mb-8">
@@ -186,10 +186,10 @@ export default function PrivacyPolicyPage() {
               practices, please contact us:
             </p>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-700">
+              <p className="text-gray-700 text-sm sm:text-base">
                 <strong>NLarge Global</strong>
                 <br />
-                Email: privacy@nlarge.com
+                Email: privacy@nlargecorp.com
                 <br />
                 Website: https://nlargecorp.com/contact
               </p>

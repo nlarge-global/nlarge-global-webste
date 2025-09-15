@@ -19,7 +19,7 @@ export default function HeroSection() {
   return (
     <section
       ref={ref}
-      className="relative h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-[60vh] sm:h-screen flex items-center justify-center overflow-hidden"
       aria-label="Hero section"
       role="banner"
     >
@@ -45,7 +45,7 @@ export default function HeroSection() {
       />
 
       <motion.div
-        className="relative z-10 text-center px-6"
+        className="relative z-10 text-center px-4 sm:px-6"
         style={{ y: textY, opacity }}
       >
         <motion.h1
@@ -56,7 +56,7 @@ export default function HeroSection() {
             ease: [0.77, 0, 0.175, 1],
             delay: 0.2,
           }}
-          className="font-serif text-8xl md:text-[12rem]  text-foreground leading-none relative"
+          className="font-serif text-4xl sm:text-7xl md:text-8xl lg:text-[12rem] text-foreground leading-none relative"
           aria-label="NLarge Global - Company Name"
         >
           NLarge
@@ -68,7 +68,7 @@ export default function HeroSection() {
               delay: 1.1,
               ease: [0.77, 0, 0.175, 1],
             }}
-            className="block text-2xl md:text-6xl  text-foreground mt-2 absolute -bottom-8 -right-27"
+            className="block text-lg sm:text-2xl md:text-6xl text-foreground mt-2 absolute -bottom-4 sm:-bottom-8 -right-10 sm:-right-27"
             aria-label="Global"
           >
             Global
@@ -82,7 +82,7 @@ export default function HeroSection() {
           className="mt-8"
         >
           <motion.p
-            className="font-serif text-lg tracking-[0.2em] uppercase text-foreground/80"
+            className="font-serif text-xs sm:text-base md:text-lg tracking-[0.2em] uppercase text-foreground/80"
             initial={{ letterSpacing: "0.1em" }}
             animate={{ letterSpacing: "0.2em" }}
             transition={{ duration: 2, delay: 1.5, ease: [0.25, 0.1, 0.25, 1] }}

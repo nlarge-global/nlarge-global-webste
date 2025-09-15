@@ -34,33 +34,33 @@ export default function TeamSection() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.6 }}
       transition={{ duration: 1.2, delay: 0.2, ease: [0.77, 0, 0.175, 1] }}
-      className="py-16 md:py-32 border-t border-foreground/10 bg-background/40"
+  className="py-10 sm:py-16 md:py-32 border-t border-foreground/10 bg-background/40"
       aria-label="Team"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="font-serif text-5xl md:text-7xl  text-foreground mb-8">
+  <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 text-center">
+  <h2 className="font-serif text-3xl sm:text-5xl md:text-7xl text-foreground mb-6 sm:mb-8 mt-16 sm:mt-24">
           Meet the Team
         </h2>
-        <p className=" text-lg text-foreground/70 mb-12">
+  <p className=" text-base sm:text-lg text-foreground/70 mb-8 sm:mb-12">
           Our founders and team are passionate about building elegant, impactful
           technology for a global audience.
         </p>
-        <div className="flex flex-col md:flex-row justify-center items-start gap-12 mt-8">
+  <div className="flex flex-col md:flex-row justify-center items-start gap-6 sm:gap-12 mt-6 sm:mt-8">
           {members.map((member, index) => {
             return (
-              <div className="w-full md:w-1/3 p-8 rounded-xl bg-white/80 flex flex-col items-center" key={`${member.name}, ${member.designation} ${index}`}>
+              <div className="w-full md:w-1/3 p-4 sm:p-8 rounded-xl bg-white/80 flex flex-col items-center" key={`${member.name}, ${member.designation} ${index}`}> 
                 <Image
                   src={member.img || ""}
                   alt={member.name}
-                  width={180}
-                  height={180}
-                  className="rounded-full shadow-lg mb-4 aspect-square object-cover"
+                  width={120}
+                  height={120}
+                  className="rounded-full shadow-lg mb-2 sm:mb-4 aspect-square object-cover"
                 />
-                <h3 className=" text-xl text-foreground mt-2 mb-1">
+                <h3 className=" text-base sm:text-xl text-foreground mt-2 mb-1">
                   {member.name}
                 </h3>
-                <p className="text-foreground/60 mb-2">{member.designation}</p>
-                <div className="flex gap-4 mt-2">
+                <p className="text-foreground/60 mb-1 sm:mb-2">{member.designation}</p>
+                <div className="flex gap-2 sm:gap-4 mt-2">
                   <a
                     href={member.linkedin}
                     target="_blank"

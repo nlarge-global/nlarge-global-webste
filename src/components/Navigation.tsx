@@ -30,6 +30,7 @@ export default function Navigation() {
     }
   };
 
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-500 nav-animate ${
@@ -54,10 +55,11 @@ export default function Navigation() {
             </Link>
           </div>
 
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-12">
             <button
               onClick={() => scrollToSection("about")}
-              className=" text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              className="mb-0 text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
               aria-label="Scroll to About section"
             >
               About us
@@ -90,7 +92,57 @@ export default function Navigation() {
               Contact
             </button>
           </div>
+
+          {/* Mobile Hamburger */}
+          <div className="md:hidden flex items-center">
+            <button
+              aria-label="Open mobile menu"
+              className="focus:outline-none"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect y="6" width="28" height="2" rx="1" fill="#2c2c2c" />
+                <rect y="13" width="28" height="2" rx="1" fill="#2c2c2c" />
+                <rect y="20" width="28" height="2" rx="1" fill="#2c2c2c" />
+              </svg>
+            </button>
+          </div>
         </div>
+        {/* Mobile Menu */}
+        {mobileOpen && (
+          <div className="md:hidden mt-4 bg-background/95 rounded-lg shadow-lg p-6 flex flex-col items-center space-y-4">
+            <button
+              onClick={() => { scrollToSection("about"); setMobileOpen(false); }}
+              className="w-full text-center text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="Scroll to About section"
+            >
+              About us
+            </button>
+            <Link
+              href="/services"
+              className="w-full text-center text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="View Services"
+              onClick={() => setMobileOpen(false)}
+            >
+              Services
+            </Link>
+            <Link
+              href="/products"
+              className="w-full text-center text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="View Products"
+              onClick={() => setMobileOpen(false)}
+            >
+              Products
+            </Link>
+            <button
+              onClick={() => { scrollToSection("contact"); setMobileOpen(false); }}
+              className="w-full text-center text-xs tracking-wide uppercase text-foreground/70 hover:text-foreground transition-colors nav-animate focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer hover:font-semibold"
+              aria-label="Scroll to Contact section"
+            >
+              Contact
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
