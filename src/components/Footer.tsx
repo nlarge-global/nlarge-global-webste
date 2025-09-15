@@ -39,10 +39,10 @@ export default function Footer() {
               </h4>
               <div className="space-y-2">
                 <p className="text-foreground/60 text-base">
-                  info@nlargeglobal.com
+                  info@nlargecorp.com
                 </p>
                 <p className="text-foreground/60 text-base">
-                  support@nlargeglobal.com
+                  support@nlargecorp.com
                 </p>
               </div>
             </div>
