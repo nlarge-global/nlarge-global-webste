@@ -1,50 +1,42 @@
 [
     {
-        "name": "John Doe",
-        "image": "/images/testimonials/john-doe.jpg",
+        "name": "Vikas Roa",
+        "image": "/images/testimonials/vikas.png",
         "heading": "A true business transformation",
         "description": "Nlarge has transformed our business with their innovative solutions. Their team is professional, responsive, and truly understands our needs.",
-        "position": "CEO of TechCorp",
-        "stars": 5
+        "position": "Enterpreneur",
+        "stars": 4
     },
     {
-        "name": "Jane Smith",
-        "image": "/images/testimonials/jane-smith.jpg",
+        "name": "Ms. Suman Sharma",
+        "image": "/images/testimonials/suman.png",
         "heading": "A faster path to our goals",
-        "description": "Working with Nlarge was a game-changer for us. Their expertise and dedication helped us achieve our goals faster than we ever imagined.",
-        "position": "Marketing Director at Creative Solutions",
+        "description": "Working with Nlarge has been a game-changer for our company. Their expertise and dedication have helped us achieve our goals faster than we ever imagined.",
+        "position": "Principle at NPS",
         "stars": 5
     },
     {
-        "name": "Michael Johnson",
-        "image": "/images/testimonials/michael-johnson.jpg",
+        "name": "Ms. Ritu Singh Saini",
+        "image": "/images/testimonials/ritu.png",
         "heading": "Exceptional service and support",
-        "description": "The level of service and support we received from Nlarge was exceptional. They went above and beyond to ensure our success.",
-        "position": "Founder of StartupX",
-        "stars": 5
+        "description": "The level of service and support we are receiving from Nlarge is exceptional. They went above and beyond to ensure our success. Still Working with them and looking forward to more collaborations.",
+        "position": "Director",
+        "stars": 4
     },
     {
-        "name": "Sarah Williams",
-        "heading": "A seamless digital launch",
-        "description": "NLarge delivered a polished platform with remarkable attention to detail. The process was collaborative, clear, and finished ahead of schedule.",
-        "position": "Product Director at Northstar",
-        "stars": 5,
-        "image": "/images/testimonials/sarah-williams.jpg"
-    },
-    {
-        "name": "David Chen",
-        "heading": "Engineering that earns trust",
-        "description": "Their technical team quickly understood our challenges and built a reliable solution that our customers love using every day.",
-        "position": "COO of Meridian Labs",
-        "stars": 5,
-        "image": "/images/testimonials/david-chen.jpg"
-    },
-    {
-        "name": "Priya Patel",
+        "name": "Rajesh Sethi",
         "heading": "Partners in every sense",
-        "description": "From strategy through launch, NLarge felt like an extension of our own team. Communication was excellent and every milestone delivered real value.",
-        "position": "Founder of BrightLine",
+        "description": "Bahut hi accha experience raha Nlarge ke sath kaam karke. Thoda time lag gya kaam krne me par acha kaam karke diya",
+        "position": "Businessman",
+        "stars": 4,
+        "image": "/images/testimonials/rajesh.png"
+    },
+    {
+        "name": "Mr. Sidhu Singh",
+        "heading": "A true business transformation",
+        "description": "We updated our existing website with Nlarge and they did a great job. They are very professional and responsive. We are very happy with the final product.",
+        "position": "Shop Owner",
         "stars": 5,
-        "image": "/images/testimonials/priya-patel.jpg"
+        "image": "/images/testimonials/sidhu.png"
     }
 ]
