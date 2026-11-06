@@ -39,8 +39,39 @@ function createTransporter() {
     port: env.SMTP_PORT,
     secure: env.SMTP_SECURE === "true",
     requireTLS: env.SMTP_SECURE !== "true",
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 10_000,
     auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
   });
+}
+
+let emailServiceCheck: Promise<boolean> | undefined;
+let emailServiceCheckExpiresAt = 0;
+let consecutiveEmailFailures = 0;
+let emailChecksExhausted = false;
+const MAX_EMAIL_CHECK_ATTEMPTS = 3;
+
+export async function isEmailServiceAvailable() {
+  const env = getServerEnv();
+  if (!env.SMTP_USER || !env.SMTP_PASS) return false;
+  if (emailChecksExhausted) return false;
+  if (Date.now() < emailServiceCheckExpiresAt && emailServiceCheck) return emailServiceCheck;
+
+  const transporter = createTransporter();
+  emailServiceCheck = transporter.verify().then(() => {
+    consecutiveEmailFailures = 0;
+    return true;
+  }).catch((error) => {
+    consecutiveEmailFailures += 1;
+    console.error(`Email service health check failed (${consecutiveEmailFailures}/${MAX_EMAIL_CHECK_ATTEMPTS}):`, error);
+    if (consecutiveEmailFailures >= MAX_EMAIL_CHECK_ATTEMPTS) emailChecksExhausted = true;
+    return false;
+  }).finally(() => transporter.close());
+  emailServiceCheckExpiresAt = Date.now() + (emailChecksExhausted ? 60_000 : 15_000);
+  const available = await emailServiceCheck;
+  if (available) emailServiceCheckExpiresAt = Date.now() + 60_000;
+  return available;
 }
 
 export async function sendContactEmails(data: ContactEmailData) {
