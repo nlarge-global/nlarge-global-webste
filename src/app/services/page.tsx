@@ -1,280 +1,143 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { FiArrowUpRight } from "react-icons/fi";
 import Footer from "@/components/Footer";
 import Navigation from "@/components/Navigation";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 
-const services = [
+export const metadata: Metadata = {
+  title: "Services | NLarge Global",
+  description: "Website development, custom software and ongoing maintenance services from NLarge Global.",
+};
+
+const developmentServices = [
   {
     number: "01",
-    title: "Digital Excellence",
-    subtitle: "Web & Mobile Development",
-    description:
-      "Crafting bespoke digital experiences that seamlessly blend aesthetic sophistication with cutting-edge functionality, delivering unparalleled user journeys across all platforms.",
-    features: [
-      "Artisanal web and application development",
-      "Responsive design mastery for every device",
-      "Luxury e-commerce and marketplace solutions",
-      "White-glove support and maintenance",
-    ],
-    accent: "Development",
+    name: "Discovery & planning",
+    text: "We clarify the audience, goals, content, features and technical requirements before design or development begins.",
+    includes: ["Requirements workshop", "User flows", "Content planning", "Technical roadmap"],
   },
   {
     number: "02",
-    title: "Infrastructure Mastery",
-    subtitle: "Cloud & Infrastructure Management",
-    description:
-      "Orchestrating robust cloud ecosystems with meticulous attention to security, scalability, and performance optimization, ensuring your digital assets operate at peak excellence.",
-    features: [
-      "Seamless cloud migration and deployment",
-      "Architectural excellence and scalability",
-      "Enterprise-grade security solutions",
-      "Round-the-clock monitoring and support",
-    ],
-    accent: "Infrastructure",
+    name: "UX & interface design",
+    text: "We turn the plan into a clear, accessible experience that feels consistent across desktop, tablet and mobile.",
+    includes: ["Figma", "Canva", "Blender", "Adobe Creative Cloud"],
   },
   {
     number: "03",
-    title: "Bespoke Solutions",
-    subtitle: "Custom Software Development",
-    description:
-      "Engineering tailored software solutions that perfectly align with your unique business vision, automating complex workflows while maintaining the highest standards of craftsmanship.",
-    features: [
-      "Enterprise resource planning systems",
-      "Customer relationship management platforms",
-      "Proprietary tools and seamless integrations",
-      "Advanced analytics and business intelligence",
-    ],
-    accent: "Solutions",
+    name: "Website development",
+    text: "We build fast, maintainable websites using modern tools and production-ready code that is easy to extend.",
+    includes: ["Next.js / React", "WordPress / PHP", "Java / Python", "Headless CMS"],
+  },
+  {
+    number: "04",
+    name: "Commerce & integrations",
+    text: "Connect the website to the systems your business already uses, or add focused commerce and business workflows.",
+    includes: ["Payments", "Booking systems", "CRM & APIs", "Analytics"],
+  },
+  {
+    number: "05",
+    name: "Launch & optimization",
+    text: "Before launch, we test real journeys, improve performance and prepare the content and technical foundation for search.",
+    includes: ["QA & accessibility", "SEO setup", "Performance", "Deployment"],
   },
 ];
 
+const maintenanceServices = [
+  { name: "Updates & fixes", text: "Routine content changes, bug fixes and small improvements are handled without disrupting the rest of your site." },
+  { name: "Monitoring & uptime", text: "We keep watch on availability and performance, catch issues early and respond when something needs attention." },
+  { name: "Security & backups", text: "Updates, dependency checks, backups and recovery planning help keep the platform protected and maintainable." },
+  { name: "Speed & reliability", text: "We review Core Web Vitals, accessibility, forms, integrations and hosting to improve everyday reliability." },
+  { name: "Ongoing improvements", text: "A practical roadmap turns feedback and analytics into useful releases as your business and visitors evolve." },
+];
+
 export default function ServicesPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen  relative overflow-hidden scroll-snap-main"
-    >
+    <div className="min-h-screen bg-white text-black">
       <Navigation />
-      <motion.section
-        className="relative text-center min-h-screen flex flex-col justify-center"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.77, 0, 0.175, 1] }}
-      >
-        <motion.div
-          className="max-w-4xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <h1 className="font-serif text-6xl md:text-8xl font-light   mb-6 tracking-tight">
-            Our Services
-          </h1>
-          <div className="w-24 h-px  mx-auto mb-8" />
-          <p className=" text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto">
-            Elevating businesses through meticulously crafted digital solutions
-          </p>
-        </motion.div>
-
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => {
-              containerRef.current?.scrollBy({
-                top: window.innerHeight,
-                behavior: "smooth",
-              });
-            }}
-          >
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path
-                d="M16 22V10M16 22L10 16M16 22L22 16"
-                stroke="#2c2c2c"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="mt-2 text-xs text-[#2c2c2c]/60 ">
-              Scroll Down
-            </span>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {services.map((service, idx) => {
-        const isEven = idx % 2 === 0;
-
-        return (
-          <motion.section
-            key={service.title}
-            className="relative py-24 md:py-32 px-4 border-t border-[#2c2c2c]/10"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: idx * 0.1 }}
-          >
-            <div className="max-w-7xl mx-auto">
-              <div
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center ${
-                  isEven ? "" : "lg:grid-flow-col-dense"
-                }`}
-              >
-                <motion.div
-                  className={`space-y-8 ${isEven ? "" : "lg:col-start-2"}`}
-                  initial={{ opacity: 0, x: isEven ? -40 : 40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{
-                    duration: 0.8,
-                    delay: 0.2,
-                    ease: [0.77, 0, 0.175, 1],
-                  }}
-                >
-                  <div className="space-y-4">
-                    <motion.span
-                      className=" text-[#2c2c2c]/40 text-lg tracking-widest"
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: 0.1 }}
-                    >
-                      {service.number}
-                    </motion.span>
-
-                    <motion.h2
-                      className=" text-4xl md:text-6xl font-serif  text-[#2c2c2c] leading-tight"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                    >
-                      {service.title}
-                    </motion.h2>
-
-                    <motion.h3
-                      className="font-light text-xl md:text-2xl  "
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                    >
-                      {service.subtitle}
-                    </motion.h3>
+      <main id="main-content">
+        <section className="px-4 pb-8 pt-28 sm:px-8 sm:pt-32 lg:px-12 lg:pb-12">
+          <div className="grid min-h-[calc(100svh-10rem)] overflow-hidden rounded-[1.75rem] bg-[#602329] lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="flex flex-col justify-between px-6 py-8 text-white sm:px-10 lg:px-12 lg:py-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/65">Services · Built to last</p>
+              <div>
+                <h1 className="max-w-[8ch] text-[clamp(4rem,9vw,8rem)] leading-[0.84] tracking-[-0.055em]">From idea to useful website.</h1>
+                <p className="mt-7 max-w-md text-lg leading-8 text-white/70">
+                  Strategy, design, development and ownership—handled as one connected process.
+                </p>
+              </div>
+              <Link href="/contact" className="mt-10 inline-flex w-fit items-center gap-3 border-b border-white pb-2 text-sm font-semibold text-white">
+                Discuss a project <FiArrowUpRight aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="grid content-center gap-px bg-black/10 p-5 sm:p-8 lg:p-12">
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1.25rem] bg-black/10 sm:grid-cols-3">
+                {["Planning / Strategy", "UI/UX & Design", "Web & App Development", "AI Integration", "Chatbots", "Voice Assistants", "Dashboards", "CMS & SEO", "CI/CD & DevOps", "Integrations", "Launch & Support", "Micro Services"].map((item, index) => (
+                  <div key={item} className="flex min-h-28 flex-col justify-between bg-[#f1efea] p-5 sm:min-h-36">
+                    <span className="text-xs text-black/40">{index > 8 ? "" : 0}{index + 1}</span>
+                    <span className="text-lg font-semibold tracking-[-0.03em] sm:text-xl">{item}</span>
                   </div>
-
-                  <motion.div
-                    className="w-16 h-px "
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  />
-
-                  <motion.p
-                    className=" text-lg md:text-xl leading-relaxed"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                  >
-                    {service.description}
-                  </motion.p>
-
-                  <motion.ul
-                    className="space-y-1 list-disc list-inside"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                  >
-                    {service.features.map((feature, featureIdx) => (
-                      <li
-                        key={feature}
-                        className=" text-base md:text-lg list-item"
-                      >
-                        {feature}
-                      </li>
-                    ))}
-                  </motion.ul>
-                </motion.div>
-
-                <motion.div
-                  className={`relative ${
-                    isEven ? "" : "lg:col-start-1 lg:row-start-1"
-                  }`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{
-                    duration: 0.8,
-                    delay: 0.3,
-                    ease: [0.77, 0, 0.175, 1],
-                  }}
-                >
-                  <div className="relative aspect-square max-w-md mx-auto">
-                    {/* Elegant geometric background */}
-                    <div className="absolute inset-0 border border-[#2c2c2c]/20 rounded-full" />
-                    <div className="absolute inset-4 border border-[#2c2c2c]/10 rounded-full" />
-
-                    {/* Central accent text */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.span
-                        className="font-serif text-6xl font-light   text-[#2c2c2c]/40 select-none"
-                        initial={{ opacity: 0, rotate: -10 }}
-                        whileInView={{ opacity: 1, rotate: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                      >
-                        {service.accent}
-                      </motion.span>
-                    </div>
-
-                    {/* Subtle floating elements */}
-                    <motion.div
-                      className="absolute top-8 right-8 w-2 h-2 rounded-full bg-black"
-                      animate={{
-                        y: [0, -10, 0],
-                        opacity: [0.2, 0.4, 0.2],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Number.POSITIVE_INFINITY,
-                        delay: idx * 0.5,
-                      }}
-                    />
-                    <motion.div
-                      className="absolute bottom-12 left-12 w-1 h-1 bg-black  rounded-full"
-                      animate={{
-                        y: [0, 8, 0],
-                        opacity: [0.3, 0.6, 0.3],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Number.POSITIVE_INFINITY,
-                        delay: idx * 0.7,
-                      }}
-                    />
-                  </div>
-                </motion.div>
+                ))}
               </div>
             </div>
-          </motion.section>
-        );
-      })}
+          </div>
+        </section>
 
-      <section>
-        <Footer />
-      </section>
+        <section aria-labelledby="development-title" className="px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">Website development</p>
+              <h2 id="development-title" className="mt-5 max-w-[8ch] text-[clamp(3.8rem,7vw,6.5rem)] leading-[0.86] tracking-[-0.055em]">What we can build.</h2>
+            </div>
+            <div className="border-t border-black">
+              {developmentServices.map((service) => (
+                <article key={service.name} className="grid gap-5 border-b border-black py-7 sm:grid-cols-[3rem_0.9fr_1.1fr] sm:py-8">
+                  <span className="text-sm text-black/40">{service.number}</span>
+                  <div>
+                    <h3 className="text-2xl font-semibold tracking-[-0.03em]">{service.name}</h3>
+                    <p className="mt-4 leading-7 text-black/60">{service.text}</p>
+                  </div>
+                  <ul className="grid grid-cols-2 gap-x-5 gap-y-2 text-sm sm:border-l sm:border-black/15 sm:pl-8">
+                    {service.includes.map((item) => <li key={item} className="border-b border-black/10 pb-2">{item}</li>)}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="maintenance-title" className="px-4 pb-4 sm:px-8 lg:px-12 lg:pb-12">
+          <div className="rounded-[1.75rem] bg-[#f1efea] px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
+            <div className="grid gap-8 border-b border-black pb-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">After launch</p>
+                <h2 id="maintenance-title" className="mt-5 text-[clamp(3.7rem,7vw,6rem)] leading-[0.86] tracking-[-0.055em]">Maintenance with a human response.</h2>
+              </div>
+              <div className="max-w-xl lg:justify-self-end">
+                <p className="text-lg leading-8 text-black/60">
+                  A website should keep getting safer, faster and more useful. Our maintenance plans cover the work behind the scenes and the improvements visitors can feel.
+                </p>
+                <p className="mt-6 border-l border-[#602329] pl-5 text-sm leading-7 text-black/70">
+                  We also help public institutions move digital transformation forward via building accessible, dependable services for citizens and teams, with security and long-term ownership in mind.
+                </p>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3">
+              {maintenanceServices.map((service, index) => (
+                <article key={service.name} className="border-b border-black/20 py-8 md:px-6 lg:min-h-64">
+                  <span className="text-sm text-black/40">0{index + 1}</span>
+                  <h3 className="mt-12 text-2xl font-semibold tracking-[-0.03em]">{service.name}</h3>
+                  <p className="mt-4 leading-7 text-black/60">{service.text}</p>
+                </article>
+              ))}
+            </div>
+            <Link href="/contact" className="mt-10 inline-flex items-center gap-3 rounded-full bg-[#602329] py-4 pl-6 pr-4 text-sm font-semibold text-white">
+              Plan ongoing support
+              <span className="grid size-9 place-items-center rounded-full bg-white text-[#602329]"><FiArrowUpRight aria-hidden="true" /></span>
+            </Link>
+          </div>
+        </section>
+      </main>
+      <Footer />
     </div>
   );
 }

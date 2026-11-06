@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function ProductsPage() {
   return (
-    <div className="min-h-screen bg-white scroll-snap-main">
+    <div id="main-content" className="min-h-screen bg-white scroll-snap-main">
       <Navigation />
       <ProductsSection />
       <section>

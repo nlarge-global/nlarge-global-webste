@@ -1,0 +1,50 @@
+[
+    {
+        "name": "John Doe",
+        "image": "/images/testimonials/john-doe.jpg",
+        "heading": "A true business transformation",
+        "description": "Nlarge has transformed our business with their innovative solutions. Their team is professional, responsive, and truly understands our needs.",
+        "position": "CEO of TechCorp",
+        "stars": 5
+    },
+    {
+        "name": "Jane Smith",
+        "image": "/images/testimonials/jane-smith.jpg",
+        "heading": "A faster path to our goals",
+        "description": "Working with Nlarge was a game-changer for us. Their expertise and dedication helped us achieve our goals faster than we ever imagined.",
+        "position": "Marketing Director at Creative Solutions",
+        "stars": 5
+    },
+    {
+        "name": "Michael Johnson",
+        "image": "/images/testimonials/michael-johnson.jpg",
+        "heading": "Exceptional service and support",
+        "description": "The level of service and support we received from Nlarge was exceptional. They went above and beyond to ensure our success.",
+        "position": "Founder of StartupX",
+        "stars": 5
+    },
+    {
+        "name": "Sarah Williams",
+        "heading": "A seamless digital launch",
+        "description": "NLarge delivered a polished platform with remarkable attention to detail. The process was collaborative, clear, and finished ahead of schedule.",
+        "position": "Product Director at Northstar",
+        "stars": 5,
+        "image": "/images/testimonials/sarah-williams.jpg"
+    },
+    {
+        "name": "David Chen",
+        "heading": "Engineering that earns trust",
+        "description": "Their technical team quickly understood our challenges and built a reliable solution that our customers love using every day.",
+        "position": "COO of Meridian Labs",
+        "stars": 5,
+        "image": "/images/testimonials/david-chen.jpg"
+    },
+    {
+        "name": "Priya Patel",
+        "heading": "Partners in every sense",
+        "description": "From strategy through launch, NLarge felt like an extension of our own team. Communication was excellent and every milestone delivered real value.",
+        "position": "Founder of BrightLine",
+        "stars": 5,
+        "image": "/images/testimonials/priya-patel.jpg"
+    }
+]

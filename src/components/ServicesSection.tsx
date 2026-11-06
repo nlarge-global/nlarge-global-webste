@@ -1,36 +1,53 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { FiArrowUpRight } from "react-icons/fi";
+
+const capabilities = [
+  {
+    name: "Build",
+    text: "Custom software, business platforms, individual solutions and ready-made products shaped around real needs.",
+    link: "Explore development",
+  },
+  {
+    name: "Improve",
+    text: "Redesigns, codebase assessments, bug fixes, new features, performance, security and usability improvements.",
+    link: "Improve a platform",
+  },
+  {
+    name: "Take ownership",
+    text: "Maintenance, technical support, monitoring and long-term management for platforms that need to keep moving.",
+    link: "Discuss ownership",
+  },
+];
 
 export default function ServicesSection() {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 80 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: 0.7, delay: 0.1, ease: [0.77, 0, 0.175, 1] }}
-      className="py-24 md:py-40 bg-background/60 border-t border-foreground/10 flex items-center justify-center"
-      aria-label="Services"
-    >
-      <div className="max-w-3xl w-full mx-auto text-center flex flex-col items-center gap-8">
-        <h2 className="font-display text-6xl md:text-8xl font-extrabold text-foreground mb-4 tracking-tight leading-tight">
-          Our Services
-        </h2>
-        <p className=" text-xl md:text-2xl text-foreground/70 mb-8 max-w-xl mx-auto">
-          Discover how NLarge Global can help you build, scale, and transform your
-          business with world-class technology and design.
-        </p>
-        <Link href="/services">
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            className=" text-lg md:text-xl px-8 py-4 border border-foreground bg-background text-foreground shadow-lg hover:bg-foreground hover:text-background transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 cursor-pointer"
-            aria-label="View All Services"
-          >
-            View All Services
-          </motion.button>
-        </Link>
+    <section aria-labelledby="services-title" className="bg-white px-5 py-24 sm:px-8 sm:py-32 lg:px-12">
+      <div className="mx-auto">
+        <div className="grid gap-8 border-b border-foreground/20 pb-12 lg:grid-cols-[1fr_1fr]">
+          <h2 id="services-title" className="max-w-[10ch] font-serif text-[clamp(3.5rem,8vw,7rem)] leading-[0.88] tracking-[-0.04em] max-lg:text-[clamp(3.5rem,8vw,7rem)]">
+            What we do.
+          </h2>
+          <p className="max-w-xl text-lg leading-8 text-foreground/65 lg:self-end lg:justify-self-end">
+            From a first release to an existing platform that needs more care, we focus on useful, durable technology <br /> <span className="font-semibold text-[#602329]">Not unnecessary complexity.</span>
+          </p>
+        </div>
+        <div className="divide-y divide-foreground/15">
+          {capabilities.map((capability, index) => (
+            <Link key={capability.name} href="/services" className="group grid gap-6 py-9 transition sm:grid-cols-[6rem_1fr_1fr_auto] sm:items-center sm:py-12">
+              <span className="text-sm text-foreground/45">0{index + 1}</span>
+              <h3 className="font-serif text-4xl sm:text-5xl flex gap-2 items-center justify-between">{capability.name}
+                <span className="sm:hidden grid text-lg size-12 place-items-center rounded-full border border-foreground/20 transition group-hover:bg-[#602329] group-hover:text-white">
+                <FiArrowUpRight aria-hidden="true" />
+              </span>
+              </h3>
+              <p className="max-w-md leading-7 text-foreground/65">{capability.text}</p>
+              <span className="hidden sm:grid size-12 place-items-center rounded-full border border-foreground/20 transition group-hover:bg-[#602329] group-hover:text-white">
+                <FiArrowUpRight aria-hidden="true" />
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

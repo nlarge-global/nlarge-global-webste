@@ -1,385 +1,131 @@
 "use client";
-import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState } from "react";
-import Navigation from "@/components/Navigation";
+
 import Footer from "@/components/Footer";
+import Navigation from "@/components/Navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FiArrowUpRight } from "react-icons/fi";
+import { z } from "zod";
 
 const contactSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be less than 50 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  queryType: z.string().min(1, "Please select a query type"),
-  subject: z
-    .string()
-    .min(5, "Subject must be at least 5 characters")
-    .max(100, "Subject must be less than 100 characters"),
-  message: z
-    .string()
-    .min(10, "Message must be at least 10 characters")
-    .max(1000, "Message must be less than 1000 characters"),
+  name: z.string().trim().min(2, "Enter your name").max(50, "Name must be less than 50 characters"),
+  email: z.string().email("Enter a valid email address"),
+  queryType: z.string().min(1, "Select a query type"),
+  subject: z.string().trim().min(5, "Add a subject").max(100, "Subject must be less than 100 characters"),
+  message: z.string().trim().min(10, "Tell us a little more").max(1000, "Message must be less than 1000 characters"),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-export default function ContactPage() {
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
+const queryTypes = [
+  { value: "general", label: "General inquiry", email: "info@nlargecorp.com" },
+  { value: "support", label: "Technical support", email: "support@nlargecorp.com" },
+];
 
+export default function ContactPage() {
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    watch,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-    mode: "onBlur",
-  });
-
-  const queryTypes = [
-    {
-      value: "general",
-      label: "General Inquiry",
-      email: "info@nlargecorp.com",
-    },
-    {
-      value: "support",
-      label: "Technical Support",
-      email: "support@nlargecorp.com",
-    },
-  ];
-
-  const watchedValues = watch();
+  } = useForm<ContactFormData>({ resolver: zodResolver(contactSchema), mode: "onBlur" });
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("idle");
-
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
       const result = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus("success");
-        reset();
-        setTimeout(() => {
-          window.location.reload();
-        }, 5000);
-      } else {
-        throw new Error(result.error || "Failed to send message");
-      }
+      if (!response.ok) throw new Error(result.error || "Failed to send message");
+      setSubmitStatus("success");
+      reset();
     } catch (error) {
       console.error("Contact form error:", error);
       setSubmitStatus("error");
     }
   };
 
+  const fieldClass = "w-full border-0 border-b border-black/20 bg-transparent px-0 py-4 text-base outline-none transition-colors placeholder:text-black/35 focus:border-[#602329] focus:ring-0";
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white text-black">
       <Navigation />
-
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-center mb-16"
-          >
-            <h1 className="font-serif text-5xl md:text-7xl  mb-6 tracking-tight">
-              Contact Us
-            </h1>
-            <div className="w-24 h-px bg-current mx-auto mb-8 opacity-60" />
-            <p className=" text-lg md:text-xl opacity-70 max-w-2xl mx-auto leading-relaxed">
-              Begin a conversation with our team. We're here to discuss your
-              vision and explore how we can craft excellence together.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Contact Form Section */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-20 items-start">
-            {/* Contact Information */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="space-y-12"
-            >
+      <main id="main-content">
+        <section className="px-4 pb-8 pt-28 sm:px-8 sm:pt-32 lg:px-12 lg:pb-12">
+          <div className="grid min-h-[calc(100svh-10rem)] overflow-hidden rounded-[1.75rem] bg-[#602329] lg:grid-cols-[0.82fr_1.18fr]">
+            <div className="flex flex-col justify-between px-6 py-8 text-white sm:px-10 lg:px-12 lg:py-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Start a conversation</p>
               <div>
-                <h2 className="font-serif text-4xl font-light  mb-8">
-                  Get in Touch
-                </h2>
-                <p className=" opacity-70 leading-relaxed text-lg mb-12">
-                  Whether you're seeking innovative solutions, technical
-                  support, or exploring partnership opportunities, our dedicated
-                  team is ready to assist you with the utmost care and
-                  professionalism.
+                <h1 className="max-w-[8ch] text-[clamp(4rem,9vw,8rem)] leading-[0.84] tracking-[-0.055em]">Let’s build what’s next.</h1>
+                <p className="mt-7 max-w-md text-lg leading-8 text-white/70">
+                  Tell us where you are, where you want to go, and what needs to change.
                 </p>
               </div>
-
-              <div className="space-y-8">
-                {queryTypes.map((type, index) => (
-                  <motion.div
-                    key={type.value}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                    className="border-l border-current border-opacity-20 pl-8"
-                  >
-                    <h3 className=" font-medium mb-2 text-lg">
-                      {type.label}
-                    </h3>
-                    <p className=" text-sm opacity-60">{type.email}</p>
-                  </motion.div>
+              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {queryTypes.map((type) => (
+                  <a key={type.value} href={`mailto:${type.email}`} className="border-t border-white/25 pt-4 text-sm">
+                    <span className="block text-white/55">{type.label}</span>
+                    <span className="mt-1 block font-semibold">{type.email}</span>
+                  </a>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                {/* Name Field */}
-                <div>
-                  <div className="relative">
-                    <motion.input
-                      type="text"
-                      {...register("name")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
-                      placeholder="Full Name"
-                      id="name"
-                    />
-                    <motion.label
-                      htmlFor="name"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
-                    >
-                      Full Name
-                    </motion.label>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-px bg-current origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: watchedValues.name ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ width: "100%" }}
-                    />
+            <div className="bg-[#f1efea] px-6 py-8 sm:px-10 lg:px-12 lg:py-12">
+              <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <div className="grid gap-x-8 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="name" className="text-sm font-semibold">Your name</label>
+                    <input id="name" autoComplete="name" placeholder="Jane Smith" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} {...register("name")} className={fieldClass} />
+                    {errors.name && <p id="name-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.name.message}</p>}
                   </div>
-                  {errors.name && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70 text-red-600"
-                    >
-                      {errors.name.message}
-                    </motion.p>
-                  )}
-                </div>
-                {/* Email Field */}
-                <div>
-                  <div className="relative">
-                    <motion.input
-                      type="email"
-                      {...register("email")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
-                      placeholder="Email Address"
-                      id="email"
-                    />
-                    <motion.label
-                      htmlFor="email"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
-                    >
-                      Email Address
-                    </motion.label>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-px bg-current origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: watchedValues.email ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ width: "100%" }}
-                    />
+                  <div>
+                    <label htmlFor="email" className="text-sm font-semibold">Email address</label>
+                    <input id="email" type="email" autoComplete="email" placeholder="jane@company.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} {...register("email")} className={fieldClass} />
+                    {errors.email && <p id="email-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.email.message}</p>}
                   </div>
-                  {errors.email && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
-                    >
-                      {errors.email.message}
-                    </motion.p>
-                  )}
                 </div>
 
-                {/* Query Type Field */}
-                <div>
-                  <div className="relative">
-                    <select
-                      {...register("queryType")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg focus:outline-none focus:border-opacity-60 transition-all duration-500 appearance-none cursor-pointer"
-                      id="queryType"
-                    >
-                      <option value="">Select Query Type</option>
-                      {queryTypes.map((type) => (
-                        <option
-                          key={type.value}
-                          value={type.value}
-                          className=""
-                        >
-                          {type.label}
-                        </option>
-                      ))}
+                <div className="mt-8 grid gap-x-8 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="queryType" className="text-sm font-semibold">What can we help with?</label>
+                      <select id="queryType" aria-invalid={Boolean(errors.queryType)} aria-describedby={errors.queryType ? "queryType-error" : undefined} {...register("queryType")} className={`${fieldClass} cursor-pointer`}>
+                      <option value="">Select one</option>
+                      {queryTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
                     </select>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-px bg-current origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: watchedValues.queryType ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ width: "100%" }}
-                    />
+                    {errors.queryType && <p id="queryType-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.queryType.message}</p>}
                   </div>
-                  {errors.queryType && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
-                    >
-                      {errors.queryType.message}
-                    </motion.p>
-                  )}
+                  <div>
+                    <label htmlFor="subject" className="text-sm font-semibold">Subject</label>
+                    <input id="subject" placeholder="A short summary" aria-invalid={Boolean(errors.subject)} aria-describedby={errors.subject ? "subject-error" : undefined} {...register("subject")} className={fieldClass} />
+                    {errors.subject && <p id="subject-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.subject.message}</p>}
+                  </div>
                 </div>
 
-                {/* Subject Field */}
-                <div>
-                  <div className="relative">
-                    <motion.input
-                      type="text"
-                      {...register("subject")}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 peer"
-                      placeholder="Subject"
-                      id="subject"
-                    />
-                    <motion.label
-                      htmlFor="subject"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
-                    >
-                      Subject
-                    </motion.label>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-px bg-current origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: watchedValues.subject ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                  {errors.subject && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
-                    >
-                      {errors.subject.message}
-                    </motion.p>
-                  )}
+                <div className="mt-8">
+                  <label htmlFor="message" className="text-sm font-semibold">Tell us about the project</label>
+                  <textarea id="message" rows={6} placeholder="What are you trying to build or improve?" aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "message-error" : undefined} {...register("message")} className={`${fieldClass} resize-none`} />
+                  {errors.message && <p id="message-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.message.message}</p>}
                 </div>
 
-                <div>
-                  {/* Message Field */}
-                  <div className="relative">
-                    <motion.textarea
-                      {...register("message")}
-                      rows={2}
-                      className="w-full py-3 bg-transparent border-0 border-b border-current border-opacity-20  text-lg placeholder-transparent focus:outline-none focus:border-opacity-60 transition-all duration-500 resize-none peer"
-                      placeholder="Message"
-                      id="message"
-                    />
-                    <motion.label
-                      htmlFor="message"
-                      className="absolute left-0 top-4  text-lg opacity-60 transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-lg peer-focus:-top-6 peer-focus:text-sm peer-focus:opacity-80 peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:opacity-80"
-                    >
-                      Message
-                    </motion.label>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-px bg-current origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: watchedValues.message ? 1 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                  {errors.message && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm opacity-70  text-red-600"
-                    >
-                      {errors.message.message}
-                    </motion.p>
-                  )}
+                <div className="mt-8 flex flex-wrap items-center gap-5">
+                  <button type="submit" disabled={isSubmitting} className="group inline-flex items-center gap-8 rounded-full bg-[#602329] py-4 pl-6 pr-4 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60">
+                    {isSubmitting ? "Sending…" : "Send inquiry"}
+                    <span className="grid size-9 place-items-center rounded-full bg-white text-[#602329] transition-transform group-hover:rotate-45"><FiArrowUpRight aria-hidden="true" /></span>
+                  </button>
+                  {submitStatus === "success" && <p className="text-sm font-semibold text-[#602329]" role="status">Thanks—your message is on its way.</p>}
+                  {submitStatus === "error" && <p className="text-sm font-semibold text-[#602329]" role="alert">Something went wrong. Please try again.</p>}
                 </div>
-
-                {/* Status Messages */}
-                {submitStatus === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-6 border border-green-800 border-opacity-20 text-green-800"
-                  >
-                    <p className=" opacity-80">
-                      Thank you for your message. We'll get back to you within
-                      24 hours.
-                    </p>
-                  </motion.div>
-                )}
-
-                {submitStatus === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-6 border border-red-600 border-opacity-20 text-red-500"
-                  >
-                    <p className=" opacity-80">
-                      Sorry, there was an error sending your message. Please try
-                      again.
-                    </p>
-                  </motion.div>
-                )}
-
-                {/* Submit Button */}
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                  className="w-full py-4 px-6 border border-current border-opacity-20  font-medium text-lg transition-all duration-200 hover:border-opacity-60 hover:bg-black focus:outline-none focus:border-opacity-60 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white cursor-pointer "
-                >
-                  {isSubmitting ? "Sending Message..." : "Send Message"}
-                </motion.button>
-
-                
               </form>
-            </motion.div>
+            </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      </main>
       <Footer />
     </div>
   );

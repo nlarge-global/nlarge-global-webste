@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Atlas Workspace",
+    "category": "Operations platform",
+    "summary": "A clearer way for teams to plan work, understand progress, and move every decision forward.",
+    "image": "/images/projects/atlas-workspace.jpg",
+    "url": "https://example.com"
+  },
+  {
+    "name": "Northstar Digital",
+    "category": "Commerce experience",
+    "summary": "A faster, more accessible storefront designed around confident product discovery and checkout.",
+    "image": "/images/projects/northstar-digital.jpg",
+    "url": "https://example.com"
+  },
+  {
+    "name": "Meridian Platform",
+    "category": "Custom software",
+    "summary": "Connected tools that replace repetitive manual work with a reliable daily operating system.",
+    "image": "/images/projects/meridian-platform.jpg",
+    "url": "https://example.com"
+  }
+]
