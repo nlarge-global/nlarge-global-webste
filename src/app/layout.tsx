@@ -1,7 +1,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond, Dancing_Script } from "next/font/google";
-import "./globals.css";
+import "@/styles/globals.css";
 import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({
@@ -56,7 +56,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className="antialiased bg-white text-foreground overflow-x-hidden">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "NLarge Global", url: "https://nlargecorp.com", logo: "https://nlargecorp.com/logo.webp" }).replace(/</g, "\\u003c") }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": [
+          { "@type": "Organization", "@id": "https://nlargecorp.com/#organization", name: "NLarge Global", url: "https://nlargecorp.com", logo: "https://nlargecorp.com/logo-transparent.png" },
+          { "@type": "WebSite", "@id": "https://nlargecorp.com/#website", name: "NLarge Global", url: "https://nlargecorp.com", publisher: { "@id": "https://nlargecorp.com/#organization" } }
+        ] }).replace(/</g, "\\u003c") }} />
         <a href="#main-content" className="fixed left-4 top-0 z-[100] -translate-y-full rounded-b-md bg-[#602329] px-4 py-3 text-sm font-semibold text-white focus:translate-y-0">Skip to main content</a>
         <NextTopLoader
           color="#000000"

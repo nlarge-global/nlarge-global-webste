@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
-import Navigation from "@/components/Navigation";
+import Footer from "@/components/layout/Footer";
+import Navigation from "@/components/layout/Navigation";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | NLarge Global",
+  title: "Privacy Policy",
   description: "How NLarge Global collects, uses and protects information submitted through our website.",
+  alternates: { canonical: "/privacy-policy" },
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-white text-black">
       <Navigation />
-      <main id="main-content" className="mx-auto max-w-[92rem] px-5 pb-20 pt-32 sm:px-8 lg:px-12 lg:pb-28 lg:pt-40">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[92rem] px-5 pb-20 pt-32 sm:px-8 lg:px-12 lg:pb-28 lg:pt-40">
         <header className="border-b border-black pb-10">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">Legal</p>
           <h1 className="mt-5 max-w-[10ch] text-[clamp(4rem,9vw,7.5rem)] leading-[0.86] tracking-[-0.055em]">Privacy Policy</h1>
-          <p className="mt-6 text-sm text-black/55">Effective 6 November 2026</p>
+          <p className="mt-6 text-sm text-black/60">Effective 6 November 2026</p>
         </header>
         <div className="grid gap-12 pt-12 lg:grid-cols-[0.55fr_1fr]">
           <p className="text-lg font-semibold">How we handle information shared with NLarge Global.</p>

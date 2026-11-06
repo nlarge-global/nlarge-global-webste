@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -5,6 +7,7 @@ export default function Footer() {
   return (
     <footer
       id="top"
+      tabIndex={-1}
       className="w-full px-5 pb-7 pt-14 text-black sm:px-8 lg:px-12 lg:pb-9 lg:pt-20"
     >
       <div className="grid overflow-hidden border-y border-black lg:grid-cols-[0.58fr_1.42fr]">
@@ -49,7 +52,7 @@ export default function Footer() {
               </svg>
               Bengaluru, India
             </p>
-            <p className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-black/45">
+            <p className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-black/60">
               Build · Improve · Own
             </p>
           </div>
@@ -91,19 +94,19 @@ export default function Footer() {
             <div className="flex sm:flex-col gap-2 sm:gap-3 ">
               <Link
                 href="/sitemap.xml"
-                className="text-sm text-black/55 hover:text-black"
+                className="text-sm text-black/60 hover:text-black"
               >
                 Sitemap
               </Link>
               <Link
                 href="/privacy-policy"
-                className="text-sm text-black/55 hover:text-black"
+                className="text-sm text-black/60 hover:text-black"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms-of-service"
-                className=" text-sm text-black/55 hover:text-black"
+                className=" text-sm text-black/60 hover:text-black"
               >
                 Terms of Service
               </Link>
@@ -112,14 +115,18 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 pt-5 text-xs text-black/55 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 pt-5 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
         <p>© {new Date().getFullYear()} NLarge Global. All rights reserved.</p>
-        <a
-          href="#top"
-          className="w-fit font-semibold text-black hover:text-[#602329]"
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById("top")?.focus({ preventScroll: true });
+            window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+          }}
+          className="w-fit cursor-pointer font-semibold text-black hover:text-[#602329]"
         >
           Back to top ↑
-        </a>
+        </button>
       </div>
     </footer>
   );

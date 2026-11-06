@@ -34,7 +34,7 @@ export default function ServicesSection() {
         <div className="divide-y divide-foreground/15">
           {capabilities.map((capability, index) => (
             <Link key={capability.name} href="/services" className="group grid gap-6 py-9 transition sm:grid-cols-[6rem_1fr_1fr_auto] sm:items-center sm:py-12">
-              <span className="text-sm text-foreground/45">0{index + 1}</span>
+              <span className="text-sm text-foreground/60">0{index + 1}</span>
               <h3 className="font-serif text-4xl sm:text-5xl flex gap-2 items-center justify-between">{capability.name}
                 <span className="sm:hidden grid text-lg size-12 place-items-center rounded-full border border-foreground/20 transition group-hover:bg-[#602329] group-hover:text-white">
                 <FiArrowUpRight aria-hidden="true" />

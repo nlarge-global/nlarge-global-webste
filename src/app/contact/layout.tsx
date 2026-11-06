@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { safeJsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -8,5 +9,18 @@ export const metadata: Metadata = {
 };
 
 export default function ContactLayout({ children }: { children: ReactNode }) {
-  return children;
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: "Contact NLarge Global",
+    url: "https://nlargecorp.com/contact",
+    about: { "@id": "https://nlargecorp.com/#organization" },
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }} />
+      {children}
+    </>
+  );
 }

@@ -1,8 +1,8 @@
-import Footer from "@/components/Footer";
-import Navigation from "@/components/Navigation";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import ProjectShowcase from "@/components/ProjectShowcase";
-import ServicesSection from "@/components/ServicesSection";
+import Footer from "@/components/layout/Footer";
+import Navigation from "@/components/layout/Navigation";
+import TestimonialsSection from "@/features/showcase/components/TestimonialsSection";
+import ProjectShowcase from "@/features/showcase/components/ProjectShowcase";
+import ServicesSection from "@/components/sections/ServicesSection";
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowUpRight } from "react-icons/fi";
@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <div className="w-full bg-white text-black">
       <Navigation />
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <section
           aria-labelledby="proof-title"
           className="flex min-h-[100svh] items-center overflow-hidden px-4 py-24 sm:px-4 lg:px-12 lg:py-28"
@@ -97,7 +97,7 @@ export default function HomePage() {
                   </div>
                   <figcaption className="pt-3">
                     <strong className="block">{person.name}</strong>
-                    <span className="text-sm text-black/55">{person.role}</span>
+                    <span className="text-sm text-black/60">{person.role}</span>
                   </figcaption>
                 </figure>
               ))}
