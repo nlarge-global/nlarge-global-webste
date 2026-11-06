@@ -6,18 +6,11 @@ import ServicesSection from "@/components/sections/ServicesSection";
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowUpRight } from "react-icons/fi";
-import { isEmailServiceAvailable } from "@/features/contact/services/email";
-import EmailStatusToast from "@/features/contact/components/EmailStatusToast";
 
-export const dynamic = "force-dynamic";
-
-export default async function HomePage() {
-  const emailServiceAvailable = await isEmailServiceAvailable();
-
+export default function HomePage() {
   return (
     <div className="w-full bg-white text-black">
       <Navigation />
-      {!emailServiceAvailable && <EmailStatusToast recipientEmail="info@nlargecorp.com" />}
       <main id="main-content" tabIndex={-1}>
         <section
           aria-labelledby="proof-title"

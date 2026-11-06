@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowUpRight } from "react-icons/fi";
+import { isEmailServiceAvailable } from "@/features/contact/services/email";
+import EmailStatusToast from "@/features/contact/components/EmailStatusToast";
 
 import { contactSchema, type ContactFormData } from "@/features/contact/schemas/contact";
 
@@ -41,7 +43,6 @@ export default function ContactForm() {
       setSubmitStatus("error");
     }
   };
-
   const fieldClass = "w-full border-0 border-b border-black/20 bg-transparent px-0 py-4 text-base outline-none transition-colors placeholder:text-black/60 focus:border-[#602329] focus:ring-0";
 
   return (
@@ -103,6 +104,24 @@ export default function ContactForm() {
                   <label htmlFor="message" className="text-sm font-semibold">Tell us about the project</label>
                   <textarea id="message" rows={6} placeholder="What are you trying to build or improve?" aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "message-error" : undefined} {...register("message")} className={`${fieldClass} resize-none`} />
                   {errors.message && <p id="message-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.message.message}</p>}
+                </div>
+
+                <div className="mt-8">
+                  <label className="flex items-start gap-3 text-sm leading-6 text-black/70">
+                    <input
+                      type="checkbox"
+                      className="mt-1 size-4 shrink-0 accent-[#602329]"
+                      aria-invalid={Boolean(errors.consent)}
+                      aria-describedby={errors.consent ? "consent-error" : undefined}
+                      {...register("consent")}
+                    />
+                    <span>
+                      I agree that NLarge Global may use these details to respond to my inquiry, as described in the{" "}
+                      <a href="/privacy-policy" className="font-semibold text-[#602329] underline underline-offset-4">Privacy Policy</a>. I also agree to the{" "}
+                      <a href="/terms-of-service" className="font-semibold text-[#602329] underline underline-offset-4">Terms of Service</a>.
+                    </span>
+                  </label>
+                  {errors.consent && <p id="consent-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.consent.message}</p>}
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-5">

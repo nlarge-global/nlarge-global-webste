@@ -76,7 +76,7 @@ export default function Footer() {
           >
             <div className="flex sm:flex-col gap-2 sm:gap-3">
               <Link
-                href="/#services"
+                href="/services"
                 className=" text-base hover:text-[#602329]"
               >
                 Services

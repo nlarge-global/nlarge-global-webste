@@ -6,6 +6,7 @@ export const contactSchema = z.object({
   queryType: z.enum(["general", "support", "business", "careers"]),
   subject: z.string().trim().min(5, "Add a subject").max(100, "Subject must be less than 100 characters").refine((value) => !/[\r\n]/.test(value), "Invalid subject"),
   message: z.string().trim().min(10, "Tell us a little more").max(1000, "Message must be less than 1000 characters"),
+  consent: z.literal(true, { message: "Accept the privacy and data-use terms to continue" }),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
