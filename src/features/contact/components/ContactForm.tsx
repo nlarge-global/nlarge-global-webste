@@ -6,8 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowUpRight } from "react-icons/fi";
-import { isEmailServiceAvailable } from "@/features/contact/services/email";
-import EmailStatusToast from "@/features/contact/components/EmailStatusToast";
 
 import { contactSchema, type ContactFormData } from "@/features/contact/schemas/contact";
 
@@ -31,7 +29,7 @@ export default function ContactForm() {
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify(data),
       });
       const result = await response.json();
@@ -126,7 +124,7 @@ export default function ContactForm() {
 
                 <div className="mt-8 flex flex-wrap items-center gap-5">
                   <button type="submit" disabled={isSubmitting} className="group inline-flex items-center gap-8 rounded-full bg-[#602329] py-4 pl-6 pr-4 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSubmitting ? "Sending…" : "Send inquiry"}
+                    {isSubmitting ? "Submitting…" : "Send inquiry"}
                     <span className="grid size-9 place-items-center rounded-full bg-white text-[#602329] transition-transform group-hover:rotate-45"><FiArrowUpRight aria-hidden="true" /></span>
                   </button>
                   {submitStatus === "success" && <p className="text-sm font-semibold text-[#602329]" role="status">Thanks—your message is on its way.</p>}

@@ -1,0 +1,40 @@
+import bcrypt from "bcryptjs";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { getAdminCredentials, requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
+import { decryptSecretValue } from "@/features/admin/auth/encryption";
+import { Secret } from "@/features/admin/models/secret";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getClientWithKey } from "@/features/admin/auth/secret-keys";
+import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
+
+const revealSchema = z.object({ password: z.string().min(1).max(200) });
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; secretId: string }> }) {
+  try {
+    const session = await requireAdminSession();
+    await validateCsrfToken(request, session);
+    const { password, } = revealSchema.parse(await request.json());
+    const credentials = getAdminCredentials();
+    if (!await bcrypt.compare(password, credentials.passwordHash)) return NextResponse.json({ error: "Re-authentication failed." }, { status: 403 });
+    const { id, secretId } = await params;
+    await connectToDatabase();
+    const result = await getClientWithKey(id);
+    const secret = await Secret.findOne({ _id: secretId, clientId: id }).select("+encryptedValue +iv +authTag +keyVersion");
+    if (!result || !secret) return NextResponse.json({ error: "Secret not found." }, { status: 404 });
+    const value = decryptSecretValue({
+      ciphertext: secret.encryptedValue,
+      iv: secret.iv,
+      authTag: secret.authTag,
+      keyVersion: secret.keyVersion,
+    }, result.key);
+    await writeAuditEvent({ actor: "admin", action: "secret.revealed", resourceType: "secret", resourceId: secretId, requestId: getRequestId(request), metadata: { clientId: id } });
+    return NextResponse.json({ value });
+  } catch (error) {
+    if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
+    if (error instanceof z.ZodError) return NextResponse.json({ error: "Password is required." }, { status: 400 });
+    console.error("Secret reveal failed:", error);
+    return NextResponse.json({ error: "Unable to reveal secret." }, { status: 500 });
+  }
+}

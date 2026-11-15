@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { contactSchema } from "@/features/contact/schemas/contact";
-import { sendContactEmails } from "@/features/contact/services/email";
-import { getServerEnv } from "@/lib/env";
 import { isContactRateLimited } from "@/features/contact/api/rate-limit";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Inquiry } from "@/features/admin/models/inquiry";
+import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("cf-connecting-ip")
@@ -11,24 +12,31 @@ export async function POST(request: NextRequest) {
     || request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
     || "unknown";
   try {
+    const data = contactSchema.parse(await request.json());
     if (await isContactRateLimited(ip)) {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    const env = getServerEnv();
-    if (!env.SMTP_USER || !env.SMTP_PASS) {
-      console.error("SMTP credentials are not configured");
-      return NextResponse.json({ error: "Email service is not configured" }, { status: 500 });
+    const idempotencyKey = request.headers.get("idempotency-key")?.trim();
+    if (!idempotencyKey || idempotencyKey.length > 200) {
+      return NextResponse.json({ error: "A valid submission key is required." }, { status: 400 });
     }
 
-    const data = contactSchema.parse(await request.json());
-    await sendContactEmails(data);
-    return NextResponse.json({ message: "Message sent successfully" });
+    await connectToDatabase();
+    const existing = await Inquiry.findOne({ idempotencyKey }).select("_id");
+    if (existing) return NextResponse.json({ message: "Inquiry received" });
+
+    const inquiry = await Inquiry.create({ ...data, source: "website", idempotencyKey });
+    await writeAuditEvent({ actor: "public", action: "inquiry.created", resourceType: "inquiry", resourceId: String(inquiry._id), requestId: getRequestId(request), metadata: { source: "website" } });
+    return NextResponse.json({ message: "Inquiry received" });
   } catch (error) {
     console.error("Contact form error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Validation failed", details: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to send message. Please try again." }, { status: 500 });
+    if (error instanceof Error && error.name === "MongoServerError" && "code" in error && error.code === 11000) {
+      return NextResponse.json({ message: "Inquiry received" });
+    }
+    return NextResponse.json({ error: "Failed to save inquiry. Please try again." }, { status: 500 });
   }
 }

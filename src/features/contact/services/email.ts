@@ -34,6 +34,7 @@ function createTransporter() {
   if (!env.SMTP_USER || !env.SMTP_PASS) {
     throw new Error("SMTP_USER and SMTP_PASS are required");
   }
+
   return nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
@@ -44,6 +45,15 @@ function createTransporter() {
     socketTimeout: 10_000,
     auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
   });
+}
+
+export async function verifyDashboardEmail() {
+  const transporter = createTransporter();
+  try {
+    await transporter.verify();
+  } finally {
+    transporter.close();
+  }
 }
 
 let emailServiceCheck: Promise<boolean> | undefined;
@@ -108,5 +118,32 @@ export async function sendContactEmails(data: ContactEmailData) {
     });
   } catch (error) {
     console.error("Visitor confirmation email failed after staff notification:", error);
+  }
+}
+
+export type DashboardReplyData = {
+    recipient: string;
+    subject: string;
+    message: string;
+    signature: string;
+  };
+
+export async function sendDashboardReply(data: DashboardReplyData) {
+  if (/[\r\n]/.test(data.subject)) throw new Error("Invalid email subject");
+  const env = getServerEnv();
+  const transporter = createTransporter();
+  const safeMessage = escapeHtml(data.message).replace(/\n/g, "<br>");
+  const safeSignature = escapeHtml(data.signature).replace(/\n/g, "<br>");
+
+  try {
+    await transporter.sendMail({
+      from: `NLarge Global <${env.SMTP_USER}>`,
+      to: data.recipient,
+      subject: data.subject,
+      text: `${data.message}\n\n${data.signature}`,
+      html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#111"><p>${safeMessage}</p><p>${safeSignature}</p></body></html>`,
+    });
+  } finally {
+    transporter.close();
   }
 }

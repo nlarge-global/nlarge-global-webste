@@ -28,6 +28,14 @@ src/
 │   │   └── services/page.tsx     # /services
 │   ├── api/contact/route.ts      # Contact HTTP boundary
 │   ├── contact/page.tsx          # /contact
+│   ├── admin/                    # Private dashboard route surface
+│   │   ├── layout.tsx            # Admin shell and admin-only metadata
+│   │   ├── login/page.tsx        # Admin login
+│   │   ├── page.tsx              # /admin overview placeholder
+│   │   └── [section]/page.tsx    # Planned admin section placeholders
+│   ├── api/admin/auth/
+│   │   ├── login/route.ts        # Login boundary
+│   │   └── logout/route.ts       # CSRF-protected logout boundary
 │   ├── privacy-policy/page.tsx
 │   ├── terms-of-service/page.tsx
 │   ├── layout.tsx                # Root layout and metadata
@@ -48,11 +56,34 @@ src/
 │       └── components/
 │           ├── ProjectShowcase.tsx
 │           └── TestimonialsSection.tsx
+│   └── admin/
+│       └── auth/
+│           ├── rate-limit.ts
+│           └── session.ts
+│       ├── models/
+│       │   ├── inquiry.ts
+│       │   ├── conversation-entry.ts
+│       │   └── email-record.ts
+│       ├── client.ts
+│       ├── project.ts
+│       ├── task.ts
+│       ├── secret.ts
+│       ├── document.ts
+│       ├── payment.ts
+│       ├── audit-event.ts
+│       └── settings.ts
+│       └── components/
+│           ├── AdminShell.tsx
+│           ├── AdminPlaceholderPage.tsx
+│           ├── AdminTour.tsx
+│           └── HelpTooltip.tsx
 ├── content/
 │   ├── projects.json
 │   └── testimonials.json
 ├── lib/
 │   ├── env.ts
+│   ├── mongodb.ts                 # Cached Mongoose connection adapter
+│   ├── mongoose-model.ts          # Development-safe model registration
 │   └── email/                    # Reserved for a generic email provider boundary
 ├── styles/
 │   └── globals.css
@@ -80,6 +111,11 @@ src/
 | `/privacy-policy` | `src/app/privacy-policy/page.tsx` | Privacy policy |
 | `/terms-of-service` | `src/app/terms-of-service/page.tsx` | Terms of service |
 | `/api/contact` | `src/app/api/contact/route.ts` | Contact submission endpoint |
+| `/admin` | `src/app/admin/page.tsx` | Admin overview shell placeholder |
+| `/admin/[section]` | `src/app/admin/[section]/page.tsx` | Planned admin section shell placeholders |
+| `/admin/login` | `src/app/admin/login/page.tsx` | Admin credential login |
+| `/api/admin/auth/login` | `src/app/api/admin/auth/login/route.ts` | Admin login and session creation |
+| `/api/admin/auth/logout` | `src/app/api/admin/auth/logout/route.ts` | Revocation with same-origin and CSRF checks |
 | `/robots.txt` | `src/app/robots.ts` | Search crawler policy |
 | `/sitemap.xml` | `src/app/sitemap.ts` | Public route index |
 
@@ -102,8 +138,7 @@ flowchart TD
     ContactForm -->|POST /api/contact| ContactAPI[Contact route]
     ContactAPI --> ContactSchema
     ContactAPI --> RateLimit[Redis or memory limiter]
-    ContactAPI --> Email[Contact email service]
-    Email --> SMTP[(SMTP)]
+    ContactAPI --> Inquiry[(MongoDB Inquiry)]
 ```
 
 ## Contact request flow
@@ -155,3 +190,20 @@ See `example.env` for the copyable template.
 - Route files compose features and shared layout; feature-specific behavior stays under `features/<name>/`.
 - Public metadata, canonical URLs, robots and sitemap must remain synchronized with public routes.
 - Preserve the wine-red (`#602329`), warm-neutral, large-type visual system.
+- The admin surface uses the same brand accents with a separate warm-neutral workspace layout. Step 1 contains visual placeholders only; authentication, persistence, and protected operations are added in later features.
+- The admin walkthrough and contextual help are client-side UI preferences only during the foundation phase. Tour completion is stored in browser storage until authenticated admin preferences are implemented.
+- MongoDB access is server-only through `src/lib/mongodb.ts`; it fails explicitly when `MONGODB_URI` is missing or the connection cannot be established. Models must use `getOrCreateModel()` to avoid development recompilation errors.
+- Admin sessions are opaque random cookies whose HMAC is stored in the `AdminSession` collection. Protected pages query the server-backed session, enforce expiry/revocation, and redirect unauthenticated users to `/admin/login`; logout requires a matching same-origin request and CSRF token.
+- Public contact submissions validate with the shared schema, apply rate limiting, persist to the `Inquiry` collection with `source: website` and an idempotency key, and do not call SMTP. SMTP remains reserved for the later dashboard reply and Health features.
+- Inquiry conversation entries are stored separately from the inquiry, scoped by `inquiryId`, and sorted by editable `occurredAt` timestamps. Timeline creation requires an authenticated admin session and CSRF validation.
+- Dashboard replies are the only current path that uses SMTP. Reply text is escaped before HTML generation, includes a plain-text fallback, stores delivery metadata in `EmailRecord`, and creates an outbound `ConversationEntry`.
+- Client records stay small and inquiries reference an optional `clientId`. Linking, unlinking, and relinking are authenticated server operations; client detail pages query only their linked inquiries.
+- Projects belong to exactly one client and contain technical/delivery details. Tasks are separate records linked to projects (and inherit the client), with indexed status and due-date fields for later overview and follow-up views.
+- Client secrets use a unique client data key wrapped by `MASTER_ENCRYPTION_KEY`; secret values store only ciphertext, IV, authentication tag, and key version. Lists exclude encrypted fields, and reveal requires admin re-authentication.
+- Client documents use private R2 object keys under `clients/{clientId}/documents/...`; uploads validate size, declared type, and file signature, while access uses five-minute signed URLs. Metadata and object deletion are coordinated with orphan cleanup on metadata failure.
+- Payments are client-scoped records with bounded amount/currency/method/status fields and optional references to private proof documents. Payment credentials are not accepted by the schema.
+- Audit events are append-only, indexed by time and resource, carry a bounded request ID and safe metadata only, and never accept secret values or request bodies. Implemented mutations write events through the shared audit service.
+- Health checks are private and return only configured/ok/error summaries for environment, MongoDB, SMTP, and R2. Public contact submission does not call Health.
+- Settings are a single dashboard preference record. Password hash generation returns a bcrypt hash once and never persists the plaintext or hash.
+- Overview metrics are derived from current collections and do not have a separate collection. New inquiries use `status: new`, while recent inquiries use creation order across statuses; task/payment/secret signals use indexed collection queries.
+- Client exports are created through authenticated `POST /api/admin/exports`, exclude secret values, and optionally include private R2 document contents. ZIPs use random private object keys and short-lived `ExportJob` download tokens; creation is audited, while expired-object cleanup is deferred to the Step 18 operational policy.
