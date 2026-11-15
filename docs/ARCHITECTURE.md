@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is the NLarge Global marketing website. Next.js App Router renders the public pages and delegates contact submissions to a server route that validates input and sends email through SMTP.
+This repository is the NLarge Global marketing website. Next.js App Router renders the public pages and delegates contact submissions to a server route that validates input and stores inquiries in MongoDB.
 
 ## Technology
 
@@ -28,6 +28,7 @@ src/
 │   │   └── services/page.tsx     # /services
 │   ├── api/contact/route.ts      # Contact HTTP boundary
 │   ├── contact/page.tsx          # /contact
+│   ├── support/page.tsx          # /support
 │   ├── admin/                    # Private dashboard route surface
 │   │   ├── layout.tsx            # Admin shell and admin-only metadata
 │   │   ├── login/page.tsx        # Admin login

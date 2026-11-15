@@ -120,6 +120,7 @@ export default function ContactForm() {
                     </span>
                   </label>
                   {errors.consent && <p id="consent-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.consent.message}</p>}
+                  <p className="mt-3 text-sm text-black/60">To ask us to access, correct or delete your information, visit <a href="/support" className="font-semibold text-[#602329] underline underline-offset-4">Support</a>.</p>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-5">

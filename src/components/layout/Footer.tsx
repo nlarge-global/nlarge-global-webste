@@ -99,6 +99,12 @@ export default function Footer() {
                 Sitemap
               </Link>
               <Link
+                href="/support"
+                className="text-sm text-black/60 hover:text-black"
+              >
+                Support
+              </Link>
+              <Link
                 href="/privacy-policy"
                 className="text-sm text-black/60 hover:text-black"
               >
