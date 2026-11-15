@@ -74,16 +74,22 @@ export function AdminPagination({
   pageSize = 10,
   basePath,
   param = "page",
+  queryParams,
 }: {
   page: number;
   total: number;
   pageSize?: number;
   basePath: string;
   param?: string;
+  queryParams?: Record<string, string>;
 }) {
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1) return null;
-  const href = (value: number) => `${basePath}?${param}=${value}`;
+  const href = (value: number) => {
+    const params = new URLSearchParams(queryParams);
+    params.set(param, String(value));
+    return `${basePath}?${params.toString()}`;
+  };
   return (
     <Pagination className="border-t border-black/10 p-4">
       <PaginationContent>

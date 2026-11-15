@@ -8,10 +8,12 @@ export default function TaskStatusSelect({
   taskId,
   status,
   onOptimisticChange,
+  ariaLabel = "Task status",
 }: {
   taskId: string;
   status: "todo" | "in-progress" | "done";
   onOptimisticChange?: (status: "todo" | "in-progress" | "done") => void;
+  ariaLabel?: string;
 }) {
   const [value, setValue] = useState(status);
   const [error, setError] = useState("");
@@ -56,7 +58,7 @@ export default function TaskStatusSelect({
         value={value}
         onChange={(event) => update(event.target.value)}
         disabled={pending}
-        aria-label="Task status"
+        aria-label={ariaLabel}
         className="min-h-10 rounded-lg pr-10"
       >
         <option value="todo">Todo</option>

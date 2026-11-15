@@ -15,7 +15,11 @@ import {
 import { Button } from "./ui/Button";
 import { Select } from "@/components/ui/select";
 
-type ExportResult = { downloadUrl: string; expiresAt?: string };
+type ExportResult = {
+  downloadUrl: string;
+  expiresAt?: string;
+  unavailableDocuments: string[];
+};
 
 export default function ExportManager({
   clients,
@@ -53,6 +57,7 @@ export default function ExportManager({
       const result = (await response.json()) as {
         downloadUrl?: string;
         expiresAt?: string;
+        unavailableDocuments?: string[];
         error?: string;
       };
       if (!response.ok || !result.downloadUrl) {
@@ -61,6 +66,7 @@ export default function ExportManager({
       setExportResult({
         downloadUrl: result.downloadUrl,
         expiresAt: result.expiresAt,
+        unavailableDocuments: result.unavailableDocuments ?? [],
       });
     } catch (reason) {
       setError(
@@ -201,6 +207,18 @@ export default function ExportManager({
                 )}
               </p>
             </div>
+          </div>
+        )}
+        {exportResult && exportResult.unavailableDocuments.length > 0 && (
+          <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+            <p className="font-semibold">
+              Export created, but {exportResult.unavailableDocuments.length} document
+              {exportResult.unavailableDocuments.length === 1 ? " file is" : " files are"} missing from storage.
+            </p>
+            <p className="mt-1 leading-5">
+              The archive includes a <code>documents-unavailable.json</code> manifest
+              listing them. Check the original uploads before sharing this export.
+            </p>
           </div>
         )}
       </form>

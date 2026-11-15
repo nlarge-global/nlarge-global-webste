@@ -33,6 +33,12 @@ function createZip(files: Array<{ name: string; content: string | Buffer }>) {
   });
 }
 
+function isMissingPrivateObject(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const storageError = error as { name?: string; Code?: string; code?: string };
+  return storageError.name === "NoSuchKey" || storageError.Code === "NoSuchKey" || storageError.code === "NoSuchKey";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdminSession();
@@ -59,9 +65,31 @@ export async function POST(request: NextRequest) {
       { name: "conversations.json", content: JSON.stringify(conversations, null, 2) },
       { name: "documents.json", content: JSON.stringify(documents.map(({ objectKey: _objectKey, ...metadata }) => metadata), null, 2) },
     ];
+    const unavailableDocuments: string[] = [];
     if (data.includeDocuments) {
       for (const document of documents) {
-        files.push({ name: `documents/${document.filename}`, content: await downloadPrivateObject(document.objectKey) });
+        try {
+          files.push({
+            name: `documents/${document.filename}`,
+            content: await downloadPrivateObject(document.objectKey),
+          });
+        } catch (error) {
+          if (!isMissingPrivateObject(error)) throw error;
+          unavailableDocuments.push(document.filename);
+        }
+      }
+      if (unavailableDocuments.length > 0) {
+        files.push({
+          name: "documents-unavailable.json",
+          content: JSON.stringify(
+            {
+              message: "These document records had no matching file in private storage and were not included.",
+              filenames: unavailableDocuments,
+            },
+            null,
+            2,
+          ),
+        });
       }
     }
     const zip = await createZip(files);
@@ -72,7 +100,11 @@ export async function POST(request: NextRequest) {
     await uploadPrivateObject(objectKey, zip, "application/zip");
     await ExportJob.create({ clientId: client._id, tokenHash: crypto.createHash("sha256").update(token).digest("hex"), objectKey, expiresAt });
     await writeAuditEvent({ actor: "admin", action: "client.export.created", resourceType: "client", resourceId: data.clientId, requestId: getRequestId(request), metadata: { includeDocuments: data.includeDocuments } });
-    return NextResponse.json({ downloadUrl: `/api/admin/exports/${token}`, expiresAt: expiresAt.toISOString() });
+    return NextResponse.json({
+      downloadUrl: `/api/admin/exports/${token}`,
+      expiresAt: expiresAt.toISOString(),
+      unavailableDocuments,
+    });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
