@@ -160,6 +160,8 @@ ADMIN_SESSION_SECRET=
 The plain password is never stored. A password change generates a new hash
 once and shows manual Vercel environment-variable and redeploy instructions.
 The generated hash is not persisted in MongoDB, logs, or browser storage.
+Bcrypt passwords are limited to 72 UTF-8 bytes at generation, login, and
+re-authentication to prevent suffixes from being ignored.
 
 ### Encryption
 

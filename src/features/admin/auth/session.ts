@@ -101,7 +101,12 @@ export async function validateCsrfToken(request: Request, session: AdminSessionD
   if (!origin || new URL(origin).origin !== requestOrigin) throw new Error("CSRF_ORIGIN_INVALID");
 
   const token = request.headers.get("x-csrf-token");
-  if (!token || token !== session.csrfToken) throw new Error("CSRF_TOKEN_INVALID");
+  if (!token) throw new Error("CSRF_TOKEN_INVALID");
+  const tokenBuffer = Buffer.from(token);
+  const sessionTokenBuffer = Buffer.from(session.csrfToken);
+  if (tokenBuffer.length !== sessionTokenBuffer.length || !crypto.timingSafeEqual(tokenBuffer, sessionTokenBuffer)) {
+    throw new Error("CSRF_TOKEN_INVALID");
+  }
 }
 
 export function getAdminCredentials() {

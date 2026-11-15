@@ -394,6 +394,7 @@ export default function SecretManager({
                   type="password"
                   autoFocus
                   required
+                  maxLength={72}
                   value={revealPassword}
                   onChange={(event) => setRevealPassword(event.target.value)}
                   className="mt-4 min-h-11 w-full rounded-xl border border-black/15 px-3"

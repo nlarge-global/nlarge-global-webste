@@ -7,8 +7,11 @@ import { Secret } from "@/features/admin/models/secret";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getClientWithKey } from "@/features/admin/auth/secret-keys";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
+import { BCRYPT_PASSWORD_TOO_LONG, isWithinBcryptPasswordLimit } from "@/features/admin/auth/bcrypt-password";
 
-const revealSchema = z.object({ password: z.string().min(1).max(200) });
+const revealSchema = z.object({
+  password: z.string().min(1).max(200).refine(isWithinBcryptPasswordLimit, BCRYPT_PASSWORD_TOO_LONG),
+});
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; secretId: string }> }) {
   try {
@@ -37,7 +40,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
-    if (error instanceof z.ZodError) return NextResponse.json({ error: "Password is required." }, { status: 400 });
+    if (error instanceof z.ZodError) {
+      const passwordTooLong = error.issues.some((issue) => issue.message === BCRYPT_PASSWORD_TOO_LONG);
+      return NextResponse.json({ error: passwordTooLong ? BCRYPT_PASSWORD_TOO_LONG : "Password is required." }, { status: 400 });
+    }
     console.error("Secret reveal failed:", error);
     return NextResponse.json({ error: "Unable to reveal secret." }, { status: 500 });
   }

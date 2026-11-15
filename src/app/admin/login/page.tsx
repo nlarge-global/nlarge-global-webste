@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiLock } from "react-icons/fi";
 import { Button } from "@/features/admin/components/ui/Button";
+import { BCRYPT_PASSWORD_MAX_BYTES } from "@/features/admin/auth/bcrypt-password";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -66,7 +67,7 @@ export default function AdminLoginPage() {
         </label>
         <label htmlFor="admin-password" className="mt-4 block text-sm font-medium">
           Password
-          <input id="admin-password" name="password" type="password" required autoComplete="current-password" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3 outline-none focus:border-[#602329]" />
+          <input id="admin-password" name="password" type="password" required maxLength={BCRYPT_PASSWORD_MAX_BYTES} autoComplete="current-password" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3 outline-none focus:border-[#602329]" />
         </label>
         {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
         <Button type="submit" disabled={pending} className="mt-6 w-full">

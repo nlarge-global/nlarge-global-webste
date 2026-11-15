@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
+import { BCRYPT_PASSWORD_TOO_LONG, isWithinBcryptPasswordLimit } from "@/features/admin/auth/bcrypt-password";
 import { Settings } from "@/features/admin/models/settings";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { connectToDatabase } from "@/lib/mongodb";
@@ -49,14 +50,19 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireAdminSession();
     await validateCsrfToken(request, session);
-    const body = z.object({ password: z.string().min(12).max(200) }).parse(await request.json());
+    const body = z.object({
+      password: z.string().min(12).max(200).refine(isWithinBcryptPasswordLimit, BCRYPT_PASSWORD_TOO_LONG),
+    }).parse(await request.json());
     const hash = await bcrypt.hash(body.password, 12);
     await writeAuditEvent({ actor: "admin", action: "settings.password_hash_generated", resourceType: "settings", resourceId: "dashboard", resourceLabel: "Admin password hash", requestId: getRequestId(request) });
     return NextResponse.json({ hash });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
-    if (error instanceof z.ZodError) return NextResponse.json({ error: "Password must be at least 12 characters." }, { status: 400 });
+    if (error instanceof z.ZodError) {
+      const passwordTooLong = error.issues.some((issue) => issue.message === BCRYPT_PASSWORD_TOO_LONG);
+      return NextResponse.json({ error: passwordTooLong ? BCRYPT_PASSWORD_TOO_LONG : "Password must be at least 12 characters." }, { status: 400 });
+    }
     console.error("Password hash generation failed:", error);
     return NextResponse.json({ error: "Unable to generate password hash." }, { status: 500 });
   }
