@@ -1,1 +1,1 @@
-export { Pagination as default } from "@/components/ui/pagination";
+export { AdminPagination as default } from "@/components/ui/pagination";

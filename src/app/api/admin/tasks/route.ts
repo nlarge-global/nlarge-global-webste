@@ -19,7 +19,7 @@ const taskSchema = z.object({
 const taskUpdateSchema = z.object({
   status: z.enum(["todo", "in-progress", "done"]).optional(),
   title: z.string().trim().min(1).max(200).optional(),
-  dueDate: z.coerce.date().optional(),
+  dueDate: z.coerce.date().nullable().optional(),
   priority: z.enum(["low", "normal", "high"]).optional(),
   notes: z.string().trim().max(3000).optional(),
 });

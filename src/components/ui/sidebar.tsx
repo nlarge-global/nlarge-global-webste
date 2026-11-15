@@ -4,6 +4,7 @@ import * as React from "react";
 import { FiMenu } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { Button } from "./button";
+import { VscLayoutSidebarRight, VscLayoutSidebarRightOff } from "react-icons/vsc";
 
 type SidebarContextValue = {
   collapsed: boolean;
@@ -59,14 +60,14 @@ function SidebarContent({ children }: { children: React.ReactNode }) {
 }
 
 function SidebarFooter({ children }: { children: React.ReactNode }) {
-  return <div className="border-t border-[#eee6e0] pt-5">{children}</div>;
+  return <div className="border-t border-[#eee6e0] pt-4">{children}</div>;
 }
 
 function SidebarTrigger({ className }: { className?: string }) {
-  const { toggle } = useSidebar();
+  const { toggle, collapsed } = useSidebar();
   return (
     <Button type="button" variant="outline" size="icon" onClick={toggle} aria-label="Toggle sidebar" className={className}>
-      <FiMenu aria-hidden="true" />
+      {collapsed ? <VscLayoutSidebarRight aria-hidden="true" /> : <VscLayoutSidebarRightOff aria-hidden="true" />}
     </Button>
   );
 }

@@ -68,6 +68,9 @@ const now = new Date();
 const daysFromNow = (days) => new Date(now.getTime() + days * 86_400_000);
 const clientAKey = createClientKey();
 const clientBKey = createClientKey();
+const fixtureId = (prefix, index) => new mongoose.Types.ObjectId(`${prefix}${index.toString(16).padStart(18, "0")}`);
+const longText = "Long-form fixture content for pagination, wrapping, keyboard navigation, and truncation checks. ".repeat(10).slice(0, 900);
+const weirdText = "Edge case: café / 東京 / مرحبا / emoji 🚀 / quotes \" ' / <>& / tabs\tand newlines\ninside.";
 
 const clients = [
   {
@@ -135,11 +138,11 @@ const projects = [
 const secrets = [
   (() => {
     const encrypted = encrypt("demo-api-key-mehta", clientAKey.key);
-    return { _id: ids.secretA, clientId: ids.clientA, projectId: ids.projectA, label: "Staging API key", type: "api-key", ...encrypted, expiresAt: daysFromNow(90) };
+    return { _id: ids.secretA, clientId: ids.clientA, projectId: ids.projectA, label: "Staging API key", type: "api-key", encryptedValue: encrypted.ciphertext, iv: encrypted.iv, authTag: encrypted.authTag, keyVersion: encrypted.keyVersion, expiresAt: daysFromNow(90) };
   })(),
   (() => {
     const encrypted = encrypt("demo-portal-token-kapoor", clientBKey.key);
-    return { _id: ids.secretB, clientId: ids.clientB, projectId: ids.projectC, label: "Portal integration token", type: "token", ...encrypted, expiresAt: daysFromNow(120) };
+    return { _id: ids.secretB, clientId: ids.clientB, projectId: ids.projectC, label: "Portal integration token", type: "token", encryptedValue: encrypted.ciphertext, iv: encrypted.iv, authTag: encrypted.authTag, keyVersion: encrypted.keyVersion, expiresAt: daysFromNow(120) };
   })(),
 ];
 
@@ -170,6 +173,128 @@ const tasks = [
   { _id: ids.taskB, clientId: ids.clientA, projectId: ids.projectB, title: "Approve final brand exports", status: "todo", priority: "normal", dueDate: daysFromNow(10) },
   { _id: ids.taskC, clientId: ids.clientB, projectId: ids.projectC, title: "Test staff order workflow", status: "done", priority: "normal", dueDate: daysFromNow(-2), completedAt: daysFromNow(-3) },
 ];
+
+const generatedClients = [];
+const generatedProjects = [];
+const generatedSecrets = [];
+const generatedDocuments = [];
+const generatedPayments = [];
+const generatedInquiries = [];
+const generatedTasks = [];
+const generatedClientKeys = new Map([
+  [String(ids.clientA), clientAKey],
+  [String(ids.clientB), clientBKey],
+]);
+
+for (let index = 1; index <= 30; index += 1) {
+  const clientId = fixtureId("66a000", index);
+  const key = createClientKey();
+  generatedClientKeys.set(String(clientId), key);
+  generatedClients.push({
+    _id: clientId,
+    name: index % 5 === 0 ? `Client ${index} — ${weirdText.slice(0, 20)}` : `Fixture Client ${String(index).padStart(2, "0")}`,
+    email: `fixture.client.${index}@example.test`,
+    company: index % 4 === 0 ? `Very Long Company Name ${index} ${"North ".repeat(8)}`.slice(0, 150) : `Fixture Company ${index}`,
+    phone: index % 3 === 0 ? `+91 90000 ${String(index).padStart(5, "0")}` : undefined,
+    notes: index % 6 === 0 ? longText : index % 7 === 0 ? weirdText : `Generated client record ${index}.`,
+    tags: index % 5 === 0 ? ["long-tag-value", "edge-case", "priority"] : ["fixture"],
+    encryptedDataKey: key.wrapped.ciphertext,
+    dataKeyIv: key.wrapped.iv,
+    dataKeyAuthTag: key.wrapped.authTag,
+    dataKeyVersion: key.wrapped.keyVersion,
+  });
+  for (let projectIndex = 1; projectIndex <= 2; projectIndex += 1) {
+    const projectId = fixtureId("66b000", (index - 1) * 2 + projectIndex);
+    generatedProjects.push({
+      _id: projectId,
+      clientId,
+      name: projectIndex === 2 && index % 5 === 0 ? `${"A very long project name ".repeat(6)}${index}`.slice(0, 150) : `Fixture Project ${index}.${projectIndex}`,
+      technicalDetails: index % 4 === 0 ? longText : `Technical fixture notes for client ${index}.`,
+      deliveryDetails: index % 3 === 0 ? weirdText : "Delivery checklist and handoff notes.",
+      environment: ["Development", "Staging", "Production", "Discovery"][index % 4],
+      deadline: daysFromNow(index % 2 === 0 ? index - 15 : -index),
+      notes: index % 8 === 0 ? longText : undefined,
+    });
+    const projectKey = generatedClientKeys.get(String(clientId));
+    for (let taskIndex = 1; taskIndex <= 3; taskIndex += 1) {
+      generatedTasks.push({
+        _id: fixtureId("66c000", (index - 1) * 6 + (projectIndex - 1) * 3 + taskIndex),
+        clientId,
+        projectId,
+        title: taskIndex === 3 && index % 6 === 0 ? longText.slice(0, 200) : `Fixture task ${index}.${projectIndex}.${taskIndex}`,
+        status: ["todo", "in-progress", "done"][(index + taskIndex) % 3],
+        priority: ["low", "normal", "high"][(index + projectIndex + taskIndex) % 3],
+        dueDate: daysFromNow(index % 9 === 0 ? -index : index + taskIndex),
+        notes: index % 5 === 0 ? weirdText : undefined,
+        completedAt: (index + taskIndex) % 3 === 0 ? daysFromNow(-taskIndex) : undefined,
+      });
+    }
+    if (projectKey) {
+      for (let secretIndex = 1; secretIndex <= 3; secretIndex += 1) {
+        const encrypted = encrypt(index % 4 === 0 ? weirdText : `fixture-secret-${index}-${secretIndex}`, projectKey.key);
+        generatedSecrets.push({
+          _id: fixtureId("66d000", (index - 1) * 6 + (projectIndex - 1) * 3 + secretIndex),
+          clientId,
+          projectId,
+          label: secretIndex === 3 && index % 5 === 0 ? `Secret with an unusually long label ${"x".repeat(90)}`.slice(0, 150) : `Fixture ${["API key", "Token", "Password"][secretIndex - 1]} ${index}.${projectIndex}`,
+          type: ["api-key", "token", "username-password"][secretIndex - 1],
+          encryptedValue: encrypted.ciphertext,
+          iv: encrypted.iv,
+          authTag: encrypted.authTag,
+          keyVersion: encrypted.keyVersion,
+          expiresAt: daysFromNow(index % 4 === 0 ? -index : index + secretIndex * 10),
+        });
+      }
+      generatedDocuments.push({
+        _id: fixtureId("66e000", (index - 1) * 2 + projectIndex),
+        clientId,
+        projectId,
+        filename: index % 5 === 0 ? `fixture file ${index} — weird & long name.pdf` : `fixture-${index}-${projectIndex}.pdf`,
+        description: index % 4 === 0 ? longText : index % 3 === 0 ? weirdText : `Fixture document ${index}.${projectIndex}`,
+        objectKey: `fixtures/${clientId}/documents/${projectId}.pdf`,
+        contentType: "application/pdf",
+        size: 1024 + index * 4096,
+      });
+      generatedPayments.push({
+        _id: fixtureId("66f000", (index - 1) * 2 + projectIndex),
+        clientId,
+        projectId,
+        amount: index % 7 === 0 ? 0.01 : index * 1375.5,
+        currency: ["INR", "USD", "EUR", "GBP"][index % 4],
+        method: ["bank-transfer", "card", "cash", "other"][index % 4],
+        status: ["pending", "paid", "partial", "overdue", "cancelled"][index % 5],
+        milestone: index % 5 === 0 ? longText.slice(0, 150) : `Fixture milestone ${index}.${projectIndex}`,
+        notes: index % 6 === 0 ? weirdText : `Generated payment ${index}.${projectIndex}.`,
+        paidAt: index % 5 === 1 ? daysFromNow(-index) : undefined,
+      });
+    }
+  }
+  generatedInquiries.push({
+    _id: fixtureId("670000", index),
+    name: index % 5 === 0 ? `Person ${index} — 東京` : `Fixture Enquirer ${index}`,
+    email: `fixture.inquiry.${index}@example.test`,
+    queryType: ["general", "support", "business", "careers"][index % 4],
+    subject: index % 6 === 0 ? longText.slice(0, 100) : `Fixture inquiry subject ${index}`,
+    message: index % 4 === 0 ? longText : weirdText,
+    consent: true,
+    source: ["website", "whatsapp", "linkedin", "call", "friend", "personal", "referral", "other"][index % 8],
+    status: ["new", "in-progress", "converted", "archived"][index % 4],
+    priority: ["low", "normal", "high"][index % 3],
+    tags: index % 5 === 0 ? ["fixture", "long-tag", "weird-data"] : ["fixture"],
+    nextAction: index % 3 === 0 ? weirdText.slice(0, 500) : undefined,
+    followUpAt: daysFromNow(index - 15),
+    clientId: index % 4 === 0 ? generatedClients[index - 1]._id : undefined,
+    idempotencyKey: `seed-fixture-inquiry-${index}`,
+  });
+}
+
+clients.push(...generatedClients);
+projects.push(...generatedProjects);
+secrets.push(...generatedSecrets);
+documents.push(...generatedDocuments);
+payments.push(...generatedPayments);
+inquiries.push(...generatedInquiries);
+tasks.push(...generatedTasks);
 
 const collections = {
   clients,

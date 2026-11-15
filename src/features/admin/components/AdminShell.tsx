@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiBarChart2,
   FiChevronRight,
@@ -17,9 +17,18 @@ import {
   FiMessageSquare,
   FiX,
 } from "react-icons/fi";
+import { VscLayoutSidebarRight } from "react-icons/vsc";
 import type { IconType } from "react-icons";
 import { Button } from "./ui/Button";
-import { Sidebar as ShadcnSidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
 type AdminNavItem = {
   label: string;
@@ -43,13 +52,12 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { collapsed } = useSidebar();
 
   return (
-    <nav
-      aria-label="Admin navigation"
-      className="space-y-1"
-    >
+    <nav aria-label="Admin navigation" className="space-y-1">
       {navigation.map(({ label, href, icon: Icon }) => {
         const active =
-          href === "/admin/overview" ? pathname === href : pathname.startsWith(href);
+          href === "/admin/overview"
+            ? pathname === href
+            : pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -60,7 +68,8 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
               active
                 ? "bg-[#602329] text-white shadow-sm"
                 : "text-black hover:bg-[#602329] hover:text-white"
-            }`}
+            }
+            ${collapsed ? "justify-center" : "justify-start"}`}
           >
             <Icon aria-hidden="true" className="size-[1.05rem] shrink-0" />
             <span className={collapsed ? "sr-only" : undefined}>{label}</span>
@@ -74,7 +83,8 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
 function HeaderBreadcrumbs() {
   const pathname = usePathname();
   const parts = pathname.split("/").filter(Boolean);
-  const shortId = (value: string) => /^[a-f\d]{24}$/i.test(value) ? `${value.slice(0, 4)}…` : value;
+  const shortId = (value: string) =>
+    /^[a-f\d]{24}$/i.test(value) ? `${value.slice(0, 4)}…` : value;
   const labels: Record<string, string> = {
     overview: "Overview",
     clients: "Clients",
@@ -94,7 +104,9 @@ function HeaderBreadcrumbs() {
       label: labels[part] ?? (index === parts.length - 2 ? "Details" : part),
       href: `/${parts.slice(0, index + 2).join("/")}`,
     })),
-  ].filter((crumb, index, all) => index === 0 || crumb.href !== all[index - 1].href);
+  ].filter(
+    (crumb, index, all) => index === 0 || crumb.href !== all[index - 1].href,
+  );
   return (
     <nav
       aria-label="Workspace breadcrumbs"
@@ -102,13 +114,17 @@ function HeaderBreadcrumbs() {
     >
       {crumbs.map((crumb, index) => (
         <span key={crumb.href} className="flex max-w-full items-center gap-1.5">
-          {index > 0 && <FiChevronRight aria-hidden="true" className="size-3" />}
+          {index > 0 && (
+            <FiChevronRight aria-hidden="true" className="size-3" />
+          )}
           <Link
             href={crumb.href}
             title={crumb.label}
-            className={`max-w-[12rem] truncate ${index === crumbs.length - 1
+            className={`max-w-[12rem] truncate ${
+              index === crumbs.length - 1
                 ? "font-medium text-black/70"
-                : "hover:text-[#602329]"}`}
+                : "hover:text-[#602329]"
+            }`}
           >
             {shortId(crumb.label)}
           </Link>
@@ -128,38 +144,54 @@ function AdminSidebar({
   onLogout: () => void;
 }) {
   const { collapsed } = useSidebar();
+
   return (
-    <ShadcnSidebar className={mobile ? "min-h-full w-full" : "lg:sticky lg:top-0 lg:h-screen"}>
+    <ShadcnSidebar
+      className={
+        mobile ? "min-h-full w-full" : "lg:sticky lg:top-0 lg:h-screen"
+      }
+    >
       <SidebarHeader>
-      <div className="flex items-center justify-between px-2">
-        <Link
-          href="/admin"
-          onClick={onClose}
-          className="min-w-0"
-          aria-label="NLarge admin overview"
-        >
-          <span className="block text-xl font-bold tracking-[-0.04em]">N<span className={collapsed ? "sr-only" : undefined}>Large</span></span>
-          <span className={collapsed ? "sr-only" : "block text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[#602329]"}>Control room</span>
-        </Link>
-        {mobile && (
-          <Button
-            type="button"
+        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-start"} px-2`}>
+          <Link
+            href="/admin"
             onClick={onClose}
-            aria-label="Close admin navigation"
-            className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] hover:bg-[#faf2ec]"
+            className="min-w-0"
+            aria-label="NLarge admin overview"
           >
-            <FiX aria-hidden="true" />
-          </Button>
-        )}
-      </div>
+            <span className="block text-xl font-bold tracking-[-0.04em]">
+              NL<span className={collapsed ? "sr-only" : undefined}>arge</span>
+            </span>
+            <span
+              className={
+                collapsed
+                  ? "sr-only"
+                  : "block text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[#602329]"
+              }
+            >
+              ADMIN DAShboard
+            </span>
+          </Link>
+          {mobile && (
+            <Button
+              type="button"
+              onClick={onClose}
+              aria-label="Close admin navigation"
+              className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] hover:bg-[#faf2ec]"
+            >
+              <FiX aria-hidden="true" />
+            </Button>
+          )}
+        </div>
       </SidebarHeader>
-      <SidebarContent><NavigationLinks onNavigate={onClose} /></SidebarContent>
+      <SidebarContent>
+        <NavigationLinks onNavigate={onClose} />
+      </SidebarContent>
       <SidebarFooter>
         <Button
           type="button"
           onClick={onLogout}
-          variant="outline"
-          className="w-full justify-start gap-3"
+          className={`w-full ${collapsed ? "justify-center" : "justify-start"}  gap-3 `}
         >
           <FiLogOut aria-hidden="true" />
           <span className={collapsed ? "sr-only" : undefined}>Sign out</span>
@@ -177,6 +209,7 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
 
   if (pathname === "/admin/login") {
     return (
@@ -200,62 +233,62 @@ export default function AdminShell({
 
   return (
     <SidebarProvider>
-    <div className="min-h-screen bg-white text-[#352c29]">
-      <div className="flex">
-        <div className="hidden lg:block">
-          <AdminSidebar onLogout={logout} />
-        </div>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <Button
-              type="button"
-              aria-label="Close admin navigation"
-              onClick={() => setMobileOpen(false)}
-              className="absolute inset-0 bg-black/30"
-            />
-            <div className="relative h-full w-[min(19rem,88vw)] shadow-2xl">
-              <AdminSidebar mobile onClose={() => setMobileOpen(false)} onLogout={logout} />
-            </div>
+      <div className="min-h-screen bg-white text-[#352c29]">
+        <div className="flex">
+          <div className="hidden lg:block">
+            <AdminSidebar onLogout={logout} />
           </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <header
-            className="sticky top-0 z-30 border-b border-[#ece5df] bg-[#fffdfb]/95 backdrop-blur"
-          >
-            <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
-              <div className="flex min-w-0 items-center gap-3">
-                <Button
-                  type="button"
-                  onClick={() => setMobileOpen(true)}
-                  aria-label="Open admin navigation"
-                  aria-expanded={mobileOpen}
-                  className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] bg-[#fffdfb] hover:border-[#b86f58] lg:hidden"
-                >
-                  <FiMenu aria-hidden="true" />
-                </Button>
-                <SidebarTrigger className="hidden lg:inline-flex" />
-                <div>
-                  <HeaderBreadcrumbs />
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-black/55">
-                <span className="hidden sm:inline">Admin session</span>
-                <span
-                  className="size-2 rounded-full bg-emerald-500"
-                  aria-label="Admin session active"
+          {mobileOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+              <Button
+                type="button"
+                aria-label="Close admin navigation"
+                onClick={() => setMobileOpen(false)}
+                className="absolute inset-0 bg-black/30"
+              />
+              <div className="relative h-full w-[min(19rem,88vw)] shadow-2xl">
+                <AdminSidebar
+                  mobile
+                  onClose={() => setMobileOpen(false)}
+                  onLogout={logout}
+
                 />
               </div>
             </div>
-          </header>
-          <main
-            id="main-content"
-            className="p-4"
-          >
-            <div className="mx-auto">{children}</div>
-          </main>
+          )}
+          <div className="min-w-0 flex-1">
+            <header className="sticky top-0 z-30 border-b border-[#ece5df] bg-[#fffdfb]/95 backdrop-blur">
+              <div className="flex min-h-16 items-center justify-between gap-4 px-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setMobileOpen(true)}
+                    aria-label="Open admin navigation"
+                    aria-expanded={mobileOpen}
+                    className="lg:hidden"
+                  >
+                    <VscLayoutSidebarRight aria-hidden="true" />
+                  </Button>
+                  <SidebarTrigger className="hidden lg:inline-flex" />
+                  <div>
+                    <HeaderBreadcrumbs />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-black/55">
+                  <span className="hidden sm:inline">Admin session</span>
+                  <span
+                    className="size-2 rounded-full bg-emerald-500"
+                    aria-label="Admin session active"
+                  />
+                </div>
+              </div>
+            </header>
+            <main id="main-content" className="p-4">
+              <div className="mx-auto">{children}</div>
+            </main>
+          </div>
         </div>
       </div>
-    </div>
     </SidebarProvider>
   );
 }

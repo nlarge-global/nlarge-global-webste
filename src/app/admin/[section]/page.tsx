@@ -49,7 +49,7 @@ export default async function AdminSectionPage({
 
   if (section === "audit") {
     await connectToDatabase();
-    const pageSize = 25;
+    const pageSize = 10;
     const [events, total] = await Promise.all([
       AuditEvent.find().sort({ createdAt: -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize).lean(),
       AuditEvent.countDocuments(),
@@ -82,7 +82,7 @@ export default async function AdminSectionPage({
             </TableBody>
           </Table>
         </Card>
-        <Pagination page={pageNumber} hasNext={pageNumber * pageSize < total} basePath="/admin/audit" />
+        <Pagination page={pageNumber} total={total} pageSize={pageSize} basePath="/admin/audit" />
         <Link
           href="/admin/overview"
           className="mt-5 inline-block text-sm font-semibold text-[#602329]"

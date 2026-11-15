@@ -4,7 +4,7 @@ import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import { Inquiry } from "@/features/admin/models/inquiry";
 import { connectToDatabase } from "@/lib/mongodb";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 export default async function AdminInquiriesPage({
   searchParams,
@@ -37,7 +37,8 @@ export default async function AdminInquiriesPage({
       }))}
       pagination={{
         page,
-        hasNext: page * PAGE_SIZE < total,
+        total,
+        pageSize: PAGE_SIZE,
         basePath: "/admin/inquiries",
       }}
     />

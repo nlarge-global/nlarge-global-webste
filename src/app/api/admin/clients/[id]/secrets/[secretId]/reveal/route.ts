@@ -20,10 +20,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id, secretId } = await params;
     await connectToDatabase();
     const result = await getClientWithKey(id);
-    const secret = await Secret.findOne({ _id: secretId, clientId: id }).select("+encryptedValue +iv +authTag +keyVersion");
+    const secret = await Secret.findOne({ _id: secretId, clientId: id }).select("+encryptedValue +iv +authTag +keyVersion ciphertext");
     if (!result || !secret) return NextResponse.json({ error: "Secret not found." }, { status: 404 });
+    const ciphertext = secret.encryptedValue ?? (secret as typeof secret & { ciphertext?: string }).ciphertext;
+    if (!ciphertext || !secret.iv || !secret.authTag || !secret.keyVersion) {
+      return NextResponse.json({ error: "This secret has incomplete encrypted data and cannot be revealed." }, { status: 422 });
+    }
     const value = decryptSecretValue({
-      ciphertext: secret.encryptedValue,
+      ciphertext,
       iv: secret.iv,
       authTag: secret.authTag,
       keyVersion: secret.keyVersion,

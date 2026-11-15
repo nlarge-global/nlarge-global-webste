@@ -1,42 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 
 export default function TaskStatusSelect({
   taskId,
   status,
+  onOptimisticChange,
 }: {
   taskId: string;
   status: "todo" | "in-progress" | "done";
+  onOptimisticChange?: (status: "todo" | "in-progress" | "done") => void;
 }) {
   const [value, setValue] = useState(status);
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => setValue(status), [status]);
+
   async function update(next: string) {
+    const previous = value;
+    const nextStatus = next as typeof value;
     setError("");
-    const csrfToken = document.cookie
-      .split("; ")
-      .find((cookie) => cookie.startsWith("nlarge_admin_csrf="))
-      ?.split("=")[1];
-    const response = await fetch("/api/admin/tasks", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}),
-      },
-      body: JSON.stringify({ taskId, status: next }),
-    });
-    if (!response.ok) {
+    setValue(nextStatus);
+    onOptimisticChange?.(nextStatus);
+    setPending(true);
+    try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("nlarge_admin_csrf="))
+        ?.split("=")[1];
+      const response = await fetch("/api/admin/tasks", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}),
+        },
+        body: JSON.stringify({ taskId, status: nextStatus }),
+      });
+      if (!response.ok) throw new Error("Unable to update task status.");
+      router.refresh();
+    } catch {
+      setValue(previous);
+      onOptimisticChange?.(previous);
       setError("Unable to update");
-      return;
+    } finally {
+      setPending(false);
     }
-    setValue(next as typeof value);
   }
   return (
     <div className="flex items-center gap-2">
       <Select
         value={value}
         onChange={(event) => update(event.target.value)}
+        disabled={pending}
         aria-label="Task status"
         className="min-h-10 rounded-lg pr-10"
       >

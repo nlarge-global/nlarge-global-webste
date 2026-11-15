@@ -3,7 +3,7 @@ import { AdminBreadcrumbs } from "./AdminShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import DeleteRowAction from "./DeleteRowAction";
-import Pagination from "./Pagination";
+import { AdminPagination } from "@/components/ui/pagination";
 
 type RecordRow = {
   id: string;
@@ -23,7 +23,7 @@ export default function AdminRecordsPage({
   title: string;
   description: string;
   rows: RecordRow[];
-  pagination?: { page: number; hasNext: boolean; basePath: string };
+  pagination?: { page: number; total: number; pageSize?: number; basePath: string };
 }) {
   return (
     <div>
@@ -43,7 +43,7 @@ export default function AdminRecordsPage({
             </TableBody>
           </Table>
         )}
-        {pagination && <Pagination {...pagination} />}
+        {pagination && <AdminPagination {...pagination} />}
       </Card>
     </div>
   );

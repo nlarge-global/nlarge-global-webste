@@ -7,7 +7,7 @@ import { Project } from "@/features/admin/models/project";
 import TaskStatusSelect from "@/features/admin/components/TaskStatusSelect";
 import Pagination from "@/features/admin/components/Pagination";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 export default async function AdminTasksPage({
   searchParams,
@@ -84,7 +84,8 @@ export default async function AdminTasksPage({
         </div>
         <Pagination
           page={page}
-          hasNext={page * PAGE_SIZE < total}
+          total={total}
+          pageSize={PAGE_SIZE}
           basePath="/admin/overview/tasks"
         />
       </section>

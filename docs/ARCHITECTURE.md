@@ -184,7 +184,7 @@ See `example.env` for the copyable template.
 
 ## Development admin data
 
-After creating a fresh MongoDB database, run `npm run seed:admin` to insert linked demo clients, projects, tasks, inquiries, secrets, documents, and payments. The command is explicit and never runs during application startup; it replaces only records with the seed IDs, so it can be run again safely.
+After creating a fresh MongoDB database, run `npm run seed:admin` to insert linked demo clients, projects, tasks, inquiries, secrets, documents, and payments. The command creates the two base records plus 30 varied fixture clients, 60 projects, 180 tasks, 90 secrets, 60 documents, 60 payments, and 30 inquiries. Fixtures include boundary dates, long text, unusual Unicode and punctuation, small amounts, mixed statuses, and unassigned inquiries for pagination and UI edge-case testing. The command is explicit and never runs during application startup; it replaces only records with the seed IDs, so it can be run again safely.
 
 ## Conventions
 

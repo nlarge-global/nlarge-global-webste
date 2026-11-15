@@ -6,11 +6,21 @@ import { Button } from "./ui/Button";
 import DialogDraft from "./DialogDraft";
 import { FiEdit3 } from "react-icons/fi";
 import DeleteRowAction from "./DeleteRowAction";
+import { IoCloseSharp } from "react-icons/io5";
 
-const ClientForm = dynamic(() => import("./ClientForm"), { ssr: false, loading: () => <DialogSkeleton /> });
+const ClientForm = dynamic(() => import("./ClientForm"), {
+  ssr: false,
+  loading: () => <DialogSkeleton />,
+});
 
 function DialogSkeleton() {
-  return <div aria-label="Loading form" className="space-y-3" aria-busy="true"><div className="h-11 animate-pulse rounded-xl bg-black/10" /><div className="h-11 animate-pulse rounded-xl bg-black/10" /><div className="h-24 animate-pulse rounded-xl bg-black/10" /></div>;
+  return (
+    <div aria-label="Loading form" className="space-y-3" aria-busy="true">
+      <div className="h-11 animate-pulse rounded-xl bg-black/10" />
+      <div className="h-11 animate-pulse rounded-xl bg-black/10" />
+      <div className="h-24 animate-pulse rounded-xl bg-black/10" />
+    </div>
+  );
 }
 
 type Client = {
@@ -23,7 +33,13 @@ type Client = {
   tags: string[];
 };
 
-export default function ClientDialog({ client, redirectTo }: { client?: Client; redirectTo?: string }) {
+export default function ClientDialog({
+  client,
+  redirectTo,
+}: {
+  client?: Client;
+  redirectTo?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [dirty, setDirty] = useState(false);
   function close() {
@@ -36,10 +52,22 @@ export default function ClientDialog({ client, redirectTo }: { client?: Client; 
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button type="button" onClick={() => setOpen(true)} size={client ? "icon" : "default"} aria-label={client ? "Edit client" : undefined}>
+        <Button
+          type="button"
+          onClick={() => setOpen(true)}
+          size={client ? "icon" : "default"}
+          aria-label={client ? "Edit client" : undefined}
+        >
           {client ? <FiEdit3 aria-hidden="true" /> : "Add client"}
         </Button>
-        {client && <DeleteRowAction endpoint={`/api/admin/clients/${client._id}`} redirectTo={redirectTo} label={`Delete ${client.name}`} description="Archive this client and all of its projects, tasks, secrets, documents, payments, and linked inquiries." />}
+        {client && (
+          <DeleteRowAction
+            endpoint={`/api/admin/clients/${client._id}`}
+            redirectTo={redirectTo}
+            label={`Delete ${client.name}`}
+            description="Archive this client and all of its projects, tasks, secrets, documents, payments, and linked inquiries."
+          />
+        )}
       </div>
       {open && (
         <div
@@ -47,24 +75,31 @@ export default function ClientDialog({ client, redirectTo }: { client?: Client; 
           role="dialog"
           aria-modal="true"
           aria-labelledby="client-dialog-title"
-          onMouseDown={(event) =>
-            event.target === event.currentTarget && close()
-          }
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-[#fffdfb] p-5 shadow-2xl ">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <h2 id="client-dialog-title" className="text-xl font-semibold">
-                {client ? "Edit client details" : "Add client"}
-              </h2>
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-[#fffdfb] p-2 shadow-2xl ">
+            <div className="mb-4 flex items-center justify-between gap-4 p-2">
+              <div className="flex flex-col">
+                <h2 id="client-dialog-title" className="text-xl font-semibold">
+                  {client ? "Edit" : "Add client"}
+                </h2>
+                <p className="text-sm text-black/45">
+                  {client ? "Make changes to the client's details" : "Add a new client to manage projects, inquiries, and operational records."}
+                </p>
+              </div>
               <Button
                 type="button"
                 onClick={close}
-                variant="outline"
+                variant="destructive"
+                size="icon"
+                aria-label="Close client dialog"
               >
-                Close
+                <IoCloseSharp aria-hidden="true" />
+                <span className="sr-only">Close</span>
               </Button>
             </div>
-            <DialogDraft storageKey={`admin-client-${client?._id ?? "new"}`}><ClientForm client={client} onDirty={() => setDirty(true)} /></DialogDraft>
+            <DialogDraft storageKey={`admin-client-${client?._id ?? "new"}`}>
+              <ClientForm client={client} onDirty={() => setDirty(true)} />
+            </DialogDraft>
           </div>
         </div>
       )}

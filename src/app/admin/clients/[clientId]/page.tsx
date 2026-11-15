@@ -30,7 +30,11 @@ export default async function ClientDetailPage({
     Inquiry.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
     Project.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
     Promise.all([
-      Task.find({ clientId: client._id }).sort({ dueDate: 1, createdAt: -1 }).skip((taskPage - 1) * TASK_PAGE_SIZE).limit(TASK_PAGE_SIZE).lean(),
+      Task.find({ clientId: client._id })
+        .sort({ dueDate: 1, createdAt: -1 })
+        .skip((taskPage - 1) * TASK_PAGE_SIZE)
+        .limit(TASK_PAGE_SIZE)
+        .lean(),
       Task.countDocuments({ clientId: client._id }),
     ]),
   ]);
@@ -138,7 +142,13 @@ export default async function ClientDetailPage({
             </Link>
           ))}
         </div>
-        <Pagination page={taskPage} hasNext={taskPage * TASK_PAGE_SIZE < taskTotal} basePath={`/admin/clients/${client._id}`} param="taskPage" />
+        <Pagination
+          page={taskPage}
+          total={taskTotal}
+          pageSize={TASK_PAGE_SIZE}
+          basePath={`/admin/clients/${client._id}`}
+          param="taskPage"
+        />
       </section>
       <p className="mt-6 text-sm text-black/50">
         Secrets, documents, and payments are managed from each project
