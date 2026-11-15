@@ -17,7 +17,11 @@ const taskSchema = z.object({
 });
 
 const taskUpdateSchema = z.object({
-  status: z.enum(["todo", "in-progress", "done"]),
+  status: z.enum(["todo", "in-progress", "done"]).optional(),
+  title: z.string().trim().min(1).max(200).optional(),
+  dueDate: z.coerce.date().optional(),
+  priority: z.enum(["low", "normal", "high"]).optional(),
+  notes: z.string().trim().max(3000).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -47,11 +51,11 @@ export async function PATCH(request: NextRequest) {
       await validateCsrfToken(request, session);
       const body = await request.json() as { taskId?: string; status?: string };
       const taskId = z.string().regex(/^[a-f\d]{24}$/i).parse(body.taskId);
-      const { status } = taskUpdateSchema.parse(body);
+      const data = taskUpdateSchema.parse(body);
       await connectToDatabase();
       const task = await Task.findByIdAndUpdate(
         taskId,
-        { status, completedAt: status === "done" ? new Date() : undefined },
+        { ...data, ...(data.status ? { completedAt: data.status === "done" ? new Date() : undefined } : {}) },
         { new: true, runValidators: true },
       ).lean();
       if (!task) return NextResponse.json({ error: "Task not found." }, { status: 404 });
@@ -61,7 +65,7 @@ export async function PATCH(request: NextRequest) {
         resourceType: "task",
         resourceId: taskId,
         requestId: getRequestId(request),
-        metadata: { status },
+        metadata: { status: data.status ?? null, updated: Boolean(data.title) },
       });
       return NextResponse.json({ task });
     } catch (error) {
@@ -70,5 +74,25 @@ export async function PATCH(request: NextRequest) {
       if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task details." }, { status: 400 });
       console.error("Task update failed:", error);
       return NextResponse.json({ error: "Unable to update task." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+    try {
+      const session = await requireAdminSession();
+      await validateCsrfToken(request, session);
+      const taskId = z.string().regex(/^[a-f\d]{24}$/i).parse(new URL(request.url).searchParams.get("taskId"));
+      if (request.headers.get("x-confirm-delete") !== taskId) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
+      await connectToDatabase();
+      const task = await Task.findByIdAndUpdate(taskId, { deletedAt: new Date() }, { new: true }).lean();
+      if (!task) return NextResponse.json({ error: "Task not found." }, { status: 404 });
+      await writeAuditEvent({ actor: "admin", action: "task.deleted", resourceType: "task", resourceId: taskId, requestId: getRequestId(request), metadata: { softDelete: true } });
+      return NextResponse.json({ message: "Task archived." });
+    } catch (error) {
+      if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
+      if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task." }, { status: 400 });
+      console.error("Task deletion failed:", error);
+      return NextResponse.json({ error: "Unable to archive task." }, { status: 500 });
   }
 }

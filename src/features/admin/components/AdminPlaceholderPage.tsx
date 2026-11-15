@@ -15,7 +15,7 @@ export default function AdminPlaceholderPage({ title, description }: AdminPlaceh
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#602329]">Admin foundation</p>
           <div className="flex items-center gap-2">
-            <h1 data-tour="admin-overview" className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{title}</h1>
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{title}</h1>
             <HelpTooltip label={`${title} help`}>
               This area will explain the purpose of the page and the decisions that matter when its data is connected.
             </HelpTooltip>

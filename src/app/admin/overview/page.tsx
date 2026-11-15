@@ -29,7 +29,7 @@ export default async function OverviewPage() {
   const cards = [
     ["New inquiries", newInquiries, "/admin/inquiries"],
     ["Total clients", totalClients, "/admin/clients"],
-    ["Expiring secrets", expiringSecrets, "/admin/clients"],
+    ["Expiring secrets", expiringSecrets, "/admin/overview/secrets"],
     ["Outstanding payments", outstandingPayments, "/admin/overview/payments"],
   ] as const;
 

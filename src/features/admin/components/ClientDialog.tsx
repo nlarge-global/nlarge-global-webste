@@ -3,8 +3,15 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Button } from "./ui/Button";
+import DialogDraft from "./DialogDraft";
+import { FiEdit3 } from "react-icons/fi";
+import DeleteRowAction from "./DeleteRowAction";
 
-const ClientForm = dynamic(() => import("./ClientForm"), { ssr: false });
+const ClientForm = dynamic(() => import("./ClientForm"), { ssr: false, loading: () => <DialogSkeleton /> });
+
+function DialogSkeleton() {
+  return <div aria-label="Loading form" className="space-y-3" aria-busy="true"><div className="h-11 animate-pulse rounded-xl bg-black/10" /><div className="h-11 animate-pulse rounded-xl bg-black/10" /><div className="h-24 animate-pulse rounded-xl bg-black/10" /></div>;
+}
 
 type Client = {
   _id: string;
@@ -16,7 +23,7 @@ type Client = {
   tags: string[];
 };
 
-export default function ClientDialog({ client }: { client?: Client }) {
+export default function ClientDialog({ client, redirectTo }: { client?: Client; redirectTo?: string }) {
   const [open, setOpen] = useState(false);
   const [dirty, setDirty] = useState(false);
   function close() {
@@ -25,14 +32,15 @@ export default function ClientDialog({ client }: { client?: Client }) {
     setOpen(false);
     setDirty(false);
   }
+
   return (
     <>
-      <Button
-        type="button"
-        onClick={() => setOpen(true)}
-      >
-        {client ? "Edit details" : "Add client"}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button type="button" onClick={() => setOpen(true)} size={client ? "icon" : "default"} aria-label={client ? "Edit client" : undefined}>
+          {client ? <FiEdit3 aria-hidden="true" /> : "Add client"}
+        </Button>
+        {client && <DeleteRowAction endpoint={`/api/admin/clients/${client._id}`} redirectTo={redirectTo} label={`Delete ${client.name}`} description="Archive this client and all of its projects, tasks, secrets, documents, payments, and linked inquiries." />}
+      </div>
       {open && (
         <div
           className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
@@ -56,7 +64,7 @@ export default function ClientDialog({ client }: { client?: Client }) {
                 Close
               </Button>
             </div>
-            <ClientForm client={client} onDirty={() => setDirty(true)} />
+            <DialogDraft storageKey={`admin-client-${client?._id ?? "new"}`}><ClientForm client={client} onDirty={() => setDirty(true)} /></DialogDraft>
           </div>
         </div>
       )}

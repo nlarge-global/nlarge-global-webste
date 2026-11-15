@@ -3,6 +3,11 @@ import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { Client } from "@/features/admin/models/client";
 import { Inquiry } from "@/features/admin/models/inquiry";
+import { Project } from "@/features/admin/models/project";
+import { Task } from "@/features/admin/models/task";
+import { Secret } from "@/features/admin/models/secret";
+import { ClientDocument } from "@/features/admin/models/document";
+import { PaymentRecord } from "@/features/admin/models/payment";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 
@@ -48,5 +53,36 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid client details." }, { status: 400 });
     console.error("Client update failed:", error);
     return NextResponse.json({ error: "Unable to update client." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+      const session = await requireAdminSession();
+      await validateCsrfToken(request, session);
+      const { id } = await params;
+      if (request.headers.get("x-confirm-delete") !== id) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
+      await connectToDatabase();
+      const client = await Client.findById(id);
+      if (!client) return NextResponse.json({ error: "Client not found." }, { status: 404 });
+      const deletedAt = new Date();
+      const projects = await Project.find({ clientId: id }).select("_id").lean();
+      const projectIds = projects.map((project) => project._id);
+      await Promise.all([
+        Project.updateMany({ clientId: id }, { $set: { deletedAt } }),
+        Task.updateMany({ $or: [{ clientId: id }, { projectId: { $in: projectIds } }] }, { $set: { deletedAt } }),
+        Secret.updateMany({ clientId: id }, { $set: { deletedAt } }),
+        ClientDocument.updateMany({ clientId: id }, { $set: { deletedAt } }),
+        PaymentRecord.updateMany({ clientId: id }, { $set: { deletedAt } }),
+        Inquiry.updateMany({ clientId: id }, { $set: { deletedAt } }),
+        Client.updateOne({ _id: id }, { $set: { deletedAt } }),
+      ]);
+      await writeAuditEvent({ actor: "admin", action: "client.deleted", resourceType: "client", resourceId: id, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
+      return NextResponse.json({ message: "Client archived." });
+    } catch (error) {
+      if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
+      console.error("Client deletion failed:", error);
+      return NextResponse.json({ error: "Unable to archive client." }, { status: 500 });
   }
 }

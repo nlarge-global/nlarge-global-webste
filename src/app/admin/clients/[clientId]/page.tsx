@@ -9,25 +9,32 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
 import ProjectDialog from "@/features/admin/components/ProjectDialog";
+import Pagination from "@/features/admin/components/Pagination";
+
+const TASK_PAGE_SIZE = 10;
 
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ clientId: string }>;
+  searchParams: Promise<{ taskPage?: string }>;
 }) {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
   const { clientId: id } = await params;
+  const taskPage = Math.max(1, Number((await searchParams).taskPage || 1));
   await connectToDatabase();
   const client = await Client.findById(id).lean();
   if (!client) notFound();
   const [inquiries, projects, tasks] = await Promise.all([
     Inquiry.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
     Project.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
-    Task.find({ clientId: client._id })
-      .sort({ dueDate: 1, createdAt: -1 })
-      .limit(5)
-      .lean(),
+    Promise.all([
+      Task.find({ clientId: client._id }).sort({ dueDate: 1, createdAt: -1 }).skip((taskPage - 1) * TASK_PAGE_SIZE).limit(TASK_PAGE_SIZE).lean(),
+      Task.countDocuments({ clientId: client._id }),
+    ]),
   ]);
+  const [clientTasks, taskTotal] = tasks;
   const projectMap = new Map(
     projects.map((project) => [String(project._id), project.name]),
   );
@@ -49,6 +56,7 @@ export default async function ClientDetailPage({
             phone: client.phone ?? undefined,
             notes: client.notes ?? undefined,
           }}
+          redirectTo="/admin/clients"
         />
       </div>
       <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
@@ -113,10 +121,10 @@ export default async function ClientDetailPage({
           </Link>
         </div>
         <div className="mt-4 divide-y divide-black/10">
-          {tasks.length === 0 && (
+          {clientTasks.length === 0 && (
             <p className="py-5 text-sm text-black/50">No tasks yet.</p>
           )}
-          {tasks.map((task) => (
+          {clientTasks.map((task) => (
             <Link
               key={String(task._id)}
               href={`/admin/clients/${client._id}/projects/${task.projectId}`}
@@ -130,6 +138,7 @@ export default async function ClientDetailPage({
             </Link>
           ))}
         </div>
+        <Pagination page={taskPage} hasNext={taskPage * TASK_PAGE_SIZE < taskTotal} basePath={`/admin/clients/${client._id}`} param="taskPage" />
       </section>
       <p className="mt-6 text-sm text-black/50">
         Secrets, documents, and payments are managed from each project

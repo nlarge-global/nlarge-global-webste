@@ -22,10 +22,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params;
     await connectToDatabase();
     if (!await Client.exists({ _id: id })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    const projectId = new URL(_request.url).searchParams.get("projectId");
+    const searchParams = new URL(_request.url).searchParams;
+    const projectId = searchParams.get("projectId");
+    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)));
     if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-    const secrets = await Secret.find({ clientId: id, ...(projectId ? { projectId } : {}) }).select("label type expiresAt createdAt").sort({ createdAt: -1 }).lean();
-    return NextResponse.json({ secrets });
+    const filter = { clientId: id, ...(projectId ? { projectId } : {}) };
+    const [secrets, total] = await Promise.all([
+      Secret.find(filter).select("label type expiresAt createdAt").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      Secret.countDocuments(filter),
+    ]);
+    return NextResponse.json({ secrets, pagination: { page, limit, total, hasNext: page * limit < total } });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Secret list failed:", error);

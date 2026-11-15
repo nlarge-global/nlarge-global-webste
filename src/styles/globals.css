@@ -4,6 +4,10 @@
   outline: 2px solid #602329;
   outline-offset: 3px;
 }
+
+[role="dialog"] {
+  text-align: left;
+}
 @custom-variant dark (&:is(.dark *));
 
 :root {

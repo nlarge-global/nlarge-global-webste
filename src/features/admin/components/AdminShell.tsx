@@ -14,11 +14,12 @@ import {
   FiFileText,
   FiSettings,
   FiUsers,
+  FiMessageSquare,
   FiX,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
-import AdminTour from "./AdminTour";
 import { Button } from "./ui/Button";
+import { Sidebar as ShadcnSidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 type AdminNavItem = {
   label: string;
@@ -29,6 +30,7 @@ type AdminNavItem = {
 const navigation: AdminNavItem[] = [
   { label: "Overview", href: "/admin/overview", icon: FiBarChart2 },
   { label: "Clients", href: "/admin/clients", icon: FiUsers },
+  { label: "Inquiries", href: "/admin/inquiries", icon: FiMessageSquare },
   { label: "Tasks", href: "/admin/overview/tasks", icon: FiCheckSquare },
   { label: "Audit log", href: "/admin/audit", icon: FiArchive },
   { label: "Health", href: "/admin/health", icon: FiActivity },
@@ -38,11 +40,11 @@ const navigation: AdminNavItem[] = [
 
 function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { collapsed } = useSidebar();
 
   return (
     <nav
       aria-label="Admin navigation"
-      data-tour="admin-navigation"
       className="space-y-1"
     >
       {navigation.map(({ label, href, icon: Icon }) => {
@@ -61,7 +63,7 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
             }`}
           >
             <Icon aria-hidden="true" className="size-[1.05rem] shrink-0" />
-            <span>{label}</span>
+            <span className={collapsed ? "sr-only" : undefined}>{label}</span>
           </Link>
         );
       })}
@@ -116,30 +118,28 @@ function HeaderBreadcrumbs() {
   );
 }
 
-function Sidebar({
+function AdminSidebar({
   mobile = false,
   onClose,
+  onLogout,
 }: {
   mobile?: boolean;
   onClose?: () => void;
+  onLogout: () => void;
 }) {
+  const { collapsed } = useSidebar();
   return (
-    <aside
-      className={`flex w-full flex-col border-[#e8e0da] bg-[#fffdfb] p-3 text-[#352c29] ${
-        mobile
-          ? "min-h-full"
-          : "min-h-screen border-r lg:sticky lg:top-0 lg:h-screen"
-      }`}
-    >
-      <div className="flex items-center justify-between px-2 pb-8 pt-2">
+    <ShadcnSidebar className={mobile ? "min-h-full w-full" : "lg:sticky lg:top-0 lg:h-screen"}>
+      <SidebarHeader>
+      <div className="flex items-center justify-between px-2">
         <Link
           href="/admin"
           onClick={onClose}
           className="min-w-0"
           aria-label="NLarge admin overview"
         >
-          <span className="block text-xl font-bold tracking-[-0.04em]">NLarge</span>
-          <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[#602329]">Control room</span>
+          <span className="block text-xl font-bold tracking-[-0.04em]">N<span className={collapsed ? "sr-only" : undefined}>Large</span></span>
+          <span className={collapsed ? "sr-only" : "block text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[#602329]"}>Control room</span>
         </Link>
         {mobile && (
           <Button
@@ -152,12 +152,20 @@ function Sidebar({
           </Button>
         )}
       </div>
-      <NavigationLinks onNavigate={onClose} />
-      <div className="mt-auto border-t border-[#eee6e0] px-2 pt-5 text-xs leading-5 text-[#8a7c74]">
-        <p className="font-semibold text-[#5b4d47]">Private workspace</p>
-        <p>Protected operational data for authorized administrators.</p>
-      </div>
-    </aside>
+      </SidebarHeader>
+      <SidebarContent><NavigationLinks onNavigate={onClose} /></SidebarContent>
+      <SidebarFooter>
+        <Button
+          type="button"
+          onClick={onLogout}
+          variant="outline"
+          className="w-full justify-start gap-3"
+        >
+          <FiLogOut aria-hidden="true" />
+          <span className={collapsed ? "sr-only" : undefined}>Sign out</span>
+        </Button>
+      </SidebarFooter>
+    </ShadcnSidebar>
   );
 }
 
@@ -191,10 +199,11 @@ export default function AdminShell({
   }
 
   return (
+    <SidebarProvider>
     <div className="min-h-screen bg-white text-[#352c29]">
-      <div className="lg:grid lg:grid-cols-[17rem_1fr]">
-        <div className="hidden lg:block ">
-          <Sidebar />
+      <div className="flex">
+        <div className="hidden lg:block">
+          <AdminSidebar onLogout={logout} />
         </div>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -205,13 +214,12 @@ export default function AdminShell({
               className="absolute inset-0 bg-black/30"
             />
             <div className="relative h-full w-[min(19rem,88vw)] shadow-2xl">
-              <Sidebar mobile onClose={() => setMobileOpen(false)} />
+              <AdminSidebar mobile onClose={() => setMobileOpen(false)} onLogout={logout} />
             </div>
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <header
-            data-tour="admin-main"
             className="sticky top-0 z-30 border-b border-[#ece5df] bg-[#fffdfb]/95 backdrop-blur"
           >
             <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
@@ -225,6 +233,7 @@ export default function AdminShell({
                 >
                   <FiMenu aria-hidden="true" />
                 </Button>
+                <SidebarTrigger className="hidden lg:inline-flex" />
                 <div>
                   <HeaderBreadcrumbs />
                 </div>
@@ -235,15 +244,6 @@ export default function AdminShell({
                   className="size-2 rounded-full bg-emerald-500"
                   aria-label="Admin session active"
                 />
-                <AdminTour />
-                <Button
-                  type="button"
-                  onClick={logout}
-                  aria-label="Sign out"
-                  className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white hover:border-[#602329] hover:text-[#602329]"
-                >
-                  <FiLogOut aria-hidden="true" />
-                </Button>
               </div>
             </div>
           </header>
@@ -256,6 +256,7 @@ export default function AdminShell({
         </div>
       </div>
     </div>
+    </SidebarProvider>
   );
 }
 

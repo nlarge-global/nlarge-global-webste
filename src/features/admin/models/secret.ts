@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type SecretDocument = Document & {
   clientId: Types.ObjectId;
@@ -26,6 +27,7 @@ const secretSchema = new Schema<SecretDocument>({
   keyVersion: { type: String, required: true, select: false },
   expiresAt: { type: Date },
 }, { timestamps: true, strict: true });
+addSoftDelete(secretSchema);
 
 secretSchema.index({ clientId: 1, expiresAt: 1 });
 

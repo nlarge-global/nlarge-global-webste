@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type InquiryDocument = Document & {
   name: string;
@@ -36,6 +37,7 @@ const inquirySchema = new Schema<InquiryDocument>({
   clientId: { type: Schema.Types.ObjectId, ref: "Client", index: true },
   idempotencyKey: { type: String, required: true, unique: true, index: true },
 }, { timestamps: true, strict: true });
+addSoftDelete(inquirySchema);
 
 inquirySchema.index({ status: 1, createdAt: -1 });
 inquirySchema.index({ email: 1, createdAt: -1 });

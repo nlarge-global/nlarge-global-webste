@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Button } from "./ui/Button";
+import { Select } from "@/components/ui/select";
 
 export default function TaskForm({ projectId, onCreated }: { projectId: string; onCreated: (task: { _id: string; title: string; status: string; priority: string; dueDate?: string }) => void }) {
   const [error, setError] = useState("");
@@ -33,7 +34,7 @@ export default function TaskForm({ projectId, onCreated }: { projectId: string; 
       <label className="mt-4 block text-sm font-medium">Title<input name="title" required className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium">Due date<input name="dueDate" type="date" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
-        <label className="text-sm font-medium">Priority<select name="priority" defaultValue="normal" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option></select></label>
+        <label className="text-sm font-medium">Priority<Select name="priority" defaultValue="normal"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option></Select></label>
       </div>
       <label className="mt-4 block text-sm font-medium">Notes<textarea name="notes" rows={3} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
       {error && <p role="alert" className="mt-3 text-sm text-[#602329]">{error}</p>}

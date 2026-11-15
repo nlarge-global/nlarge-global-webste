@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Button } from "./ui/Button";
+import { Select } from "@/components/ui/select";
 import { FiMessageSquare } from "react-icons/fi";
 
 type TimelineEntry = {
@@ -77,20 +78,20 @@ export default function ConversationTimeline({ inquiryId, initialEntries }: { in
       <form onSubmit={addEntry} className="h-fit rounded-2xl border border-black/10 bg-white p-5">
         <h2 className="font-semibold">Add entry</h2>
         <label className="mt-5 block text-sm font-medium">Channel
-          <select name="channel" defaultValue="internal-note" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3">
+          <Select name="channel" defaultValue="internal-note">
             <option value="internal-note">Internal note</option>
             <option value="email">Email</option>
             <option value="whatsapp">WhatsApp</option>
             <option value="phone">Phone</option>
             <option value="meeting">Meeting</option>
-          </select>
+          </Select>
         </label>
         <label className="mt-4 block text-sm font-medium">Direction
-          <select name="direction" defaultValue="internal" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3">
+          <Select name="direction" defaultValue="internal">
             <option value="internal">Internal</option>
             <option value="inbound">Inbound</option>
             <option value="outbound">Outbound</option>
-          </select>
+          </Select>
         </label>
         <label className="mt-4 block text-sm font-medium">Occurred at
           <input name="occurredAt" type="datetime-local" defaultValue={new Date().toISOString().slice(0, 16)} required className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" />

@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type PaymentRecordDocument = Document & {
   clientId: Types.ObjectId;
@@ -30,6 +31,7 @@ const paymentSchema = new Schema<PaymentRecordDocument>({
   notes: { type: String, trim: true, maxlength: 3000 },
   proofDocumentId: { type: Schema.Types.ObjectId, ref: "ClientDocument" },
 }, { timestamps: true, strict: true });
+addSoftDelete(paymentSchema);
 
 paymentSchema.index({ clientId: 1, status: 1, createdAt: -1 });
 

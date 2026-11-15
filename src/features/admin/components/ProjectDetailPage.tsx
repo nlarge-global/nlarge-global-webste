@@ -11,6 +11,7 @@ import { Secret } from "@/features/admin/models/secret";
 import { ClientDocument } from "@/features/admin/models/document";
 import { PaymentRecord } from "@/features/admin/models/payment";
 import { connectToDatabase } from "@/lib/mongodb";
+import DeleteRowAction from "./DeleteRowAction";
 
 export default async function ProjectDetailPage({ projectId }: { projectId: string }) {
   await connectToDatabase();
@@ -31,13 +32,13 @@ export default async function ProjectDetailPage({ projectId }: { projectId: stri
       <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-black/45"><Link href="/admin/overview">Overview</Link><span>/</span><Link href="/admin/clients">Clients</Link><span>/</span><Link href={`/admin/clients/${clientId}`}>{client.name}</Link><span>/</span><span className="text-black/75">{project.name}</span></nav>
       <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em]">{project.name}</h1>
       <p className="mt-2 text-sm text-black/55">Client: {client.name}</p>
-      <div className="mt-6"><ProjectDialog label="Edit project" clients={[{ _id: clientId, name: client.name }]} project={{ ...project, _id: String(project._id), clientId, deadline: project.deadline?.toISOString().slice(0, 10), technicalDetails: project.technicalDetails ?? undefined, deliveryDetails: project.deliveryDetails ?? undefined, repositoryUrl: project.repositoryUrl ?? undefined, environment: project.environment ?? undefined, productionUrl: project.productionUrl ?? undefined, stagingUrl: project.stagingUrl ?? undefined, notes: project.notes ?? undefined }} /></div>
+      <div className="mt-6 flex items-center gap-2"><ProjectDialog label="Edit project" clients={[{ _id: clientId, name: client.name }]} project={{ ...project, _id: String(project._id), clientId, deadline: project.deadline?.toISOString().slice(0, 10), technicalDetails: project.technicalDetails ?? undefined, deliveryDetails: project.deliveryDetails ?? undefined, repositoryUrl: project.repositoryUrl ?? undefined, environment: project.environment ?? undefined, productionUrl: project.productionUrl ?? undefined, stagingUrl: project.stagingUrl ?? undefined, notes: project.notes ?? undefined }} /><DeleteRowAction endpoint={`/api/admin/projects/${project._id}`} label={`Delete ${project.name}`} description="Archive this project and all of its tasks, secrets, documents, and payments." redirectTo={`/admin/clients/${clientId}`} /></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <Link href={`${canonicalPath}/secrets`} className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"><FiKey aria-hidden="true" className="text-[#602329]" /><p className="mt-3 text-2xl font-semibold">{secretCount}</p><p className="text-sm text-black/50">Secrets</p></Link>
         <Link href={`${canonicalPath}/documents`} className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"><FiFileText aria-hidden="true" className="text-[#602329]" /><p className="mt-3 text-2xl font-semibold">{documentCount}</p><p className="text-sm text-black/50">Documents</p></Link>
         <Link href={`${canonicalPath}/payments`} className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"><FiCreditCard aria-hidden="true" className="text-[#602329]" /><p className="mt-3 text-2xl font-semibold">{paymentCount}</p><p className="text-sm text-black/50">Payments</p></Link>
       </div>
-      <div className="mt-6"><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Tasks</h2><TaskDialog projectId={String(project._id)} onCreated={() => undefined} /></div><TaskList projectId={String(project._id)} initialTasks={tasks.map((task) => ({ _id: String(task._id), title: task.title, status: task.status, priority: task.priority, dueDate: task.dueDate?.toISOString() }))} /></div>
+      <div className="mt-6"><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Tasks</h2><TaskDialog projectId={String(project._id)} /></div><TaskList projectId={String(project._id)} initialTasks={tasks.map((task) => ({ _id: String(task._id), title: task.title, status: task.status, priority: task.priority, dueDate: task.dueDate?.toISOString() }))} /></div>
     </div>
   );
 }

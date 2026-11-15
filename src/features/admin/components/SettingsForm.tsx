@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { FiCheck, FiKey, FiMail, FiSave, FiSettings } from "react-icons/fi";
 import { Button } from "./ui/Button";
+import { Select } from "@/components/ui/select";
 
 type Settings = { displayName: string; timezone: string; dateFormat: string; emailSignature: string; defaultReplyTemplate: string };
 
@@ -53,10 +54,10 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
             <label className="text-sm font-medium">Timezone<input name="timezone" defaultValue={initial.timezone} placeholder="Asia/Kolkata" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3 outline-none focus:border-[#602329] focus:ring-2 focus:ring-[#602329]/10" /></label>
             <label className="text-sm font-medium">
               Date format
-              <select name="dateFormat" defaultValue={initial.dateFormat} className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus:border-[#602329] focus:ring-2 focus:ring-[#602329]/10">
+              <Select name="dateFormat" defaultValue={initial.dateFormat}>
                 {!dateFormatOptions.some((option) => option.value === initial.dateFormat) && <option value={initial.dateFormat}>{initial.dateFormat} (saved custom format)</option>}
                 {dateFormatOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
+              </Select>
               <span className="mt-2 block text-xs font-normal leading-5 text-black/50">Choose how dates appear. Example: {dateFormatOptions.find((option) => option.value === initial.dateFormat)?.label ?? initial.dateFormat}.</span>
             </label>
           </div>

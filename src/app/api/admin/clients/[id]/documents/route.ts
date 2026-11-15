@@ -23,10 +23,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     await requireAdminSession();
     const { id } = await params;
     await connectToDatabase();
-    const projectId = new URL(_request.url).searchParams.get("projectId");
+    const searchParams = new URL(_request.url).searchParams;
+    const projectId = searchParams.get("projectId");
+    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)));
     if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-    const documents = await ClientDocument.find({ clientId: id, ...(projectId ? { projectId } : {}) }).select("filename contentType size createdAt").sort({ createdAt: -1 }).lean();
-    return NextResponse.json({ documents });
+    const filter = { clientId: id, ...(projectId ? { projectId } : {}) };
+    const [documents, total] = await Promise.all([
+      ClientDocument.find(filter).select("filename description contentType size createdAt").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      ClientDocument.countDocuments(filter),
+    ]);
+    return NextResponse.json({ documents, pagination: { page, limit, total, hasNext: page * limit < total } });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Document list failed:", error);
@@ -50,13 +57,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!await Client.exists({ _id: id })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
     if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const documentId = crypto.randomUUID();
-    const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 150) || "document";
+    const safeFilename = String(formData.get("filename") || file.name).replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 150) || "document";
+    const description = String(formData.get("description") || "").trim().slice(0, 1000);
     const objectKey = `clients/${id}/documents/${documentId}/${safeFilename}`;
     await uploadPrivateObject(objectKey, bytes, file.type);
     try {
-      const document = await ClientDocument.create({ _id: documentId, clientId: id, projectId: projectId || undefined, filename: safeFilename, objectKey, contentType: file.type, size: file.size });
+      const document = await ClientDocument.create({ _id: documentId, clientId: id, projectId: projectId || undefined, filename: safeFilename, description, objectKey, contentType: file.type, size: file.size });
       await writeAuditEvent({ actor: "admin", action: "document.uploaded", resourceType: "document", resourceId: documentId, requestId: getRequestId(request), metadata: { clientId: id, contentType: file.type, size: file.size } });
-      return NextResponse.json({ document: { _id: document._id, filename: document.filename, contentType: document.contentType, size: document.size, createdAt: document.createdAt } }, { status: 201 });
+      return NextResponse.json({ document: { _id: document._id, filename: document.filename, description: document.description, contentType: document.contentType, size: document.size, createdAt: document.createdAt } }, { status: 201 });
     } catch (error) {
       console.error("Document metadata save failed after upload:", error);
       try {

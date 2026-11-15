@@ -26,10 +26,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     await requireAdminSession();
     const { id } = await params;
     await connectToDatabase();
-    const projectId = new URL(_request.url).searchParams.get("projectId");
+    const searchParams = new URL(_request.url).searchParams;
+    const projectId = searchParams.get("projectId");
+    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)));
     if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-    const payments = await PaymentRecord.find({ clientId: id, ...(projectId ? { projectId } : {}) }).sort({ createdAt: -1 }).lean();
-    return NextResponse.json({ payments });
+    const filter = { clientId: id, ...(projectId ? { projectId } : {}) };
+    const [payments, total] = await Promise.all([
+      PaymentRecord.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      PaymentRecord.countDocuments(filter),
+    ]);
+    return NextResponse.json({ payments, pagination: { page, limit, total, hasNext: page * limit < total } });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Payment list failed:", error);

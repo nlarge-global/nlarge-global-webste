@@ -3,6 +3,9 @@ import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
+import { Secret } from "@/features/admin/models/secret";
+import { ClientDocument } from "@/features/admin/models/document";
+import { PaymentRecord } from "@/features/admin/models/payment";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 
@@ -51,5 +54,32 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid project details." }, { status: 400 });
     console.error("Project update failed:", error);
     return NextResponse.json({ error: "Unable to update project." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+      const session = await requireAdminSession();
+      await validateCsrfToken(request, session);
+      const { id } = await params;
+      if (request.headers.get("x-confirm-delete") !== id) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
+      await connectToDatabase();
+      const project = await Project.findById(id);
+      if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+      const deletedAt = new Date();
+      await Promise.all([
+        Task.updateMany({ projectId: id }, { $set: { deletedAt } }),
+        Secret.updateMany({ projectId: id }, { $set: { deletedAt } }),
+        ClientDocument.updateMany({ projectId: id }, { $set: { deletedAt } }),
+        PaymentRecord.updateMany({ projectId: id }, { $set: { deletedAt } }),
+        Project.updateOne({ _id: id }, { $set: { deletedAt } }),
+      ]);
+      await writeAuditEvent({ actor: "admin", action: "project.deleted", resourceType: "project", resourceId: id, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
+      return NextResponse.json({ message: "Project archived." });
+    } catch (error) {
+      if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
+      console.error("Project deletion failed:", error);
+      return NextResponse.json({ error: "Unable to archive project." }, { status: 500 });
   }
 }

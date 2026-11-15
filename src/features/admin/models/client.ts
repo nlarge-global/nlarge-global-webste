@@ -1,5 +1,6 @@
 import { Schema, type Document } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type ClientDocument = Document & {
   name: string;
@@ -28,6 +29,7 @@ const clientSchema = new Schema<ClientDocument>({
   dataKeyAuthTag: { type: String, select: false },
   dataKeyVersion: { type: String, select: false },
 }, { timestamps: true, strict: true });
+addSoftDelete(clientSchema);
 
 clientSchema.index({ name: 1 });
 clientSchema.index({ email: 1 });

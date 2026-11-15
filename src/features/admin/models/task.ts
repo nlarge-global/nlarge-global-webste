@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type TaskDocument = Document & {
   clientId?: Types.ObjectId;
@@ -26,6 +27,7 @@ const taskSchema = new Schema<TaskDocument>({
   notes: { type: String, trim: true, maxlength: 3000 },
   completedAt: { type: Date },
 }, { timestamps: true, strict: true });
+addSoftDelete(taskSchema);
 
 taskSchema.index({ status: 1, dueDate: 1 });
 taskSchema.index({ clientId: 1, status: 1, dueDate: 1 });

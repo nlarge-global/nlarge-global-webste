@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Button } from "./ui/Button";
+import { Select } from "@/components/ui/select";
 
 export default function ExportManager({ clients }: { clients: Array<{ _id: string; name: string }> }) {
   const [url, setUrl] = useState("");
@@ -30,7 +31,7 @@ export default function ExportManager({ clients }: { clients: Array<{ _id: strin
       <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">Client exports</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">Exports exclude secrets. Document inclusion is explicit and downloads expire quickly.</p>
       <form onSubmit={create} className="mt-6 max-w-xl rounded-2xl border border-black/10 bg-white p-5">
-        <label className="text-sm font-medium">Client<select name="clientId" required className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3"><option value="">Select a client</option>{clients.map((client) => <option key={client._id} value={client._id}>{client.name}</option>)}</select></label>
+        <label className="text-sm font-medium">Client<Select name="clientId" required><option value="">Select a client</option>{clients.map((client) => <option key={client._id} value={client._id}>{client.name}</option>)}</Select></label>
         <label className="mt-5 flex items-start gap-3 text-sm text-black/70"><input name="includeDocuments" type="checkbox" className="mt-1 size-4 accent-[#602329]" />Include permitted client documents</label>
         <Button type="submit" className="mt-5 w-full">Create export</Button>
         {url && <Button type="button" onClick={() => void download()} variant="outline" className="mt-3 w-full">Download export</Button>}

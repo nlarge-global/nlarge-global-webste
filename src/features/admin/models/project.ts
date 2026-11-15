@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type ProjectDocument = Document & {
   clientId: Types.ObjectId;
@@ -28,6 +29,7 @@ const projectSchema = new Schema<ProjectDocument>({
   deadline: { type: Date },
   notes: { type: String, trim: true, maxlength: 5000 },
 }, { timestamps: true, strict: true });
+addSoftDelete(projectSchema);
 
 projectSchema.index({ clientId: 1, createdAt: -1 });
 
