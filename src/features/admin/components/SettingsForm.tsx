@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { FiCheck, FiKey, FiMail, FiSave, FiSettings } from "react-icons/fi";
+import { Button } from "./ui/Button";
 
 type Settings = { displayName: string; timezone: string; dateFormat: string; emailSignature: string; defaultReplyTemplate: string };
 
@@ -72,7 +73,7 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
         </section>
         <div className="flex flex-col gap-3 bg-[#fbfaf8] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           {message ? <p role="status" className="inline-flex items-center gap-2 text-sm text-emerald-700"><FiCheck aria-hidden="true" />{message}</p> : <span />}
-          <button type="submit" disabled={!dirty} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#602329] px-5 text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-[#602329]"><FiSave aria-hidden="true" />Save preferences</button>
+          <Button type="submit" disabled={!dirty}><FiSave aria-hidden="true" />Save preferences</Button>
         </div>
       </form>
       <form onSubmit={generateHash} className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6">
@@ -80,7 +81,7 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-amber-800"><FiKey aria-hidden="true" /></span>
           <div><h2 className="font-semibold text-amber-950">Password security</h2><p className="mt-1 text-sm leading-6 text-amber-950/70">Generate a bcrypt hash locally for deployment. The password and generated hash are never saved by this page.</p></div>
         </div>
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row"><input name="password" type="password" minLength={12} required placeholder="New password (12+ characters)" className="min-h-11 min-w-0 flex-1 rounded-xl border border-amber-300 bg-white px-3 outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-700/10" /><button type="submit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-950 hover:border-amber-700"><FiKey aria-hidden="true" />Generate hash</button></div>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row"><input name="password" type="password" minLength={12} required placeholder="New password (12+ characters)" className="min-h-11 min-w-0 flex-1 rounded-xl border border-amber-300 bg-white px-3 outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-700/10" /><Button type="submit" variant="outline" className="border-amber-300 text-amber-950 hover:border-amber-700"><FiKey aria-hidden="true" />Generate hash</Button></div>
         {hash && <output className="mt-4 block break-all rounded-xl border border-amber-200 bg-white p-3 text-xs text-amber-950">{hash}</output>}
       </form>
       {error && <p role="alert" className="text-sm text-[#602329]">{error}</p>}

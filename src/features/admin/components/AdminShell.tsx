@@ -4,20 +4,21 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  FiActivity,
-  FiArchive,
   FiBarChart2,
   FiChevronRight,
-  FiClipboard,
-  FiFileText,
   FiLogOut,
   FiMenu,
+  FiCheckSquare,
+  FiActivity,
+  FiArchive,
+  FiFileText,
   FiSettings,
   FiUsers,
   FiX,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import AdminTour from "./AdminTour";
+import { Button } from "./ui/Button";
 
 type AdminNavItem = {
   label: string;
@@ -26,9 +27,9 @@ type AdminNavItem = {
 };
 
 const navigation: AdminNavItem[] = [
-  { label: "Overview", href: "/admin", icon: FiBarChart2 },
-  { label: "Inquiries", href: "/admin/inquiries", icon: FiClipboard },
+  { label: "Overview", href: "/admin/overview", icon: FiBarChart2 },
   { label: "Clients", href: "/admin/clients", icon: FiUsers },
+  { label: "Tasks", href: "/admin/overview/tasks", icon: FiCheckSquare },
   { label: "Audit log", href: "/admin/audit", icon: FiArchive },
   { label: "Health", href: "/admin/health", icon: FiActivity },
   { label: "Settings", href: "/admin/settings", icon: FiSettings },
@@ -46,7 +47,7 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
     >
       {navigation.map(({ label, href, icon: Icon }) => {
         const active =
-          href === "/admin" ? pathname === href : pathname.startsWith(href);
+          href === "/admin/overview" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -71,7 +72,9 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
 function HeaderBreadcrumbs() {
   const pathname = usePathname();
   const parts = pathname.split("/").filter(Boolean);
+  const shortId = (value: string) => /^[a-f\d]{24}$/i.test(value) ? `${value.slice(0, 4)}…` : value;
   const labels: Record<string, string> = {
+    overview: "Overview",
     clients: "Clients",
     projects: "Projects",
     secrets: "Secrets",
@@ -84,29 +87,28 @@ function HeaderBreadcrumbs() {
     exports: "Exports",
   };
   const crumbs = [
-    { label: "Overview", href: "/admin" },
+    { label: "Overview", href: "/admin/overview" },
     ...parts.slice(1).map((part, index) => ({
       label: labels[part] ?? (index === parts.length - 2 ? "Details" : part),
       href: `/${parts.slice(0, index + 2).join("/")}`,
     })),
-  ];
+  ].filter((crumb, index, all) => index === 0 || crumb.href !== all[index - 1].href);
   return (
     <nav
       aria-label="Workspace breadcrumbs"
-      className="flex items-center gap-1.5 text-sm text-black/45"
+      className="flex max-w-full flex-wrap items-center gap-1.5 text-sm text-black/45"
     >
       {crumbs.map((crumb, index) => (
-        <span key={crumb.href} className="flex items-center gap-1.5">
+        <span key={crumb.href} className="flex max-w-full items-center gap-1.5">
           {index > 0 && <FiChevronRight aria-hidden="true" className="size-3" />}
           <Link
             href={crumb.href}
-            className={
-              index === crumbs.length - 1
+            title={crumb.label}
+            className={`max-w-[12rem] truncate ${index === crumbs.length - 1
                 ? "font-medium text-black/70"
-                : "hover:text-[#602329]"
-            }
+                : "hover:text-[#602329]"}`}
           >
-            {crumb.label}
+            {shortId(crumb.label)}
           </Link>
         </span>
       ))}
@@ -140,14 +142,14 @@ function Sidebar({
           <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[#602329]">Control room</span>
         </Link>
         {mobile && (
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close admin navigation"
             className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] hover:bg-[#faf2ec]"
           >
             <FiX aria-hidden="true" />
-          </button>
+          </Button>
         )}
       </div>
       <NavigationLinks onNavigate={onClose} />
@@ -196,7 +198,7 @@ export default function AdminShell({
         </div>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <button
+            <Button
               type="button"
               aria-label="Close admin navigation"
               onClick={() => setMobileOpen(false)}
@@ -214,7 +216,7 @@ export default function AdminShell({
           >
             <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
               <div className="flex min-w-0 items-center gap-3">
-                <button
+                <Button
                   type="button"
                   onClick={() => setMobileOpen(true)}
                   aria-label="Open admin navigation"
@@ -222,7 +224,7 @@ export default function AdminShell({
                   className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] bg-[#fffdfb] hover:border-[#b86f58] lg:hidden"
                 >
                   <FiMenu aria-hidden="true" />
-                </button>
+                </Button>
                 <div>
                   <HeaderBreadcrumbs />
                 </div>
@@ -234,14 +236,14 @@ export default function AdminShell({
                   aria-label="Admin session active"
                 />
                 <AdminTour />
-                <button
+                <Button
                   type="button"
                   onClick={logout}
                   aria-label="Sign out"
                   className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white hover:border-[#602329] hover:text-[#602329]"
                 >
                   <FiLogOut aria-hidden="true" />
-                </button>
+                </Button>
               </div>
             </div>
           </header>

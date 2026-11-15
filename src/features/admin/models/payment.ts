@@ -3,6 +3,7 @@ import { getOrCreateModel } from "@/lib/mongoose-model";
 
 export type PaymentRecordDocument = Document & {
   clientId: Types.ObjectId;
+  projectId?: Types.ObjectId;
   amount: number;
   currency: "INR" | "USD" | "EUR" | "GBP";
   method: "bank-transfer" | "card" | "cash" | "other";
@@ -18,6 +19,7 @@ export type PaymentRecordDocument = Document & {
 
 const paymentSchema = new Schema<PaymentRecordDocument>({
   clientId: { type: Schema.Types.ObjectId, ref: "Client", required: true, index: true },
+  projectId: { type: Schema.Types.ObjectId, ref: "Project", index: true },
   amount: { type: Number, required: true, min: 0.01, max: 1_000_000_000 },
   currency: { type: String, enum: ["INR", "USD", "EUR", "GBP"], required: true },
   method: { type: String, enum: ["bank-transfer", "card", "cash", "other"], required: true },

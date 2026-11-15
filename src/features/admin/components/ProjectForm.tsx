@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/Button";
 
 type ProjectValues = { _id?: string; clientId: string; name: string; technicalDetails?: string; deliveryDetails?: string; repositoryUrl?: string; environment?: string; productionUrl?: string; stagingUrl?: string; deadline?: string; notes?: string };
 
@@ -22,9 +23,12 @@ export default function ProjectForm({ clients, project }: { clients: Array<{ _id
       headers: { "Content-Type": "application/json", ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}) },
       body: JSON.stringify(values),
     });
-    const result = await response.json() as { error?: string; project?: { _id: string } };
+    const result = await response.json() as { error?: string; project?: { _id: string; clientId?: string } };
     if (!response.ok) setError(result.error ?? "Unable to save project.");
-    else router.push(project ? `/admin/projects/${project._id}` : `/admin/projects/${result.project?._id}`);
+    else {
+      const clientId = project?.clientId ?? String(result.project?.clientId ?? "");
+      router.push(`/admin/clients/${clientId}/projects/${project?._id ?? result.project?._id}`);
+    }
     setPending(false);
   }
 
@@ -41,7 +45,7 @@ export default function ProjectForm({ clients, project }: { clients: Array<{ _id
       <label className="text-sm font-medium sm:col-span-2">Delivery details<textarea name="deliveryDetails" rows={4} defaultValue={project?.deliveryDetails} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
       <label className="text-sm font-medium sm:col-span-2">Project notes<textarea name="notes" rows={4} defaultValue={project?.notes} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
       {error && <p role="alert" className="text-sm text-[#602329] sm:col-span-2">{error}</p>}
-      <button type="submit" disabled={pending} className="min-h-11 rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black disabled:opacity-50 sm:col-span-2">{pending ? "Saving..." : project ? "Save changes" : "Create project"}</button>
+      <Button type="submit" disabled={pending} className="sm:col-span-2">{pending ? "Saving..." : project ? "Save changes" : "Create project"}</Button>
     </form>
   );
 }

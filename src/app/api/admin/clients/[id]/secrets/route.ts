@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { encryptSecretValue } from "@/features/admin/auth/encryption";
 import { Client } from "@/features/admin/models/client";
+import { Project } from "@/features/admin/models/project";
 import { Secret } from "@/features/admin/models/secret";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getClientWithKey } from "@/features/admin/auth/secret-keys";
@@ -21,7 +22,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params;
     await connectToDatabase();
     if (!await Client.exists({ _id: id })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    const secrets = await Secret.find({ clientId: id }).select("label type expiresAt createdAt").sort({ createdAt: -1 }).lean();
+    const projectId = new URL(_request.url).searchParams.get("projectId");
+    if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    const secrets = await Secret.find({ clientId: id, ...(projectId ? { projectId } : {}) }).select("label type expiresAt createdAt").sort({ createdAt: -1 }).lean();
     return NextResponse.json({ secrets });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,14 +37,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const session = await requireAdminSession();
     await validateCsrfToken(request, session);
-    const data = secretSchema.parse(await request.json());
+    const body = await request.json() as { projectId?: string; label?: string; type?: string; value?: string; expiresAt?: string };
+    const data = secretSchema.parse(body);
     const { id } = await params;
     await connectToDatabase();
     const result = await getClientWithKey(id);
     if (!result) return NextResponse.json({ error: "Client not found." }, { status: 404 });
+    if (body.projectId && !await Project.exists({ _id: body.projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const encrypted = encryptSecretValue(data.value, result.key, result.client.dataKeyVersion ?? "v1");
     const secret = await Secret.create({
       clientId: result.client._id,
+      projectId: body.projectId,
       label: data.label,
       type: data.type,
       encryptedValue: encrypted.ciphertext,

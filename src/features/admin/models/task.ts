@@ -28,5 +28,7 @@ const taskSchema = new Schema<TaskDocument>({
 }, { timestamps: true, strict: true });
 
 taskSchema.index({ status: 1, dueDate: 1 });
+taskSchema.index({ clientId: 1, status: 1, dueDate: 1 });
+taskSchema.index({ projectId: 1, status: 1, dueDate: 1 });
 
 export const Task = getOrCreateModel<TaskDocument>("Task", taskSchema);

@@ -1,20 +1,21 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Button } from "./ui/Button";
 
 type Payment = { _id: string; amount: number; currency: string; method: string; status: string; milestone?: string; paidAt?: string };
 
-export default function PaymentManager({ clientId }: { clientId: string }) {
+export default function PaymentManager({ clientId, projectId }: { clientId: string; projectId?: string }) {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState("");
   const totalPaid = useMemo(() => payments.filter((payment) => payment.status === "paid").reduce((sum, payment) => sum + payment.amount, 0), [payments]);
 
-  const load = () => fetch(`/api/admin/clients/${clientId}/payments`).then(async (response) => {
+  const load = () => fetch(`/api/admin/clients/${clientId}/payments${projectId ? `?projectId=${projectId}` : ""}`).then(async (response) => {
     const result = await response.json() as { payments?: Payment[]; error?: string };
     if (response.ok) setPayments(result.payments ?? []);
     else setError(result.error ?? "Unable to load payments.");
   }).catch(() => setError("Unable to load payments."));
-  useEffect(() => { void load(); }, [clientId]);
+  useEffect(() => { void load();   }, [clientId, projectId]);
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,7 +24,7 @@ export default function PaymentManager({ clientId }: { clientId: string }) {
     const response = await fetch(`/api/admin/clients/${clientId}/payments`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}) },
-      body: JSON.stringify(Object.fromEntries(form.entries())),
+      body: JSON.stringify({ ...Object.fromEntries(form.entries()), projectId }),
     });
     const result = await response.json() as { error?: string };
     if (!response.ok) setError(result.error ?? "Unable to save payment.");
@@ -42,7 +43,7 @@ export default function PaymentManager({ clientId }: { clientId: string }) {
         <label className="text-sm font-medium">Milestone<input name="milestone" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
         <label className="text-sm font-medium">UTR/reference<input name="utrReference" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
         <label className="text-sm font-medium sm:col-span-2">Notes<textarea name="notes" rows={3} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
-        <button type="submit" className="min-h-11 rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black sm:col-span-2">Add payment</button>
+        <Button type="submit" className="sm:col-span-2">Add payment</Button>
       </form>
       {error && <p role="alert" className="mt-3 text-sm text-[#602329]">{error}</p>}
     </section>

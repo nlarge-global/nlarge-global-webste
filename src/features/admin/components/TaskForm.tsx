@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Button } from "./ui/Button";
 
 export default function TaskForm({ projectId, onCreated }: { projectId: string; onCreated: (task: { _id: string; title: string; status: string; priority: string; dueDate?: string }) => void }) {
   const [error, setError] = useState("");
@@ -36,7 +37,7 @@ export default function TaskForm({ projectId, onCreated }: { projectId: string; 
       </div>
       <label className="mt-4 block text-sm font-medium">Notes<textarea name="notes" rows={3} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
       {error && <p role="alert" className="mt-3 text-sm text-[#602329]">{error}</p>}
-      <button type="submit" disabled={pending} className="mt-4 min-h-11 w-full rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black disabled:opacity-50">{pending ? "Adding..." : "Add task"}</button>
+      <Button type="submit" disabled={pending} className="mt-4 w-full">{pending ? "Adding..." : "Add task"}</Button>
     </form>
   );
 }

@@ -16,6 +16,10 @@ const taskSchema = z.object({
   notes: z.string().trim().max(3000).optional(),
 });
 
+const taskUpdateSchema = z.object({
+  status: z.enum(["todo", "in-progress", "done"]),
+});
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdminSession();
@@ -34,5 +38,37 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task details." }, { status: 400 });
     console.error("Task creation failed:", error);
     return NextResponse.json({ error: "Unable to create task." }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+      const session = await requireAdminSession();
+      await validateCsrfToken(request, session);
+      const body = await request.json() as { taskId?: string; status?: string };
+      const taskId = z.string().regex(/^[a-f\d]{24}$/i).parse(body.taskId);
+      const { status } = taskUpdateSchema.parse(body);
+      await connectToDatabase();
+      const task = await Task.findByIdAndUpdate(
+        taskId,
+        { status, completedAt: status === "done" ? new Date() : undefined },
+        { new: true, runValidators: true },
+      ).lean();
+      if (!task) return NextResponse.json({ error: "Task not found." }, { status: 404 });
+      await writeAuditEvent({
+        actor: "admin",
+        action: "task.status_changed",
+        resourceType: "task",
+        resourceId: taskId,
+        requestId: getRequestId(request),
+        metadata: { status },
+      });
+      return NextResponse.json({ task });
+    } catch (error) {
+      if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
+      if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task details." }, { status: 400 });
+      console.error("Task update failed:", error);
+      return NextResponse.json({ error: "Unable to update task." }, { status: 500 });
   }
 }

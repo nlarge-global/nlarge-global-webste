@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { Client } from "@/features/admin/models/client";
 import { ClientDocument } from "@/features/admin/models/document";
+import { Project } from "@/features/admin/models/project";
 import { PaymentRecord } from "@/features/admin/models/payment";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
@@ -17,6 +18,7 @@ const paymentSchema = z.object({
   paidAt: z.coerce.date().optional(),
   notes: z.string().trim().max(3000).optional(),
   proofDocumentId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
+  projectId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
 });
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -24,7 +26,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     await requireAdminSession();
     const { id } = await params;
     await connectToDatabase();
-    const payments = await PaymentRecord.find({ clientId: id }).sort({ createdAt: -1 }).lean();
+    const projectId = new URL(_request.url).searchParams.get("projectId");
+    if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    const payments = await PaymentRecord.find({ clientId: id, ...(projectId ? { projectId } : {}) }).sort({ createdAt: -1 }).lean();
     return NextResponse.json({ payments });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,7 +45,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id } = await params;
     await connectToDatabase();
     if (!await Client.exists({ _id: id })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    if (data.proofDocumentId && !await ClientDocument.exists({ _id: data.proofDocumentId, clientId: id })) return NextResponse.json({ error: "Proof document not found." }, { status: 404 });
+    if (data.projectId && !await Project.exists({ _id: data.projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    if (data.proofDocumentId && !await ClientDocument.exists({ _id: data.proofDocumentId, clientId: id, ...(data.projectId ? { projectId: data.projectId } : {}) })) return NextResponse.json({ error: "Proof document not found." }, { status: 404 });
     const payment = await PaymentRecord.create({ ...data, clientId: id });
     await writeAuditEvent({ actor: "admin", action: "payment.created", resourceType: "payment", resourceId: String(payment._id), requestId: getRequestId(request), metadata: { clientId: id, currency: data.currency, status: data.status } });
     return NextResponse.json({ payment }, { status: 201 });

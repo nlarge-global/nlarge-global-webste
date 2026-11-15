@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Button } from "./ui/Button";
 
 export default function ReplyComposer({ inquiryId }: { inquiryId: string }) {
   const [message, setMessage] = useState("");
@@ -61,9 +62,9 @@ export default function ReplyComposer({ inquiryId }: { inquiryId: string }) {
       </div>
       {error && <p role="alert" className="mt-3 text-sm text-[#602329]">{error}</p>}
       {status && <p role="status" className="mt-3 text-sm text-emerald-700">{status}</p>}
-      <button type="submit" disabled={pending} className="mt-5 min-h-11 w-full rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black disabled:opacity-50">
+      <Button type="submit" disabled={pending} className="mt-5 w-full">
         {pending ? "Sending..." : "Send reply"}
-      </button>
+      </Button>
     </form>
   );
 }

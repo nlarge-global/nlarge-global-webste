@@ -182,6 +182,10 @@ The application reads and validates environment variables through `src/lib/env.t
 
 See `example.env` for the copyable template.
 
+## Development admin data
+
+After creating a fresh MongoDB database, run `npm run seed:admin` to insert linked demo clients, projects, tasks, inquiries, secrets, documents, and payments. The command is explicit and never runs during application startup; it replaces only records with the seed IDs, so it can be run again safely.
+
 ## Conventions
 
 - Use kebab-case for directories and TypeScript modules where practical; React component names use PascalCase.

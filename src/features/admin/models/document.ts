@@ -3,6 +3,7 @@ import { getOrCreateModel } from "@/lib/mongoose-model";
 
 export type ClientDocumentRecord = Document & {
   clientId: Types.ObjectId;
+  projectId?: Types.ObjectId;
   filename: string;
   objectKey: string;
   contentType: string;
@@ -13,6 +14,7 @@ export type ClientDocumentRecord = Document & {
 
 const documentSchema = new Schema<ClientDocumentRecord>({
   clientId: { type: Schema.Types.ObjectId, ref: "Client", required: true, index: true },
+  projectId: { type: Schema.Types.ObjectId, ref: "Project", index: true },
   filename: { type: String, required: true, trim: true, maxlength: 200 },
   objectKey: { type: String, required: true, unique: true },
   contentType: { type: String, required: true, maxlength: 100 },

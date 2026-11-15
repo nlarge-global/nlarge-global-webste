@@ -2,13 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/Button";
 
 type ClientFormValues = { name: string; email?: string; company?: string; phone?: string; notes?: string; tags: string[] };
 
-export default function ClientForm({ client }: { client?: ClientFormValues & { _id: string } }) {
+export default function ClientForm({ client, onDirty }: { client?: ClientFormValues & { _id: string }; onDirty?: () => void }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [dirty, setDirty] = useState(!client);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +38,7 @@ export default function ClientForm({ client }: { client?: ClientFormValues & { _
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:grid-cols-2">
+    <form onChange={() => { setDirty(true); onDirty?.(); }} onSubmit={submit} className="grid gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:grid-cols-2">
       <label className="text-sm font-medium">Name<input name="name" required defaultValue={client?.name} className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
       <label className="text-sm font-medium">Email<input name="email" type="email" defaultValue={client?.email} className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
       <label className="text-sm font-medium">Company<input name="company" defaultValue={client?.company} className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
@@ -44,7 +46,7 @@ export default function ClientForm({ client }: { client?: ClientFormValues & { _
       <label className="text-sm font-medium sm:col-span-2">Tags <span className="font-normal text-black/45">(comma-separated)</span><input name="tags" defaultValue={client?.tags.join(", ")} className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
       <label className="text-sm font-medium sm:col-span-2">Private notes<textarea name="notes" rows={5} defaultValue={client?.notes} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label>
       {error && <p role="alert" className="text-sm text-[#602329] sm:col-span-2">{error}</p>}
-      <button type="submit" disabled={pending} className="min-h-11 rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black disabled:opacity-50 sm:col-span-2">{pending ? "Saving..." : client ? "Save changes" : "Create client"}</button>
+      {dirty && <Button type="submit" disabled={pending} className="sm:col-span-2">{pending ? "Saving..." : client ? "Save changes" : "Create client"}</Button>}
     </form>
   );
 }

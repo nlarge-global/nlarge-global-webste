@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Button } from "./ui/Button";
 import { FiMessageSquare } from "react-icons/fi";
 
 type TimelineEntry = {
@@ -98,9 +99,9 @@ export default function ConversationTimeline({ inquiryId, initialEntries }: { in
           <textarea name="content" required maxLength={5000} rows={5} className="mt-2 w-full rounded-xl border border-black/15 p-3" />
         </label>
         {error && <p role="alert" className="mt-3 text-sm text-[#602329]">{error}</p>}
-        <button type="submit" disabled={pending} className="mt-5 min-h-11 w-full rounded-xl bg-[#602329] px-4 text-sm font-semibold text-white hover:bg-black disabled:opacity-50">
+        <Button type="submit" disabled={pending} className="mt-5 w-full">
           {pending ? "Saving..." : "Save entry"}
-        </button>
+        </Button>
       </form>
     </div>
   );
