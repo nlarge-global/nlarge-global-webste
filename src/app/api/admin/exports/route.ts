@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await uploadPrivateObject(objectKey, zip, "application/zip");
     await ExportJob.create({ clientId: client._id, tokenHash: crypto.createHash("sha256").update(token).digest("hex"), objectKey, expiresAt });
-    await writeAuditEvent({ actor: "admin", action: "client.export.created", resourceType: "client", resourceId: data.clientId, requestId: getRequestId(request), metadata: { includeDocuments: data.includeDocuments } });
+    await writeAuditEvent({ actor: "admin", action: "client.export.created", resourceType: "client", resourceId: data.clientId, resourceLabel: client.name, requestId: getRequestId(request), metadata: { includeDocuments: data.includeDocuments } });
     return NextResponse.json({
       downloadUrl: `/api/admin/exports/${token}`,
       expiresAt: expiresAt.toISOString(),

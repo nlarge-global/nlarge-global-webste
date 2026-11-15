@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const data = clientSchema.parse(await request.json());
     await connectToDatabase();
     const client = await Client.create({ ...data, email: data.email || undefined });
-    await writeAuditEvent({ actor: "admin", action: "client.created", resourceType: "client", resourceId: String(client._id), requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "client.created", resourceType: "client", resourceId: String(client._id), resourceLabel: client.name, requestId: getRequestId(request) });
     return NextResponse.json({ client }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

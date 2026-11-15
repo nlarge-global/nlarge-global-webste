@@ -32,7 +32,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       Object.assign(update, { encryptedValue: encrypted.ciphertext, iv: encrypted.iv, authTag: encrypted.authTag, keyVersion: encrypted.keyVersion });
     }
     const saved = await Secret.findByIdAndUpdate(secretId, update, { new: true }).select("label type expiresAt").lean();
-    await writeAuditEvent({ actor: "admin", action: "secret.updated", resourceType: "secret", resourceId: secretId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "secret.updated", resourceType: "secret", resourceId: secretId, resourceLabel: saved?.label, requestId: getRequestId(request), metadata: { clientId: id } });
     return NextResponse.json({ secret: saved });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,7 +52,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await connectToDatabase();
     const secret = await Secret.findOneAndUpdate({ _id: secretId, clientId: id }, { $set: { deletedAt: new Date() } }, { new: true });
     if (!secret) return NextResponse.json({ error: "Secret not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "secret.deleted", resourceType: "secret", resourceId: secretId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "secret.deleted", resourceType: "secret", resourceId: secretId, resourceLabel: secret.label, requestId: getRequestId(request), metadata: { clientId: id } });
     return NextResponse.json({ message: "Secret deleted." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -46,7 +46,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await connectToDatabase();
     const project = await Project.findByIdAndUpdate(id, { ...data, repositoryUrl: data.repositoryUrl || undefined, productionUrl: data.productionUrl || undefined, stagingUrl: data.stagingUrl || undefined }, { new: true, runValidators: true }).lean();
     if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "project.updated", resourceType: "project", resourceId: id, requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "project.updated", resourceType: "project", resourceId: id, resourceLabel: project.name, requestId: getRequestId(request) });
     return NextResponse.json({ project });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -74,7 +74,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         PaymentRecord.updateMany({ projectId: id }, { $set: { deletedAt } }),
         Project.updateOne({ _id: id }, { $set: { deletedAt } }),
       ]);
-      await writeAuditEvent({ actor: "admin", action: "project.deleted", resourceType: "project", resourceId: id, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
+      await writeAuditEvent({ actor: "admin", action: "project.deleted", resourceType: "project", resourceId: id, resourceLabel: project.name, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
       return NextResponse.json({ message: "Project archived." });
     } catch (error) {
       if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

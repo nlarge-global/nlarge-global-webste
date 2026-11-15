@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!session) return NextResponse.json({ message: "Signed out" });
     await validateCsrfToken(request, session);
     await revokeCurrentAdminSession();
-    await writeAuditEvent({ actor: "admin", action: "auth.logout", resourceType: "session", requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "auth.logout", resourceType: "session", resourceLabel: "Admin session", requestId: getRequestId(request) });
     return NextResponse.json({ message: "Signed out" });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) {

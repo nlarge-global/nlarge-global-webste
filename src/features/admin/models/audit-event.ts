@@ -6,6 +6,7 @@ export type AuditEventDocument = Document & {
   action: string;
   resourceType: string;
   resourceId?: string;
+  resourceLabel?: string;
   requestId: string;
   metadata: Record<string, string | number | boolean | null>;
   createdAt: Date;
@@ -16,6 +17,7 @@ const auditEventSchema = new Schema<AuditEventDocument>({
   action: { type: String, required: true, maxlength: 100 },
   resourceType: { type: String, required: true, maxlength: 100 },
   resourceId: { type: String, maxlength: 100 },
+  resourceLabel: { type: String, maxlength: 200 },
   requestId: { type: String, required: true, maxlength: 100 },
   metadata: { type: Schema.Types.Mixed, default: {} },
 }, { timestamps: { createdAt: true, updatedAt: false }, strict: true });

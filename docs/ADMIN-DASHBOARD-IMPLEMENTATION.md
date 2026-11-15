@@ -49,7 +49,9 @@ optional polish:
 - Idempotency for public contact submissions and any future email-send retry.
 - Central request IDs, error taxonomy, safe toast responses, and bounded
   structured operational logs.
-- Compact append-only audit events with size limits and no sensitive payloads.
+- Compact append-only audit events with bounded, human-readable resource labels,
+  stable resource IDs, allowlisted metadata, and no credentials, contact details,
+  message bodies, or other sensitive payloads in new writes.
 - Versioned encryption metadata on every encrypted value, including IV,
   authentication tag, and key version.
 - R2/MongoDB consistency handling for upload, metadata-save, deletion, and
@@ -328,17 +330,21 @@ search/filter/pagination, detail view, private notes, and statuses:
 
 Completion: a valid public submission is stored without SMTP; invalid and
 rate-limited submissions behave correctly; duplicate retries are idempotent;
-dashboard users can manage the inquiry, source, tags, notes, and follow-up
-fields.
+Dashboard users can manage the inquiry, source, tags, notes, follow-up fields,
+status, and priority. Public submissions start as `new` with `normal` priority;
+priority and `converted` status are assigned manually. Manual records are
+distinguished from public submissions and do not claim public-form consent.
 
 ### 6. Inquiry conversation timeline
 
 Create `ConversationEntry` and support inbound/outbound entries for email,
 WhatsApp, phone, meetings, and internal notes. Use editable `occurredAt`
-timestamps and preserve creation metadata.
+timestamps, server-side channel/direction/text filters, and cursor pagination
+for older history.
 
-Completion: an inquiry displays a chronological manual timeline, late entries
-can be placed correctly by date/time, and entries are authorized and validated.
+Completion: an inquiry displays a newest-first manual timeline, late entries
+can be placed correctly by date/time, older history is fetched in bounded
+pages, and entries are authorized and validated.
 
 ### 7. Manual dashboard email replies
 
@@ -399,11 +405,14 @@ and no prohibited payment credentials can be entered or stored.
 
 ### 13. Audit log
 
-Create append-only `AuditEvent` records, shared audit helper, filters, search,
-pagination, and sensitive-action coverage.
+Create append-only `AuditEvent` records, a shared sanitizer, filters, search,
+pagination, and sensitive-action coverage. Show concise resource labels beside
+stable IDs; retain only bounded metadata from an explicit safe-key allowlist.
 
 Completion: authentication, inquiry, client, secret, document, payment,
-settings, and email actions are auditable without secret values.
+settings, and email actions are auditable without secret values, passwords,
+hashes, contact addresses, or message content. Labels are snapshots so later
+resource renames do not make older events harder to identify.
 
 ### 14. Private Health page
 

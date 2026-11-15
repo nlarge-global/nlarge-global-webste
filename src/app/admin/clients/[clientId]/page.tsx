@@ -139,12 +139,6 @@ export default async function ClientDetailPage({
       <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold">Client tasks</h2>
-          <Link
-            href="/admin/overview/tasks"
-            className="text-sm font-semibold text-[#602329]"
-          >
-            View all
-          </Link>
         </div>
         <div className="mt-4 divide-y divide-black/10">
           {clientTasks.length === 0 && (

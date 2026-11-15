@@ -3,12 +3,14 @@ import { FiArrowLeft } from "react-icons/fi";
 import Link from "next/link";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import ConversationTimeline from "@/features/admin/components/ConversationTimeline";
-import ReplyComposer from "@/features/admin/components/ReplyComposer";
 import { Inquiry } from "@/features/admin/models/inquiry";
 import { ConversationEntry } from "@/features/admin/models/conversation-entry";
 import { Client } from "@/features/admin/models/client";
 import InquiryClientLink from "@/features/admin/components/InquiryClientLink";
+import InquiryProperties from "@/features/admin/components/InquiryProperties";
 import { connectToDatabase } from "@/lib/mongodb";
+
+const TIMELINE_PAGE_SIZE = 30;
 
 export default async function InquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!await getCurrentAdminSession()) redirect("/admin/login");
@@ -16,8 +18,12 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
   await connectToDatabase();
   const inquiry = await Inquiry.findById(id).lean();
   if (!inquiry) notFound();
-  const entries = await ConversationEntry.find({ inquiryId: inquiry._id }).sort({ occurredAt: -1 }).lean();
-  const clients = await Client.find().select("_id name").sort({ name: 1 }).lean();
+  const [entryPage, clients] = await Promise.all([
+    ConversationEntry.find({ inquiryId: inquiry._id }).sort({ occurredAt: -1, _id: -1 }).limit(TIMELINE_PAGE_SIZE + 1).lean(),
+    Client.find().select("_id name").sort({ name: 1 }).lean(),
+  ]);
+  const hasMoreEntries = entryPage.length > TIMELINE_PAGE_SIZE;
+  const entries = entryPage.slice(0, TIMELINE_PAGE_SIZE);
 
   return (
     <div>
@@ -31,9 +37,17 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
             <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">{inquiry.subject}</h1>
             <p className="mt-2 text-sm text-black/55">{inquiry.name} · {inquiry.email}</p>
           </div>
-          <span className="rounded-full bg-[#f5f3f0] px-3 py-1 text-xs font-semibold capitalize">{inquiry.status}</span>
         </div>
         <p className="mt-6 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-black/75">{inquiry.message}</p>
+        <InquiryProperties
+          inquiryId={String(inquiry._id)}
+          initialStatus={inquiry.status}
+          initialPriority={inquiry.priority}
+        />
+        <p className="mt-4 text-xs text-black/50">
+          {inquiry.consent ? "Public contact-form consent recorded." : "Public contact-form consent was not collected."}
+          {inquiry.origin === "manual" ? " · Manually entered" : ""}
+        </p>
         <InquiryClientLink
           inquiryId={String(inquiry._id)}
           currentClientId={inquiry.clientId ? String(inquiry.clientId) : undefined}
@@ -41,16 +55,13 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
         />
       </div>
       <div className="mt-6">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)]">
-          <ConversationTimeline inquiryId={String(inquiry._id)} initialEntries={entries.map((entry) => ({
+        <ConversationTimeline inquiryId={String(inquiry._id)} initialHasMore={hasMoreEntries} initialEntries={entries.map((entry) => ({
           _id: String(entry._id),
           channel: entry.channel,
           direction: entry.direction,
           content: entry.content,
           occurredAt: entry.occurredAt.toISOString(),
           }))} />
-          <ReplyComposer inquiryId={String(inquiry._id)} />
-        </div>
       </div>
     </div>
   );

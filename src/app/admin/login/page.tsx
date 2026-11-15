@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiLock } from "react-icons/fi";
 import { Button } from "@/features/admin/components/ui/Button";
@@ -10,6 +10,11 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [pending, setPending] = useState(false);
+  const [fromShare, setFromShare] = useState(false);
+
+  useEffect(() => {
+    setFromShare(new URLSearchParams(window.location.search).get("share") === "signin");
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,7 +36,7 @@ export default function AdminLoginPage() {
     });
     const result = await response.json() as { error?: string };
     if (!response.ok) setError(result.error ?? "Unable to sign in.");
-    else router.replace("/admin");
+    else router.replace(fromShare ? "/admin/prospects?share=signin" : "/admin");
     setPending(false);
   }
 
@@ -43,6 +48,7 @@ export default function AdminLoginPage() {
         </div>
         <h1 className="mt-6 text-2xl font-semibold tracking-[-0.04em]">Sign in to admin</h1>
         <p className="mt-2 text-sm leading-6 text-black/55">Use the configured administrator credentials. This session expires automatically.</p>
+        {fromShare && <p role="status" className="mt-4 rounded-lg bg-[#f7efed] px-3 py-2 text-sm text-[#602329]">Sign in to save shared links. After signing in, share the link from your phone again.</p>}
         <label htmlFor="admin-email" className="mt-6 block text-sm font-medium">
           Email
           <input

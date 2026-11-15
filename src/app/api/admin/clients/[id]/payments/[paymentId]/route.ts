@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await connectToDatabase();
     const payment = await PaymentRecord.findOneAndUpdate({ _id: paymentId, clientId: id }, data, { new: true, runValidators: true }).lean();
     if (!payment) return NextResponse.json({ error: "Payment not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "payment.updated", resourceType: "payment", resourceId: paymentId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "payment.updated", resourceType: "payment", resourceId: paymentId, resourceLabel: payment.milestone || `${payment.currency} payment`, requestId: getRequestId(request), metadata: { clientId: id, currency: payment.currency, status: payment.status } });
     return NextResponse.json({ payment });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -45,7 +45,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await connectToDatabase();
     const payment = await PaymentRecord.findOneAndUpdate({ _id: paymentId, clientId: id }, { $set: { deletedAt: new Date() } }, { new: true });
     if (!payment) return NextResponse.json({ error: "Payment not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "payment.deleted", resourceType: "payment", resourceId: paymentId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "payment.deleted", resourceType: "payment", resourceId: paymentId, resourceLabel: payment.milestone || `${payment.currency} payment`, requestId: getRequestId(request), metadata: { clientId: id, currency: payment.currency, status: payment.status } });
     return NextResponse.json({ message: "Payment deleted." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

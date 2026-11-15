@@ -1,39 +1,53 @@
+import { isValidObjectId } from "mongoose";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
-import { Client } from "@/features/admin/models/client";
+import { ClientDocument } from "@/features/admin/models/document";
 import { Project } from "@/features/admin/models/project";
-import { connectToDatabase } from "@/lib/mongodb";
 import DocumentManager from "@/features/admin/components/DocumentManager";
-import Link from "next/link";
-import { FiArrowUpRight, FiFileText } from "react-icons/fi";
+import { connectToDatabase } from "@/lib/mongodb";
 
-export default async function ProjectDocumentsPage({ params }: { params: Promise<{ clientId: string; projectId: string }> }) {
-  if (!await getCurrentAdminSession()) redirect("/admin/login");
+const PAGE_SIZE = 10;
+
+export default async function ProjectDocumentsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ clientId: string; projectId: string }>;
+  searchParams: Promise<{ page?: string }>;
+}) {
+  if (!(await getCurrentAdminSession())) redirect("/admin/login");
   const { clientId, projectId } = await params;
+  if (!isValidObjectId(clientId) || !isValidObjectId(projectId)) notFound();
+
   await connectToDatabase();
-  const [client, project] = await Promise.all([Client.findById(clientId).select("_id name").lean(), Project.findOne({ _id: projectId, clientId }).select("_id name").lean()]);
-  if (!client || !project) notFound();
+  if (!(await Project.exists({ _id: projectId, clientId }))) notFound();
+
+  const query = await searchParams;
+  const parsedPage = Number(query.page);
+  const page =
+    Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const filter = { clientId, projectId };
+  const [documents, total] = await Promise.all([
+    ClientDocument.find(filter)
+      .select("filename description contentType size createdAt")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE)
+      .lean(),
+    ClientDocument.countDocuments(filter),
+  ]);
+
   return (
-    <div>
-      <header className="border-b border-black/10 pb-6">
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-black/50">
-          <Link href={`/admin/clients/${clientId}`} className="hover:text-[#602329] hover:underline">{client.name}</Link>
-          <span aria-hidden="true">/</span>
-          <Link href={`/admin/clients/${clientId}/projects/${projectId}`} className="inline-flex items-center gap-1 hover:text-[#602329] hover:underline">
-            {project.name}<FiArrowUpRight aria-hidden="true" className="size-3.5" />
-          </Link>
-        </nav>
-        <div className="mt-4 flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#602329]/10 text-[#602329]">
-            <FiFileText aria-hidden="true" className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="break-words text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Documents</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">Private project files for {project.name}.</p>
-          </div>
-        </div>
-      </header>
-      <DocumentManager clientId={clientId} projectId={projectId} />
-    </div>
+    <DocumentManager
+      clientId={clientId}
+      projectId={projectId}
+      documents={documents.map((document) => ({
+        ...document,
+        _id: String(document._id),
+        createdAt: new Date(document.createdAt).toISOString(),
+      }))}
+      page={page}
+      total={total}
+    />
   );
 }

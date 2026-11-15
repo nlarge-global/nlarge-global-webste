@@ -32,7 +32,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       authTag: secret.authTag,
       keyVersion: secret.keyVersion,
     }, result.key);
-    await writeAuditEvent({ actor: "admin", action: "secret.revealed", resourceType: "secret", resourceId: secretId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "secret.revealed", resourceType: "secret", resourceId: secretId, resourceLabel: secret.label, requestId: getRequestId(request), metadata: { clientId: id, type: secret.type } });
     return NextResponse.json({ value });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

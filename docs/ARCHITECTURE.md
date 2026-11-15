@@ -31,6 +31,7 @@ src/
 │   ├── admin/                    # Private dashboard route surface
 │   │   ├── layout.tsx            # Admin shell and admin-only metadata
 │   │   ├── login/page.tsx        # Admin login
+│   │   ├── prospects/            # Prospect list and detail pages
 │   │   ├── page.tsx              # /admin overview placeholder
 │   │   └── [section]/page.tsx    # Planned admin section placeholders
 │   ├── api/admin/auth/
@@ -64,6 +65,10 @@ src/
 │       │   ├── inquiry.ts
 │       │   ├── conversation-entry.ts
 │       │   └── email-record.ts
+│       │   ├── prospect.ts
+│       │   └── prospect-activity.ts
+│       ├── services/
+│       │   └── prospect-url.ts
 │       ├── client.ts
 │       ├── project.ts
 │       ├── task.ts
@@ -113,9 +118,15 @@ src/
 | `/api/contact` | `src/app/api/contact/route.ts` | Contact submission endpoint |
 | `/admin` | `src/app/admin/page.tsx` | Admin overview shell placeholder |
 | `/admin/[section]` | `src/app/admin/[section]/page.tsx` | Planned admin section shell placeholders |
+| `/admin/prospects` | `src/app/admin/prospects/page.tsx` | Private prospect list, search and follow-up |
+| `/admin/prospects/[id]` | `src/app/admin/prospects/[id]/page.tsx` | Prospect details and paginated activity |
 | `/admin/login` | `src/app/admin/login/page.tsx` | Admin credential login |
 | `/api/admin/auth/login` | `src/app/api/admin/auth/login/route.ts` | Admin login and session creation |
 | `/api/admin/auth/logout` | `src/app/api/admin/auth/logout/route.ts` | Revocation with same-origin and CSRF checks |
+| `/api/admin/prospects` | `src/app/api/admin/prospects/route.ts` | Authenticated prospect listing and manual creation |
+| `/api/admin/prospects/[id]` | `src/app/api/admin/prospects/[id]/route.ts` | Authenticated prospect update and archive |
+| `/api/admin/prospects/[id]/activities` | `src/app/api/admin/prospects/[id]/activities/route.ts` | Prospect activity timeline |
+| `/api/admin/prospects/share` | `src/app/api/admin/prospects/share/route.ts` | Installed-PWA share target for links |
 | `/robots.txt` | `src/app/robots.ts` | Search crawler policy |
 | `/sitemap.xml` | `src/app/sitemap.ts` | Public route index |
 
@@ -162,6 +173,12 @@ sequenceDiagram
     API-->>Form: Success or error response
 ```
 
+## PWA prospect capture
+
+The manifest launches the installed app on `/admin/prospects` and registers an Android share target. Deploy the site over HTTPS, install it from the browser’s app menu, and sign in before sharing a business link. The share target saves the link immediately as `To review`; if the admin session is missing, sign in and share again. Shared text is retained as notes, source is inferred only for recognized hosts, and no page content is scraped. The dashboard requires a network connection; it does not provide offline access. Archived prospects remain soft-deleted and can be found with the prospects list’s archived filter and restored.
+
+On iPhone, install from Safari’s Share menu using **Add to Home Screen**. iOS does not provide the same installed-web-app share-target behavior, so copy the business link, open Prospects, and add it manually. Follow-up dates are in-dashboard only; there are no device push notifications.
+
 ## Configuration
 
 The application reads and validates environment variables through `src/lib/env.ts`.
@@ -198,15 +215,16 @@ After creating a fresh MongoDB database, run `npm run seed:admin` to insert link
 - The admin walkthrough and contextual help are client-side UI preferences only during the foundation phase. Tour completion is stored in browser storage until authenticated admin preferences are implemented.
 - MongoDB access is server-only through `src/lib/mongodb.ts`; it fails explicitly when `MONGODB_URI` is missing or the connection cannot be established. Models must use `getOrCreateModel()` to avoid development recompilation errors.
 - Admin sessions are opaque random cookies whose HMAC is stored in the `AdminSession` collection. Protected pages query the server-backed session, enforce expiry/revocation, and redirect unauthenticated users to `/admin/login`; logout requires a matching same-origin request and CSRF token.
-- Public contact submissions validate with the shared schema, apply rate limiting, persist to the `Inquiry` collection with `source: website` and an idempotency key, and do not call SMTP. SMTP remains reserved for the later dashboard reply and Health features.
-- Inquiry conversation entries are stored separately from the inquiry, scoped by `inquiryId`, and sorted by editable `occurredAt` timestamps. Timeline creation requires an authenticated admin session and CSRF validation.
+- Public contact submissions validate with the shared schema, apply rate limiting, persist to the `Inquiry` collection with `source: website`, public origin, recorded consent, and an idempotency key, and do not call SMTP. Manually entered inquiries have manual origin and no public-form consent value; both status and priority are explicitly managed by admins, with new records defaulting to `new` and `normal`. `converted` is a manual status and is never inferred from linking a client.
+- Inquiry conversation entries are stored separately from the inquiry, scoped by `inquiryId`, and sorted newest-first by editable `occurredAt` timestamps with cursor pagination. Channel, direction, and text filters are applied by the authenticated API; creation requires CSRF validation. Email reply defaults are loaded from dashboard settings only when the reply dialog opens.
 - Dashboard replies are the only current path that uses SMTP. Reply text is escaped before HTML generation, includes a plain-text fallback, stores delivery metadata in `EmailRecord`, and creates an outbound `ConversationEntry`.
 - Client records stay small and inquiries reference an optional `clientId`. Linking, unlinking, and relinking are authenticated server operations; client detail pages query only their linked inquiries.
+- Prospects are separate from inbound inquiries. They support URL-only capture, explicit status, source, notes and in-dashboard follow-up dates; activity is stored separately and cursor-paginated. The installed PWA manifest receives Android share actions at `/api/admin/prospects/share`; capture requires an active admin session and accepts only HTTP(S) URLs. No scraping or device push notifications are used.
 - Projects belong to exactly one client and contain technical/delivery details. Tasks are separate records linked to projects (and inherit the client), with indexed status and due-date fields for later overview and follow-up views.
 - Client secrets use a unique client data key wrapped by `MASTER_ENCRYPTION_KEY`; secret values store only ciphertext, IV, authentication tag, and key version. Lists exclude encrypted fields, and reveal requires admin re-authentication.
 - Client documents use private R2 object keys under `clients/{clientId}/documents/...`; uploads validate size, declared type, and file signature, while access uses five-minute signed URLs. Metadata and object deletion are coordinated with orphan cleanup on metadata failure.
 - Payments are client-scoped records with bounded amount/currency/method/status fields and optional references to private proof documents. Payment credentials are not accepted by the schema.
-- Audit events are append-only, indexed by time and resource, carry a bounded request ID and safe metadata only, and never accept secret values or request bodies. Implemented mutations write events through the shared audit service.
+- Audit events are append-only, indexed by time and resource, and carry a bounded request ID, a sanitized resource-label snapshot, and metadata filtered through an explicit safe-key allowlist. Stable resource IDs remain available for exact tracing; new writes exclude credentials, hashes, contact details, message bodies, and request payloads, and audit readers filter legacy metadata through the same allowlist.
 - Health checks are private and return only configured/ok/error summaries for environment, MongoDB, SMTP, and R2. Public contact submission does not call Health.
 - Settings are a single dashboard preference record. Password hash generation returns a bcrypt hash once and never persists the plaintext or hash.
 - Overview metrics are derived from current collections and do not have a separate collection. New inquiries use `status: new`, while recent inquiries use creation order across statuses; task/payment/secret signals use indexed collection queries.

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Pagination from "@/features/admin/components/Pagination";
+import { sanitizeAuditMetadata } from "@/features/admin/services/audit";
 
 const sections = {
   audit: [
@@ -69,15 +70,23 @@ export default async function AdminSectionPage({
         </header>
         <Card className="mt-6 overflow-hidden">
           <Table>
-            <TableHeader><TableRow><TableHead>Action</TableHead><TableHead>Resource</TableHead><TableHead className="text-right">Time</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Action</TableHead><TableHead>Resource</TableHead><TableHead>Details</TableHead><TableHead className="text-right">Time</TableHead></TableRow></TableHeader>
             <TableBody>
             {events.length === 0 && (
-              <TableRow><TableCell colSpan={3}>No audit events yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={4}>No audit events yet.</TableCell></TableRow>
             )}
             {events.map((event) => (
               <TableRow key={String(event._id)}>
                 <TableCell className="font-medium">{event.action}</TableCell>
-                <TableCell className="text-black/55">{event.resourceType}{event.resourceId ? ` · ${event.resourceId}` : ""}</TableCell>
+                <TableCell>
+                  <p className="font-medium">{event.resourceLabel || event.resourceType}</p>
+                  <p className="mt-1 text-xs text-black/45">{event.resourceType}{event.resourceId ? ` · ${event.resourceId}` : ""}</p>
+                </TableCell>
+                <TableCell className="text-sm text-black/55">
+                  {Object.entries(sanitizeAuditMetadata(event.metadata))
+                    .map(([key, value]) => `${key}: ${String(value)}`)
+                    .join(" · ") || "—"}
+                </TableCell>
                 <TableCell className="text-right text-xs text-black/45"><time>{event.createdAt.toLocaleString()}</time></TableCell>
               </TableRow>
             ))}

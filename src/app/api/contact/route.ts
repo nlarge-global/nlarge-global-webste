@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (existing) return NextResponse.json({ message: "Inquiry received" });
 
     const inquiry = await Inquiry.create({ ...data, source: "website", idempotencyKey });
-    await writeAuditEvent({ actor: "public", action: "inquiry.created", resourceType: "inquiry", resourceId: String(inquiry._id), requestId: getRequestId(request), metadata: { source: "website" } });
+    await writeAuditEvent({ actor: "public", action: "inquiry.created", resourceType: "inquiry", resourceId: String(inquiry._id), resourceLabel: inquiry.subject, requestId: getRequestId(request), metadata: { source: "website", status: inquiry.status } });
     return NextResponse.json({ message: "Inquiry received" });
   } catch (error) {
     console.error("Contact form error:", error);

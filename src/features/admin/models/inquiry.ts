@@ -8,7 +8,8 @@ export type InquiryDocument = Document & {
   queryType: "general" | "support" | "business" | "careers";
   subject: string;
   message: string;
-  consent: true;
+  consent?: true;
+  origin?: "public" | "manual";
   source: "website" | "whatsapp" | "linkedin" | "call" | "friend" | "personal" | "referral" | "other";
   status: "new" | "in-progress" | "converted" | "archived";
   priority: "low" | "normal" | "high";
@@ -27,7 +28,8 @@ const inquirySchema = new Schema<InquiryDocument>({
   queryType: { type: String, enum: ["general", "support", "business", "careers"], required: true },
   subject: { type: String, required: true, trim: true, maxlength: 100 },
   message: { type: String, required: true, trim: true, maxlength: 1000 },
-  consent: { type: Boolean, required: true },
+  consent: { type: Boolean, default: undefined },
+  origin: { type: String, enum: ["public", "manual"], default: "public" },
   source: { type: String, enum: ["website", "whatsapp", "linkedin", "call", "friend", "personal", "referral", "other"], default: "website" },
   status: { type: String, enum: ["new", "in-progress", "converted", "archived"], default: "new" },
   priority: { type: String, enum: ["low", "normal", "high"], default: "normal" },

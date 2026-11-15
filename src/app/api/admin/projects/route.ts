@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
     if (!await Client.exists({ _id: data.clientId })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
     const project = await Project.create({ ...data, repositoryUrl: data.repositoryUrl || undefined, productionUrl: data.productionUrl || undefined, stagingUrl: data.stagingUrl || undefined });
-    await writeAuditEvent({ actor: "admin", action: "project.created", resourceType: "project", resourceId: String(project._id), requestId: getRequestId(request), metadata: { clientId: data.clientId } });
+    await writeAuditEvent({ actor: "admin", action: "project.created", resourceType: "project", resourceId: String(project._id), resourceLabel: project.name, requestId: getRequestId(request), metadata: { clientId: data.clientId } });
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

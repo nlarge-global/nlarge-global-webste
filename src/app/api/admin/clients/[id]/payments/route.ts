@@ -55,7 +55,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (data.projectId && !await Project.exists({ _id: data.projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     if (data.proofDocumentId && !await ClientDocument.exists({ _id: data.proofDocumentId, clientId: id, ...(data.projectId ? { projectId: data.projectId } : {}) })) return NextResponse.json({ error: "Proof document not found." }, { status: 404 });
     const payment = await PaymentRecord.create({ ...data, clientId: id });
-    await writeAuditEvent({ actor: "admin", action: "payment.created", resourceType: "payment", resourceId: String(payment._id), requestId: getRequestId(request), metadata: { clientId: id, currency: data.currency, status: data.status } });
+    await writeAuditEvent({ actor: "admin", action: "payment.created", resourceType: "payment", resourceId: String(payment._id), resourceLabel: payment.milestone || `${payment.currency} payment`, requestId: getRequestId(request), metadata: { clientId: id, currency: data.currency, status: data.status } });
     return NextResponse.json({ payment }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

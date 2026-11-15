@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
     await validateCsrfToken(request, session);
     const data = taskSchema.parse(await request.json());
     await connectToDatabase();
-    const project = await Project.findById(data.projectId).select("clientId");
+    const project = await Project.findById(data.projectId).select("clientId name");
     if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     if (!await Client.exists({ _id: project.clientId })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
     const task = await Task.create({ ...data, clientId: project.clientId, completedAt: data.status === "done" ? new Date() : undefined });
-    await writeAuditEvent({ actor: "admin", action: "task.created", resourceType: "task", resourceId: String(task._id), requestId: getRequestId(request), metadata: { projectId: data.projectId, status: data.status } });
+    await writeAuditEvent({ actor: "admin", action: "task.created", resourceType: "task", resourceId: String(task._id), resourceLabel: task.title, requestId: getRequestId(request), metadata: { projectId: data.projectId, status: data.status } });
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -64,8 +64,9 @@ export async function PATCH(request: NextRequest) {
         action: "task.status_changed",
         resourceType: "task",
         resourceId: taskId,
+        resourceLabel: task.title,
         requestId: getRequestId(request),
-        metadata: { status: data.status ?? null, updated: Boolean(data.title) },
+        metadata: { status: task.status, priority: task.priority, updated: Boolean(data.title) },
       });
       return NextResponse.json({ task });
     } catch (error) {
@@ -86,7 +87,7 @@ export async function DELETE(request: NextRequest) {
       await connectToDatabase();
       const task = await Task.findByIdAndUpdate(taskId, { deletedAt: new Date() }, { new: true }).lean();
       if (!task) return NextResponse.json({ error: "Task not found." }, { status: 404 });
-      await writeAuditEvent({ actor: "admin", action: "task.deleted", resourceType: "task", resourceId: taskId, requestId: getRequestId(request), metadata: { softDelete: true } });
+      await writeAuditEvent({ actor: "admin", action: "task.deleted", resourceType: "task", resourceId: taskId, resourceLabel: task.title, requestId: getRequestId(request), metadata: { softDelete: true, status: task.status } });
       return NextResponse.json({ message: "Task archived." });
     } catch (error) {
       if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

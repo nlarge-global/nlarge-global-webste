@@ -63,7 +63,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await uploadPrivateObject(objectKey, bytes, file.type);
     try {
       const document = await ClientDocument.create({ _id: documentId, clientId: id, projectId: projectId || undefined, filename: safeFilename, description, objectKey, contentType: file.type, size: file.size });
-      await writeAuditEvent({ actor: "admin", action: "document.uploaded", resourceType: "document", resourceId: documentId, requestId: getRequestId(request), metadata: { clientId: id, contentType: file.type, size: file.size } });
+      await writeAuditEvent({ actor: "admin", action: "document.uploaded", resourceType: "document", resourceId: documentId, resourceLabel: document.filename, requestId: getRequestId(request), metadata: { clientId: id, contentType: file.type, size: file.size } });
       return NextResponse.json({ document: { _id: document._id, filename: document.filename, description: document.description, contentType: document.contentType, size: document.size, createdAt: document.createdAt } }, { status: 201 });
     } catch (error) {
       console.error("Document metadata save failed after upload:", error);

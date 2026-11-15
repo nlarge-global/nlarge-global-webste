@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     inquiry.clientId = data.clientId ? new Types.ObjectId(data.clientId) : undefined;
     await inquiry.save();
-    await writeAuditEvent({ actor: "admin", action: data.clientId ? "inquiry.linked" : "inquiry.unlinked", resourceType: "inquiry", resourceId: id, requestId: getRequestId(request), metadata: { clientId: data.clientId } });
+    await writeAuditEvent({ actor: "admin", action: data.clientId ? "inquiry.linked" : "inquiry.unlinked", resourceType: "inquiry", resourceId: id, resourceLabel: inquiry.subject, requestId: getRequestId(request), metadata: { clientId: data.clientId } });
     return NextResponse.json({ message: data.clientId ? "Inquiry linked." : "Inquiry unlinked." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

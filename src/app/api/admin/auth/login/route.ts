@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!valid) return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
 
     const session = await createAdminSession();
-    await writeAuditEvent({ actor: "admin", action: "auth.login", resourceType: "session", requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "auth.login", resourceType: "session", resourceLabel: "Admin session", requestId: getRequestId(request) });
     return NextResponse.json({ message: "Signed in", expiresAt: session.expiresAt.toISOString() });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Enter a valid email and password." }, { status: 400 });

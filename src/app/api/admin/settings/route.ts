@@ -34,7 +34,7 @@ export async function PATCH(request: NextRequest) {
     const data = settingsSchema.parse(await request.json());
     await connectToDatabase();
     const settings = await Settings.findOneAndUpdate({ key: "dashboard" }, { ...data, key: "dashboard" }, { upsert: true, new: true, runValidators: true }).lean();
-    await writeAuditEvent({ actor: "admin", action: "settings.updated", resourceType: "settings", resourceId: "dashboard", requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "settings.updated", resourceType: "settings", resourceId: "dashboard", resourceLabel: "Dashboard settings", requestId: getRequestId(request) });
     return NextResponse.json({ settings });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     await validateCsrfToken(request, session);
     const body = z.object({ password: z.string().min(12).max(200) }).parse(await request.json());
     const hash = await bcrypt.hash(body.password, 12);
-    await writeAuditEvent({ actor: "admin", action: "settings.password_hash_generated", resourceType: "settings", resourceId: "dashboard", requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "settings.password_hash_generated", resourceType: "settings", resourceId: "dashboard", resourceLabel: "Admin password hash", requestId: getRequestId(request) });
     return NextResponse.json({ hash });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

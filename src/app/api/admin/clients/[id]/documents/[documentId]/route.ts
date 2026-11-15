@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const document = await ClientDocument.findOne({ _id: documentId, clientId: id }).lean();
     if (!document) return NextResponse.json({ error: "Document not found." }, { status: 404 });
     const url = await createPrivateObjectUrl(document.objectKey, document.filename, document.contentType);
-    await writeAuditEvent({ actor: "admin", action: "document.accessed", resourceType: "document", resourceId: documentId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "document.accessed", resourceType: "document", resourceId: documentId, resourceLabel: document.filename, requestId: getRequestId(request), metadata: { clientId: id } });
     return NextResponse.json({ url, expiresIn: 300 });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +33,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (!document) return NextResponse.json({ error: "Document not found." }, { status: 404 });
     document.deletedAt = new Date();
     await document.save();
-    await writeAuditEvent({ actor: "admin", action: "document.deleted", resourceType: "document", resourceId: documentId, requestId: getRequestId(request), metadata: { clientId: id } });
+    await writeAuditEvent({ actor: "admin", action: "document.deleted", resourceType: "document", resourceId: documentId, resourceLabel: document.filename, requestId: getRequestId(request), metadata: { clientId: id } });
     return NextResponse.json({ message: "Document archived." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

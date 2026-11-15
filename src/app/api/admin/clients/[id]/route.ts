@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await connectToDatabase();
     const client = await Client.findByIdAndUpdate(id, { ...data, email: data.email || undefined }, { new: true, runValidators: true }).lean();
     if (!client) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "client.updated", resourceType: "client", resourceId: id, requestId: getRequestId(request) });
+    await writeAuditEvent({ actor: "admin", action: "client.updated", resourceType: "client", resourceId: id, resourceLabel: client.name, requestId: getRequestId(request) });
     return NextResponse.json({ client });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,7 +77,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         Inquiry.updateMany({ clientId: id }, { $set: { deletedAt } }),
         Client.updateOne({ _id: id }, { $set: { deletedAt } }),
       ]);
-      await writeAuditEvent({ actor: "admin", action: "client.deleted", resourceType: "client", resourceId: id, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
+      await writeAuditEvent({ actor: "admin", action: "client.deleted", resourceType: "client", resourceId: id, resourceLabel: client.name, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });
       return NextResponse.json({ message: "Client archived." });
     } catch (error) {
       if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -13,6 +13,7 @@ import {
   FiArchive,
   FiFileText,
   FiSettings,
+  FiTarget,
   FiUsers,
   FiMessageSquare,
   FiX,
@@ -39,6 +40,7 @@ type AdminNavItem = {
 const navigation: AdminNavItem[] = [
   { label: "Overview", href: "/admin/overview", icon: FiBarChart2 },
   { label: "Clients", href: "/admin/clients", icon: FiUsers },
+  { label: "Prospects", href: "/admin/prospects", icon: FiTarget },
   { label: "Inquiries", href: "/admin/inquiries", icon: FiMessageSquare },
   { label: "Tasks", href: "/admin/overview/tasks", icon: FiCheckSquare },
   { label: "Audit log", href: "/admin/audit", icon: FiArchive },
@@ -92,6 +94,7 @@ function HeaderBreadcrumbs() {
     secrets: "Secrets",
     documents: "Documents",
     payments: "Payments",
+    prospects: "Prospects",
     inquiries: "Inquiries",
     audit: "Audit log",
     health: "Health",

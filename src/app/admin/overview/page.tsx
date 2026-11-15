@@ -47,7 +47,7 @@ export default async function OverviewPage() {
     AuditEvent.find()
       .sort({ createdAt: -1 })
       .limit(6)
-      .select("action resourceType createdAt")
+      .select("action resourceType resourceLabel createdAt")
       .lean(),
   ]);
   const projectIds = upcomingTasks
@@ -193,6 +193,7 @@ export default async function OverviewPage() {
             {recentActivity.map((event) => (
               <div key={String(event._id)} className="py-3">
                 <p className="text-sm font-medium">{event.action}</p>
+                <p className="mt-1 text-xs text-black/55">{event.resourceLabel || event.resourceType}</p>
                 <p className="mt-1 text-xs text-black/45">
                   {event.resourceType} ·{" "}
                   {new Date(event.createdAt).toLocaleString()}
