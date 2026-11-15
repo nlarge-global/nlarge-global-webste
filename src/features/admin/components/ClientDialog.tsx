@@ -7,6 +7,7 @@ import DialogDraft from "./DialogDraft";
 import { FiEdit3 } from "react-icons/fi";
 import DeleteRowAction from "./DeleteRowAction";
 import { IoCloseSharp } from "react-icons/io5";
+import { useDialogEscape } from "./useDialogEscape";
 
 const ClientForm = dynamic(() => import("./ClientForm"), {
   ssr: false,
@@ -48,6 +49,7 @@ export default function ClientDialog({
     setOpen(false);
     setDirty(false);
   }
+  const dialogRef = useDialogEscape(open, close);
 
   return (
     <>
@@ -71,6 +73,7 @@ export default function ClientDialog({
       </div>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
           role="dialog"
           aria-modal="true"

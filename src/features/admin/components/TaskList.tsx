@@ -8,6 +8,7 @@ import TaskDialog from "./TaskDialog";
 import TaskStatusSelect from "./TaskStatusSelect";
 import { Button } from "./ui/Button";
 import type { TaskRecord } from "./TaskForm";
+import { useDialogEscape } from "./useDialogEscape";
 
 type Task = TaskRecord;
 type TaskChanges = Pick<Task, "title" | "priority"> & {
@@ -186,6 +187,7 @@ function TaskEditDialog({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const dialogRef = useDialogEscape(open, () => setOpen(false), pending);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -216,6 +218,7 @@ function TaskEditDialog({
       </Button>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
           role="dialog"
           aria-modal="true"

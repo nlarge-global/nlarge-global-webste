@@ -9,6 +9,7 @@ import {
 } from "react";
 import { FiCheck, FiTrash2, FiX } from "react-icons/fi";
 import { Button } from "./ui/Button";
+import { useDialogEscape } from "./useDialogEscape";
 
 const HOLD_MS = 1600;
 
@@ -28,6 +29,10 @@ export default function DeleteConfirmationDialog({
   const [error, setError] = useState("");
   const onConfirmRef = useRef(onConfirm);
   onConfirmRef.current = onConfirm;
+  const dialogRef = useDialogEscape(open, () => {
+    setHolding(false);
+    setOpen(false);
+  }, confirming);
 
   useEffect(() => {
     if (!holding) return;
@@ -76,6 +81,7 @@ export default function DeleteConfirmationDialog({
       </Button>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-[60] grid place-items-center bg-black/45 p-4"
           role="dialog"
           aria-modal="true"
@@ -91,15 +97,16 @@ export default function DeleteConfirmationDialog({
                   {description}
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
-                className="rounded-lg p-2 text-black/50 hover:bg-black/5"
+                variant="ghost"
+                size="icon"
                 aria-label="Close delete confirmation"
                 disabled={confirming}
                 onClick={() => setOpen(false)}
               >
                 <FiX aria-hidden="true" />
-              </button>
+              </Button>
             </div>
             {error && (
               <p role="alert" className="mt-4 text-sm text-red-700">

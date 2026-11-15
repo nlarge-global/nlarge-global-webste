@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/Button";
 import { Select } from "@/components/ui/select";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+import { useDialogEscape } from "./useDialogEscape";
 
 type Payment = { _id: string; amount: number; currency: string; method: string; status: string; milestone?: string; paidAt?: string };
 const pageSize = 10;
@@ -58,7 +59,8 @@ export default function PaymentManager({ clientId, projectId }: { clientId: stri
 
 function PaymentCreateDialog({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
   const [open, setOpen] = useState(false);
-  return <><Button type="button" onClick={() => setOpen(true)}>Add payment</Button>{open && <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="add-payment-title"><form onSubmit={(event) => { onSubmit(event); setOpen(false); }} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 id="add-payment-title" className="text-xl font-semibold">Add payment</h2>
+  const dialogRef = useDialogEscape(open, () => setOpen(false));
+  return <><Button type="button" onClick={() => setOpen(true)}>Add payment</Button>{open && <div ref={dialogRef} className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="add-payment-title"><form onSubmit={(event) => { onSubmit(event); setOpen(false); }} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 id="add-payment-title" className="text-xl font-semibold">Add payment</h2>
         <label className="text-sm font-medium">Amount<input name="amount" type="number" min="0.01" step="0.01" required className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label>
         <label className="text-sm font-medium">Currency<Select name="currency" defaultValue="INR"><option>INR</option><option>USD</option><option>EUR</option><option>GBP</option></Select></label>
         <label className="text-sm font-medium">Method<Select name="method" defaultValue="bank-transfer"><option value="bank-transfer">Bank transfer</option><option value="card">Card</option><option value="cash">Cash</option><option value="other">Other</option></Select></label>
@@ -71,6 +73,7 @@ function PaymentCreateDialog({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFor
 }
 
 function PaymentEditDialog({ payment, clientId, onClose, onSaved }: { payment: Payment; clientId: string; onClose: () => void; onSaved: () => void }) {
+  const dialogRef = useDialogEscape(true, onClose);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -78,5 +81,5 @@ function PaymentEditDialog({ payment, clientId, onClose, onSaved }: { payment: P
     const response = await fetch(`/api/admin/clients/${clientId}/payments/${payment._id}`, { method: "PATCH", headers: { "Content-Type": "application/json", ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}) }, body: JSON.stringify(data) });
     if (response.ok) onSaved();
   }
-  return <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true"><form onSubmit={submit} className="w-full max-w-lg rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 className="text-xl font-semibold">Edit payment</h2><input name="amount" type="number" step="0.01" required defaultValue={payment.amount} className="mt-4 min-h-11 w-full rounded-xl border border-black/15 px-3" /><select name="currency" defaultValue={payment.currency} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option>INR</option><option>USD</option><option>EUR</option><option>GBP</option></select><select name="method" defaultValue={payment.method} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option value="bank-transfer">Bank transfer</option><option value="card">Card</option><option value="cash">Cash</option><option value="other">Other</option></select><select name="status" defaultValue={payment.status} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option>pending</option><option>paid</option><option>partial</option><option>overdue</option><option>cancelled</option></select><div className="mt-4 flex justify-end gap-2"><Button type="button" variant="outline" onClick={onClose}>Cancel</Button><Button type="submit">Save changes</Button></div></form></div>;
+  return <div ref={dialogRef} className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true"><form onSubmit={submit} className="w-full max-w-lg rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 className="text-xl font-semibold">Edit payment</h2><input name="amount" type="number" step="0.01" required defaultValue={payment.amount} className="mt-4 min-h-11 w-full rounded-xl border border-black/15 px-3" /><select name="currency" defaultValue={payment.currency} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option>INR</option><option>USD</option><option>EUR</option><option>GBP</option></select><select name="method" defaultValue={payment.method} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option value="bank-transfer">Bank transfer</option><option value="card">Card</option><option value="cash">Cash</option><option value="other">Other</option></select><select name="status" defaultValue={payment.status} className="mt-3 min-h-11 w-full rounded-xl border border-black/15 px-3"><option>pending</option><option>paid</option><option>partial</option><option>overdue</option><option>cancelled</option></select><div className="mt-4 flex justify-end gap-2"><Button type="button" variant="outline" onClick={onClose}>Cancel</Button><Button type="submit">Save changes</Button></div></form></div>;
 }

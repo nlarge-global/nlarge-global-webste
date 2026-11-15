@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "./ui/Button";
 import DialogDraft from "./DialogDraft";
 import { FiEdit3, FiX } from "react-icons/fi";
+import { useDialogEscape } from "./useDialogEscape";
 
 const ProjectForm = dynamic(() => import("./ProjectForm"), {
   ssr: false,
@@ -47,6 +48,7 @@ export default function ProjectDialog({
     setOpen(false);
     setDirty(false);
   };
+  const dialogRef = useDialogEscape(open, close);
   return (
     <>
       <Button
@@ -59,6 +61,7 @@ export default function ProjectDialog({
       </Button>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
           role="dialog"
           aria-modal="true"

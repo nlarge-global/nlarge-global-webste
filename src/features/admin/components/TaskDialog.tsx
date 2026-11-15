@@ -7,6 +7,7 @@ import { Button } from "./ui/Button";
 import DialogDraft from "./DialogDraft";
 import { IoCloseSharp } from "react-icons/io5";
 import type { TaskRecord } from "./TaskForm";
+import { useDialogEscape } from "./useDialogEscape";
 
 const TaskForm = dynamic(() => import("./TaskForm"), {
   ssr: false,
@@ -32,6 +33,7 @@ export default function TaskDialog({
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const dialogRef = useDialogEscape(open, () => setOpen(false));
   return (
     <>
       <Button type="button" onClick={() => setOpen(true)} size="sm">
@@ -39,6 +41,7 @@ export default function TaskDialog({
       </Button>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-2"
           role="dialog"
           aria-modal="true"

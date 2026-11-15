@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "./ui/Button";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+import { useDialogEscape } from "./useDialogEscape";
 
 type DocumentRecord = { _id: string; filename: string; description?: string; contentType: string; size: number; createdAt: string };
 const pageSize = 10;
@@ -69,7 +70,8 @@ export default function DocumentManager({ clientId, projectId }: { clientId: str
 
 function DocumentUploadDialog({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
   const [open, setOpen] = useState(false);
-  return <><Button type="button" className="mt-5" onClick={() => setOpen(true)}>Upload document</Button>{open && <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="upload-document-title"><form onSubmit={(event) => { onSubmit(event); setOpen(false); }} className="w-full max-w-lg rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 id="upload-document-title" className="text-xl font-semibold">Upload document</h2><label className="mt-4 block text-sm font-medium">Filename<input name="filename" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label><label className="mt-3 block text-sm font-medium">File<input name="file" type="file" accept=".pdf,image/png,image/jpeg" required className="mt-2 block min-h-11 w-full rounded-xl border border-black/15 p-2 text-sm" /></label><label className="mt-3 block text-sm font-medium">Description<textarea name="description" rows={2} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label><div className="mt-5 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit">Upload</Button></div></form></div>}</>;
+  const dialogRef = useDialogEscape(open, () => setOpen(false));
+  return <><Button type="button" className="mt-5" onClick={() => setOpen(true)}>Upload document</Button>{open && <div ref={dialogRef} className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="upload-document-title"><form onSubmit={(event) => { onSubmit(event); setOpen(false); }} className="w-full max-w-lg rounded-2xl bg-[#fffdfb] p-5 shadow-2xl"><h2 id="upload-document-title" className="text-xl font-semibold">Upload document</h2><label className="mt-4 block text-sm font-medium">Filename<input name="filename" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 px-3" /></label><label className="mt-3 block text-sm font-medium">File<input name="file" type="file" accept=".pdf,image/png,image/jpeg" required className="mt-2 block min-h-11 w-full rounded-xl border border-black/15 p-2 text-sm" /></label><label className="mt-3 block text-sm font-medium">Description<textarea name="description" rows={2} className="mt-2 w-full rounded-xl border border-black/15 p-3" /></label><div className="mt-5 flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit">Upload</Button></div></form></div>}</>;
 }
 
 function DocumentRow({ document, onOpen, onDelete }: { document: DocumentRecord; onOpen: () => void; onDelete: () => void }) {
