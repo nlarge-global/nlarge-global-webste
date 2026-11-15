@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { FiActivity, FiDownload, FiSettings, FiShield } from "react-icons/fi";
 import { AuditEvent } from "@/features/admin/models/audit-event";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
@@ -56,15 +56,17 @@ export default async function AdminSectionPage({
     ]);
     return (
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">
-          Admin
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
-          Audit log
-        </h1>
-        <p className="mt-2 text-sm text-black/55">
-          Append-only records of authenticated and public operations.
-        </p>
+        <header className="mb-6 flex items-start gap-3 border-b border-black/10 pb-6">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#602329]/10 text-[#602329]">
+            <FiShield aria-hidden="true" className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Audit log</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
+              Append-only records of authenticated and public operations.
+            </p>
+          </div>
+        </header>
         <Card className="mt-6 overflow-hidden">
           <Table>
             <TableHeader><TableRow><TableHead>Action</TableHead><TableHead>Resource</TableHead><TableHead className="text-right">Time</TableHead></TableRow></TableHeader>
@@ -83,12 +85,6 @@ export default async function AdminSectionPage({
           </Table>
         </Card>
         <Pagination page={pageNumber} total={total} pageSize={pageSize} basePath="/admin/audit" />
-        <Link
-          href="/admin/overview"
-          className="mt-5 inline-block text-sm font-semibold text-[#602329]"
-        >
-          Back to overview
-        </Link>
       </div>
     );
   }
@@ -97,15 +93,17 @@ export default async function AdminSectionPage({
     const checks = await getHealthChecks();
     return (
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">
-          Admin
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
-          Health
-        </h1>
-        <p className="mt-2 text-sm text-black/55">
-          Safe service summaries for the private workspace.
-        </p>
+        <header className="mb-6 flex items-start gap-3 border-b border-black/10 pb-6">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#602329]/10 text-[#602329]">
+            <FiActivity aria-hidden="true" className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Health</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
+              Safe service summaries for the private workspace.
+            </p>
+          </div>
+        </header>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {Object.entries(checks).map(([name, check]) => (
             <Card
@@ -134,16 +132,18 @@ export default async function AdminSectionPage({
     const env = getServerEnv();
     return (
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#602329]">
-          Admin
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
-          Settings
-        </h1>
-        <p className="mt-2 text-sm text-black/55">
-          Preferences affect dashboard display and reply defaults only.
-        </p>
-        <div className="mt-6">
+        <header className="mb-6 flex items-start gap-3 border-b border-black/10 pb-6">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#602329]/10 text-[#602329]">
+            <FiSettings aria-hidden="true" className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Settings</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
+              Preferences affect dashboard display and reply defaults only.
+            </p>
+          </div>
+        </header>
+        <div>
           <SettingsForm
             initial={{
               displayName:
@@ -170,11 +170,24 @@ export default async function AdminSectionPage({
     .sort({ name: 1 })
     .lean();
   return (
-    <ExportManager
-      clients={clients.map((client) => ({
-        _id: String(client._id),
-        name: client.name,
-      }))}
-    />
+    <div>
+      <header className="mb-6 flex items-start gap-3 border-b border-black/10 pb-6">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#602329]/10 text-[#602329]">
+          <FiDownload aria-hidden="true" className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Client exports</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
+            Prepare authenticated client handover packages.
+          </p>
+        </div>
+      </header>
+      <ExportManager
+        clients={clients.map((client) => ({
+          _id: String(client._id),
+          name: client.name,
+        }))}
+      />
+    </div>
   );
 }

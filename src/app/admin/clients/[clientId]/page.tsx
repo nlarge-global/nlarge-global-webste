@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { FiBriefcase } from "react-icons/fi";
+import { FiArrowUpRight, FiBriefcase, FiMail } from "react-icons/fi";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import ClientDialog from "@/features/admin/components/ClientDialog";
 import { Client } from "@/features/admin/models/client";
@@ -44,13 +44,35 @@ export default async function ClientDetailPage({
   );
   return (
     <div>
-      <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em]">
-        {client.name}
-      </h1>
-      <p className="mt-2 text-sm text-black/55">
-        Manage this client’s projects and related operational records.
-      </p>
-      <div className="mt-4">
+      <header className="flex flex-col gap-5 border-b border-black/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="max-w-4xl break-words text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl">
+            {client.name}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
+            Manage this client’s projects and related operational records.
+          </p>
+          {(client.company || client.email) && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-black/65">
+              {client.company && (
+                <span className="inline-flex items-center gap-2">
+                  <FiBriefcase aria-hidden="true" className="size-4 text-[#602329]" />
+                  {client.company}
+                </span>
+              )}
+              {client.email && (
+                <a
+                  href={`mailto:${client.email}`}
+                  className="inline-flex items-center gap-2 underline-offset-4 hover:text-[#602329] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#602329]"
+                >
+                  <FiMail aria-hidden="true" className="size-4 text-[#602329]" />
+                  {client.email}
+                  <FiArrowUpRight aria-hidden="true" className="size-3.5" />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
         <ClientDialog
           client={{
             ...client,
@@ -62,7 +84,7 @@ export default async function ClientDetailPage({
           }}
           redirectTo="/admin/clients"
         />
-      </div>
+      </header>
       <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold">Projects</h2>

@@ -10,7 +10,9 @@ import { Button } from "./ui/Button";
 import type { TaskRecord } from "./TaskForm";
 
 type Task = TaskRecord;
-type TaskChanges = Pick<Task, "title" | "priority"> & { dueDate?: string | null };
+type TaskChanges = Pick<Task, "title" | "priority"> & {
+  dueDate?: string | null;
+};
 
 export default function TaskList({
   projectId,
@@ -25,18 +27,18 @@ export default function TaskList({
 
   useEffect(() => setTasks(initialTasks), [initialTasks]);
 
-  const updateTask = useCallback(
-    (taskId: string, changes: Partial<Task>) => {
-      setTasks((current) =>
-        current.map((task) => (task._id === taskId ? { ...task, ...changes } : task)),
-      );
-    },
-    [],
-  );
+  const updateTask = useCallback((taskId: string, changes: Partial<Task>) => {
+    setTasks((current) =>
+      current.map((task) =>
+        task._id === taskId ? { ...task, ...changes } : task,
+      ),
+    );
+  }, []);
 
   async function saveTask(taskId: string, changes: TaskChanges) {
     const previous = tasks.find((task) => task._id === taskId);
-    if (!previous) return "This task is no longer available. Refresh and try again.";
+    if (!previous)
+      return "This task is no longer available. Refresh and try again.";
     updateTask(taskId, changes);
     try {
       const csrfToken = document.cookie
@@ -47,7 +49,9 @@ export default function TaskList({
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}),
+          ...(csrfToken
+            ? { "x-csrf-token": decodeURIComponent(csrfToken) }
+            : {}),
         },
         body: JSON.stringify({ taskId, ...changes }),
       });
@@ -79,11 +83,14 @@ export default function TaskList({
           method: "DELETE",
           headers: {
             "x-confirm-delete": taskId,
-            ...(csrfToken ? { "x-csrf-token": decodeURIComponent(csrfToken) } : {}),
+            ...(csrfToken
+              ? { "x-csrf-token": decodeURIComponent(csrfToken) }
+              : {}),
           },
         });
         const result = (await response.json()) as { error?: string };
-        if (!response.ok) throw new Error(result.error ?? "Unable to archive task.");
+        if (!response.ok)
+          throw new Error(result.error ?? "Unable to archive task.");
         setTasks((current) => current.filter((task) => task._id !== taskId));
         router.refresh();
       } catch (error) {
@@ -110,14 +117,18 @@ export default function TaskList({
         <h2 className="font-semibold">Tasks</h2>
         <TaskDialog
           projectId={projectId}
-          onOptimisticCreate={(task) => setTasks((current) => [task, ...current])}
+          onOptimisticCreate={(task) =>
+            setTasks((current) => [task, ...current])
+          }
           onCreated={(temporaryId, task) =>
             setTasks((current) =>
               current.map((item) => (item._id === temporaryId ? task : item)),
             )
           }
           onCreateFailed={(temporaryId) =>
-            setTasks((current) => current.filter((task) => task._id !== temporaryId))
+            setTasks((current) =>
+              current.filter((task) => task._id !== temporaryId),
+            )
           }
         />
       </div>
@@ -146,7 +157,9 @@ export default function TaskList({
                 <TaskStatusSelect
                   taskId={task._id}
                   status={task.status}
-                  onOptimisticChange={(status) => void updateTask(task._id, { status })}
+                  onOptimisticChange={(status) =>
+                    void updateTask(task._id, { status })
+                  }
                 />
                 <TaskEditDialog task={task} onSave={saveTask} />
                 <DeleteConfirmationDialog

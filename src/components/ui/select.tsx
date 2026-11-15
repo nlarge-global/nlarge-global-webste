@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 
 const Select = React.forwardRef<HTMLSelectElement, React.ComponentProps<"select">>(
   ({ className, children, ...props }, ref) => (
-    <span className="relative mt-2 block">
+    <span className="relative block">
       <select
         ref={ref}
         className={cn(

@@ -28,9 +28,12 @@ export default function AdminRecordsPage({
   return (
     <div>
       <AdminBreadcrumbs current={title} />
-      <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{title}</h1>
+      <header className="border-b border-black/10 pb-6">
+        <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">{description}</p>
+      </header>
       <Card className="mt-6 overflow-hidden">
-        <CardHeader><CardTitle>{title}</CardTitle><CardDescription>{description}</CardDescription></CardHeader>
+        <CardHeader><CardTitle>All {title.toLowerCase()}</CardTitle><CardDescription>Browse, open, or archive records.</CardDescription></CardHeader>
         {rows.length === 0 ? (
           <CardContent><p className="text-sm text-black/50">No {title.toLowerCase()} found.</p></CardContent>
         ) : (
