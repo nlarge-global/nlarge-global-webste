@@ -1,24 +1,63 @@
+import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import ProductsSection from "@/components/sections/ProductsSection";
 import { safeJsonLd } from "@/lib/structured-data";
+import { organizationId, siteUrl, socialPreviewImage } from "@/lib/site";
+import products from "@/content/products.json";
 
-export const metadata = {
-  title: "Products",
-  description: "Discover our sophisticated software solutions including Pravli restaurant management system and upcoming innovations.",
+export const metadata: Metadata = {
+  title: "Restaurant, School & Vending Software",
+  description:
+    "Ready-made restaurant management software, a school website platform and vending machine software. Includes source code; hosting is separate.",
+  keywords: [
+    "restaurant management software",
+    "restaurant POS software",
+    "school website platform",
+    "school website software",
+    "vending machine inventory management software",
+    "ready-made business software",
+    "software with source code",
+  ],
   alternates: { canonical: "/products" },
+  openGraph: {
+    title: "Restaurant, School & Vending Software | NLarge Global",
+    description:
+      "Ready-made restaurant management, school website and vending machine software, with source-code handover and separately scoped setup.",
+    url: "/products",
+    siteName: "NLarge Global",
+    type: "website",
+    images: [socialPreviewImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Restaurant, School & Vending Software | NLarge Global",
+    description:
+      "Ready-made restaurant management, school website and vending machine software, with source-code handover and separately scoped setup.",
+    images: [socialPreviewImage.url],
+  },
 };
 
 export default function ProductsPage() {
   const productsSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "NLarge Global software products",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, item: { "@type": "SoftwareApplication", name: "Pravli", applicationCategory: "BusinessApplication", description: "Restaurant management software for orders, tables, billing, inventory and operations." } },
-      { "@type": "ListItem", position: 2, item: { "@type": "SoftwareApplication", name: "School digital platform", applicationCategory: "BusinessApplication", description: "A school website for admissions, notices, programs, staff and parent communication." } },
-      { "@type": "ListItem", position: 3, item: { "@type": "SoftwareApplication", name: "VendFlow", applicationCategory: "BusinessApplication", description: "Vending machine management software for inventory, payments, maintenance and sales insights." } },
-    ],
+    name: "Ready-made software by NLarge Global",
+    url: `${siteUrl}/products`,
+    itemListElement: products.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "SoftwareApplication",
+        "@id": `${siteUrl}/products#${product.slug}`,
+        name: product.name,
+        url: `${siteUrl}/products#${product.slug}`,
+        applicationCategory: "BusinessApplication",
+        applicationSubCategory: product.category,
+        description: product.description,
+        provider: { "@id": organizationId },
+      },
+    })),
   };
 
   return (
@@ -32,5 +71,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-
-

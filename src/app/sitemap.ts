@@ -1,36 +1,25 @@
 import type { MetadataRoute } from "next";
+import { guides } from "@/content/guides";
+import { siteUrl } from "@/lib/site";
 
-/**
- * Public route index.
- *
- * Update the contribution date when the page's public content changes, not when
- * only internal code (API routes, tests, schema, or layout) changes.
- *
- * - Homepage: services also updated.
- * - Services: planned improvements are published.
- * - Products: catalog changes are published.
- * - Contact, support, privacy-policy, terms-of-service: legal or contact-page content updates.
- */
-// Update the contribution date when the page's public content changes, not when
-// only internal code (API routes, tests, schema, or layout) changes.
-const lastModified = {
-  "/": "2026-11-15",
-  "/services": "2026-11-15",
-  "/products": "2026-11-15",
-  "/contact": "2026-11-15",
-  "/support": "2026-11-15",
-  "/privacy-policy": "2026-11-15",
-  "/terms-of-service": "2026-11-15",
-};
+const routes: { path: string; lastModified?: string }[] = [
+  { path: "/", lastModified: "2026-11-16" },
+  { path: "/services", lastModified: "2026-11-16" },
+  { path: "/products", lastModified: "2026-11-16" },
+  { path: "/contact", lastModified: "2026-11-16" },
+  { path: "/support", lastModified: "2026-11-16" },
+  { path: "/privacy-policy", lastModified: "2026-11-15" },
+  { path: "/terms-of-service", lastModified: "2026-11-15" },
+  { path: "/guides", lastModified: "2026-11-16" },
+  ...guides.map((guide) => ({
+    path: `/guides/${guide.slug}`,
+    lastModified: guide.lastModified,
+  })),
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://nlargecorp.com";
-  return (
-    Object.entries(lastModified).map(([path, date]) => ({
-      url: `${baseUrl}${path}`,
-      lastModified: new Date(date),
-      changeFrequency: path === "/" ? "weekly" : "monthly",
-      priority: path === "/" ? 1 : 0.8,
-    }))
-  );
+  return routes.map(({ path, lastModified }) => ({
+    url: `${siteUrl}${path}`,
+    ...(lastModified ? { lastModified: new Date(lastModified) } : {}),
+  }));
 }

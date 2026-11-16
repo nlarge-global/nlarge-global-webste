@@ -11,6 +11,7 @@ import { contactSchema, type ContactFormData } from "@/features/contact/schemas/
 
 
 const queryTypes = [
+  { value: "business", label: "Discuss a project", email: "info@nlargecorp.com" },
   { value: "general", label: "General inquiry", email: "info@nlargecorp.com" },
   { value: "support", label: "Technical support", email: "support@nlargecorp.com" },
 ];
@@ -54,7 +55,7 @@ export default function ContactForm() {
               <div>
                 <h1 className="max-w-[8ch] text-[clamp(4rem,9vw,8rem)] leading-[0.84] tracking-[-0.055em]">Let’s build what’s next.</h1>
                 <p className="mt-7 max-w-md text-lg leading-8 text-white/70">
-                  Tell us where you are, where you want to go, and what needs to change.
+                  Tell us what you want to build, improve or maintain. We work with small businesses, founders and individuals in India and worldwide.
                 </p>
               </div>
               <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">

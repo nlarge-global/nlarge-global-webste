@@ -33,22 +33,9 @@ export default function TestimonialsSection() {
   }, [paused, reducedMotion]);
 
   const testimonial = testimonials[active];
-  const testimonialSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "NLarge Global",
-    aggregateRating: { "@type": "AggregateRating", ratingValue: "5", reviewCount: testimonials.length },
-    review: testimonials.map((item) => ({
-      "@type": "Review",
-      author: { "@type": "Person", name: item.name },
-      reviewRating: { "@type": "Rating", ratingValue: item.stars, bestRating: 5 },
-      reviewBody: item.description,
-    })),
-  };
 
   return (
     <section aria-labelledby="testimonials-title" className="flex min-h-fit sm:min-h-full  w-full items-center justify-center ">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(testimonialSchema).replace(/</g, "\\u003c") }} />
       <div className="testimonial-layout relative min-h-fit w-full overflow-visible sm:min-h-[46rem]">
         <div className="side-portraits side-portraits-left" aria-hidden="true">
           {sidePortraits.map((src, index) => (
@@ -60,6 +47,7 @@ export default function TestimonialsSection() {
         <div className="testimonial-content relative z-10 mx-auto flex min-h-[24rem] w-full max-w-3xl flex-col items-center justify-center px-4 py-16 text-center sm:min-h-[46rem] sm:px-4">
           <div className="mb-5 flex items-center flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/60">Our People</p>
+            <p className="sr-only">Client testimonials</p>
             <span className="flex items-center gap-3">
               <span className="h-px w-16 overflow-hidden bg-black/15" aria-hidden="true">
                 <span key={active} className={`testimonial-progress block h-full origin-left bg-[#602329]${paused ? " is-paused" : ""}`} />
@@ -70,7 +58,10 @@ export default function TestimonialsSection() {
             </span>
           </div>
           <h2 id="testimonials-title" className="text-[clamp(2.7rem,5vw,4.8rem)] leading-[0.92] tracking-[-0.05em]">
-            Why Trust Us?<br />Because Others Do.
+            Why Trust Us?<br /> Because Others Do.
+          </h2>
+          <h2 id="testimonials-title" className="text-[clamp(2.7rem,5vw,4.8rem)] leading-[0.92] tracking-[-0.05em] sr-only">
+            What clients say<br />about working with us.
           </h2>
           <figure className="mt-7 w-full">
             <blockquote>

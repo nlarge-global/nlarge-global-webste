@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "pravli",
+    "name": "Pravli",
+    "category": "Restaurant management",
+    "description": "Restaurant management and POS software for day-to-day operations, including orders, tables, billing, inventory, reporting and analytics.",
+    "detail": "Operations · POS · Reporting · Inventory · Analytics · Dashboard"
+  },
+  {
+    "slug": "school-digital-platform",
+    "name": "School digital platform",
+    "category": "Education website",
+    "description": "A ready-made school website for admissions information, notices, programs, staff profiles and parent communication.",
+    "detail": "Admissions · Gallery · Announcements · Staff · Admin Dashboard · Email Notifications"
+  },
+  {
+    "slug": "vendflow",
+    "name": "VendFlow",
+    "category": "Vending machine software",
+    "description": "Vending machine inventory management software for machine stock, payment tracking, maintenance and sales insights.",
+    "detail": "Machines · Payments · Analytics · Maintenance · Sales Insights"
+  }
+]

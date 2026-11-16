@@ -50,7 +50,7 @@ export default function Footer() {
                 <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
-              Bengaluru, India
+              Based in Rajasthan · Serving clients worldwide
             </p>
             <p className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-black/60">
               Build · Improve · Own
@@ -86,6 +86,9 @@ export default function Footer() {
                 className=" text-base hover:text-[#602329]"
               >
                 Products
+              </Link>
+              <Link href="/guides" className="text-base hover:text-[#602329]">
+                Guides
               </Link>
               <Link href="/contact" className="text-base hover:text-[#602329]">
                 Contact

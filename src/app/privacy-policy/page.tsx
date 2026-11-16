@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
+import { socialPreviewImage } from "@/lib/site";
 
 /**
  * Legal page version record.
@@ -17,8 +18,31 @@ import Navigation from "@/components/layout/Navigation";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "What information NLarge Global collects, why we use it, how long we keep it, and how to request access or deletion.",
+    "Privacy information for NLarge Global website enquiries and project work, including what we collect, retention, and how to request access, correction or deletion.",
+  keywords: [
+    "NLarge Global privacy policy",
+    "personal data access request",
+    "personal data correction",
+    "personal data deletion",
+    "website enquiry data",
+  ],
   alternates: { canonical: "/privacy-policy" },
+  openGraph: {
+    title: "Privacy Policy | NLarge Global",
+    description:
+      "How NLarge Global handles website enquiries, project information, retention, and requests to access, correct or delete personal information.",
+    url: "/privacy-policy",
+    siteName: "NLarge Global",
+    type: "website",
+    images: [socialPreviewImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy | NLarge Global",
+    description:
+      "How NLarge Global handles website enquiries, project information, retention, and personal-data requests.",
+    images: [socialPreviewImage.url],
+  },
 };
 
 const sectionClass = "space-y-3";

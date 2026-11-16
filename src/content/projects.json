@@ -2,22 +2,15 @@
   {
     "name": "NRI Public School",
     "category": "Education website",
-    "summary": "A modern, responsive website for a school that provides an engaging and informative experience for students, parents, and staff.",
+    "summary": "NLarge Global delivered this live school website for NRI Public School to share information with students, parents, and the school community.",
     "image": "/images/projects/1.png",
     "url": "https://nripublicschool.edu.in"
   },
   {
     "name": "Picture Print",
-    "category": "Image customization",
-    "summary": "Unlock the power of image customization with Picture Print. Download high-quality images and craft stunning PDFs, all in one place. Your creative journey starts here!",
+    "category": "Personal project · Free image and PDF tool",
+    "summary": "A personal project for customizing images and creating downloadable PDFs, available to use for free.",
     "image": "/images/projects/2.png",
     "url": "https://pictureprint.vercel.app/"
-  },
-  {
-    "name": "DRDO Scientist Recruitment Platform",
-    "category": "Secure recruitment and data management system",
-    "summary": "A secure, centralized web platform designed for recruiting scientists and managing applicant and employee data efficiently while supporting confidential organizational workflows.",
-    "image": "/images/projects/3.png",
-    "url": "#"
   }
 ]

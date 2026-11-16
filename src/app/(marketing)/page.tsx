@@ -6,10 +6,30 @@ import ServicesSection from "@/components/sections/ServicesSection";
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowUpRight } from "react-icons/fi";
+import projects from "@/content/projects.json";
+import { safeJsonLd } from "@/lib/structured-data";
+import { organizationId, siteUrl } from "@/lib/site";
 
 export default function HomePage() {
+  const featuredProject = projects[0];
+
   return (
     <div className="w-full bg-white text-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd({
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            "@id": `${siteUrl}/#nri-public-school-project`,
+            name: `${featuredProject.name} website`,
+            description: featuredProject.summary,
+            url: featuredProject.url,
+            image: `${siteUrl}${featuredProject.image}`,
+            creator: { "@id": organizationId },
+          }),
+        }}
+      />
       <Navigation />
       <main id="main-content" tabIndex={-1}>
         <section
@@ -24,13 +44,15 @@ export default function HomePage() {
               <div>
                 <h1
                   id="proof-title"
-                  className="max-w-[9ch] text-[clamp(3.7rem,7vw,7rem)] leading-[0.86] tracking-[-0.055em]"
+                  className="max-w-[10ch] text-[clamp(3.2rem,4.7vw,5rem)] leading-[0.9] tracking-[-0.055em]"
                 >
-                  See the work. Then the people.
+                  Build what's{" "}
+                  <span className="text-[#602329]">next.</span>
                 </h1>
                 <p className="mt-8 max-w-md text-lg leading-8 text-black/65">
-                  Digital products built carefully, improved continuously and
-                  owned after launch.
+                  From a new idea to an existing platform, we build custom
+                  software, websites and apps, then stay involved to improve
+                  and maintain them after launch.
                 </p>
               </div>
               <Link
@@ -38,14 +60,31 @@ export default function HomePage() {
                 className="w-fit flex gap-2 group border-b border-[#602329] pb-2 text-sm font-semibold text-[#602329]"
               >
                 Explore our capabilities
-                <FiArrowUpRight className="relative text-xl group-hover:rotate-45 transition" aria-hidden="true" />
+                <FiArrowUpRight
+                  className="relative text-xl group-hover:rotate-45 transition"
+                  aria-hidden="true"
+                />
               </Link>
             </div>
             <ProjectShowcase />
           </div>
         </section>
 
-        {/* Trust follows proof, using real team photography and working testimonial controls. */}
+        <section className="border-y border-black/10 bg-[#f7f5f1] px-5 py-14 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+          <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+            <p className="text-xl leading-8 text-black sm:text-2xl sm:leading-9">
+              Based in Rajasthan, India, NLarge Global helps small businesses,
+              founders and individuals across India and worldwide build custom
+              software, business websites and mobile apps.
+            </p>
+            <p className="max-w-2xl text-base leading-7 text-black/70">
+              We also improve existing products with bug fixes, speed
+              improvements, redesigns, new features and integrations, and
+              provide ongoing website maintenance and support after launch.
+            </p>
+          </div>
+        </section>
+
         <TestimonialsSection />
 
         <ServicesSection />
@@ -56,8 +95,8 @@ export default function HomePage() {
         >
           <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-end">
             <div className="flex flex-col">
-              <p className="mb-auto hidden text-[7rem] font-bold  text-[#602329] lg:block">
-                We're NLarge Global
+              <p className="mb-auto hidden text-[7rem] font-bold  text-[#602329] lg:block leading-[1]">
+                We're NLarge Global.
               </p>
               <div>
                 <h2
@@ -66,9 +105,9 @@ export default function HomePage() {
                 >
                   The people stay close.
                 </h2>
-                <p className="mt-5 max-w-md text-base leading-7 text-black/60 lg:hidden">
-                  We are NLarge Global: building useful technology with a
-                  hands-on team that stays close.
+                <p className="mt-5 max-w-lg text-base leading-7 text-black/60">
+                  NLarge Global stays close to the work, from understanding the
+                  need to building and improving the product.
                 </p>
               </div>
             </div>

@@ -25,7 +25,10 @@ src/
 │   ├── (marketing)/              # Marketing pages with transparent route-group URLs
 │   │   ├── page.tsx              # /
 │   │   ├── products/page.tsx     # /products
-│   │   └── services/page.tsx     # /services
+│   │   ├── services/page.tsx     # /services
+│   │   └── guides/               # Practical editorial guides
+│   │       ├── page.tsx          # /guides
+│   │       └── [slug]/page.tsx   # Statically generated guide articles
 │   ├── api/contact/route.ts      # Contact HTTP boundary
 │   ├── contact/page.tsx          # /contact
 │   ├── support/page.tsx          # /support
@@ -84,6 +87,7 @@ src/
 │           ├── AdminTour.tsx
 │           └── HelpTooltip.tsx
 ├── content/
+│   ├── guides.ts
 │   ├── projects.json
 │   └── testimonials.json
 ├── lib/
@@ -110,9 +114,11 @@ src/
 
 | Path | Source | Responsibility |
 |---|---|---|
-| `/` | `src/app/page.tsx` | Marketing proof, showcases, services and team |
-| `/services` | `src/app/services/page.tsx` | Services presentation |
-| `/products` | `src/app/products/page.tsx` | Product presentation |
+| `/` | `src/app/(marketing)/page.tsx` | Marketing proof, showcases, services and team |
+| `/services` | `src/app/(marketing)/services/page.tsx` | Services presentation |
+| `/products` | `src/app/(marketing)/products/page.tsx` | Product presentation |
+| `/guides` | `src/app/(marketing)/guides/page.tsx` | Guide index |
+| `/guides/[slug]` | `src/app/(marketing)/guides/[slug]/page.tsx` | Static guide articles from `src/content/guides.ts` |
 | `/contact` | `src/app/contact/page.tsx` | Contact composition |
 | `/privacy-policy` | `src/app/privacy-policy/page.tsx` | Privacy policy |
 | `/terms-of-service` | `src/app/terms-of-service/page.tsx` | Terms of service |
@@ -130,6 +136,7 @@ src/
 | `/api/admin/prospects/share` | `src/app/api/admin/prospects/share/route.ts` | Installed-PWA share target for links |
 | `/robots.txt` | `src/app/robots.ts` | Search crawler policy |
 | `/sitemap.xml` | `src/app/sitemap.ts` | Public route index |
+| `/og-image.png` | `public/og-image.png` | Shared social preview image |
 
 ## Component graph
 

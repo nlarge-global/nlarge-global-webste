@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { siteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${(process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://nlargecorp.com")}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

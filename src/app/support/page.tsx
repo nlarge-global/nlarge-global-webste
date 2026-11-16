@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
+import { socialPreviewImage } from "@/lib/site";
 
 /**
  * Legal page version record.
@@ -17,22 +18,45 @@ const versionHistory = [
   {
     version: "1.0",
     effective: "15 November 2026",
-    current: true,
+    current: false,
     change: "Initial published version.",
   },
   {
     version: "1.1",
-    effective: "TBD",
-    current: false,
-    change: "TBD",
+    effective: "16 November 2026",
+    current: true,
+    change: "Clarified the available support and privacy request contact channel.",
   },
 ];
 
 export const metadata: Metadata = {
-  title: "Support and Data Requests",
-  description:
-    "Contact NLarge Global for support, privacy questions, or requests to access, correct or delete your information.",
+  title: "Support, Privacy & Data Requests",
+  description: "Contact NLarge Global for website and software project support, privacy or personal-data requests, and security concerns.",
+  keywords: [
+    "website project support",
+    "software support",
+    "website maintenance support",
+    "personal data request",
+    "privacy request",
+    "report a security concern",
+  ],
   alternates: { canonical: "/support" },
+  openGraph: {
+    title: "Support, Privacy & Data Requests | NLarge Global",
+    description:
+      "Contact NLarge Global for project support, privacy and personal-data requests, project credentials, or to report a security concern.",
+    url: "/support",
+    siteName: "NLarge Global",
+    type: "website",
+    images: [socialPreviewImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Support, Privacy & Data Requests | NLarge Global",
+    description:
+      "Contact NLarge Global for project support, privacy and personal-data requests, project credentials, or to report a security concern.",
+    images: [socialPreviewImage.url],
+  },
 };
 
 const sectionClass = "space-y-3";
@@ -91,11 +115,6 @@ export default function SupportPage() {
                 request in full or without delay because of a legal obligation, an
                 active agreement, a dispute or a technical limitation.
               </p>
-              <p>
-                If you would prefer to use a portal, chat or ticket system, you
-                can find it on our website or let us know when you contact us. We
-                will direct you to the method that applies to your request.
-              </p>
             </section>
 
             <section className={sectionClass}>
@@ -151,7 +170,7 @@ export default function SupportPage() {
               <h2 className={headingClass}>How long is information kept?</h2>
               <p className="leading-7">
                 We may update this page when our support process changes. The
-                current version took effect 15 November 2026; if it changes, we
+                current version took effect 16 November 2026; if it changes, we
                 will show the new effective date before that version is live.
               </p>
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
+import { socialPreviewImage } from "@/lib/site";
 
 /**
  * Legal page version record.
@@ -31,8 +32,31 @@ const versionHistory = [
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "Terms governing use of the NLarge Global website and enquiries submitted through it.",
+    "Terms for using the NLarge Global website, submitting project enquiries, and understanding how separate project and product agreements apply.",
+  keywords: [
+    "NLarge Global terms of service",
+    "website terms of use",
+    "software project terms",
+    "ready-made software product terms",
+    "software purchase agreement",
+  ],
   alternates: { canonical: "/terms-of-service" },
+  openGraph: {
+    title: "Terms of Service | NLarge Global",
+    description:
+      "Terms for using the NLarge Global website, submitting project enquiries, and understanding how separate project and product agreements apply.",
+    url: "/terms-of-service",
+    siteName: "NLarge Global",
+    type: "website",
+    images: [socialPreviewImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service | NLarge Global",
+    description:
+      "Terms for using the NLarge Global website and submitting project enquiries.",
+    images: [socialPreviewImage.url],
+  },
 };
 
 const sectionClass = "space-y-3";
