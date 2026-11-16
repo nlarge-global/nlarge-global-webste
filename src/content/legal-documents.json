@@ -79,13 +79,15 @@
             "You may have the right to access, correct, delete, restrict or port personal information we hold about you, and to object to processing where we rely on legitimate interests.",
             [
               {
-                "text": "To exercise these rights, email  "
+                "text": "To exercise these rights, email "
               },
               {
                 "text": "support@nlargecorp.com",
                 "href": "mailto:support@nlargecorp.com"
               },
-              { "text": " with your name, the email address or business associated with the information, and the project or record you are asking about. We may ask for information to verify your identity and locate the relevant records." }
+              { "text": " or submit the " },
+              { "text": "contact form", "href": "/contact" },
+              { "text": " and choose “Privacy or data request.” Form submissions are saved in our Admin dashboard and do not send an email. Include your name, the email address or business associated with the information, and the project or record you are asking about. Do not include passwords, access keys, recovery codes or other secrets. We may ask for information to verify your identity and locate the relevant records." }
             ],
             "After a successful request we will confirm the action, the date it was completed, and, where we did not act immediately, the date we completed it. Where we decline a request, we will explain the legal reason. We will not keep your personal information for longer than the retention periods above after the request is completed, unless we need to keep it to resolve a dispute, defend legal claims, or meet another legal obligation."
           ]

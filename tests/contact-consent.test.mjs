@@ -29,6 +29,7 @@ const inquiry = {
 test("contact requires privacy acknowledgement and defaults marketing off", () => {
   const parsed = contactSchema.parse(inquiry);
   assert.equal(parsed.marketingConsent, false);
+  assert.equal(contactSchema.parse({ ...inquiry, queryType: "privacy" }).queryType, "privacy");
   assert.equal(
     contactSchema.safeParse({ ...inquiry, privacyAcknowledgement: false }).success,
     false,
@@ -39,6 +40,18 @@ test("contact requires privacy acknowledgement and defaults marketing off", () =
   );
 });
 
+test("contact explains minimum subject and message lengths", () => {
+  const shortSubject = contactSchema.safeParse({ ...inquiry, subject: "Hey" });
+  const shortMessage = contactSchema.safeParse({ ...inquiry, message: "Too short" });
+  const missingSubject = contactSchema.safeParse({ ...inquiry, subject: "" });
+  const missingMessage = contactSchema.safeParse({ ...inquiry, message: "" });
+
+  assert.equal(shortSubject.error.issues[0].message, "Subject must be at least 5 characters");
+  assert.equal(shortMessage.error.issues[0].message, "Message must be at least 10 characters");
+  assert.equal(missingSubject.error.issues[0].message, "Add a subject");
+  assert.equal(missingMessage.error.issues[0].message, "Tell us a little more");
+});
+
 test("legal content resolves effective versions and fingerprints the complete archived document", () => {
   const now = new Date("2026-11-18T00:00:00+05:30");
   const privacyPolicy = getCurrentLegalDocument("privacyPolicy", now);
@@ -46,6 +59,9 @@ test("legal content resolves effective versions and fingerprints the complete ar
   assert.equal(privacyPolicy.version, "1.0");
   assert.equal(privacyPolicy.hash, getCurrentLegalDocument("privacyPolicy", now).hash);
   assert.match(privacyPolicy.hash, /^[a-f\d]{64}$/);
+  const rightsSection = privacyPolicy.sections.find((section) => section.title === "Your rights and how long we keep data");
+  assert.ok(rightsSection.paragraphs[1].some((segment) => segment.href === "/contact"));
+  assert.match(rightsSection.paragraphs[1].at(-1).text, /do not send an email/);
   assert.equal(marketingConsent.version, "email-updates-1");
   assert.equal(marketingConsent.withdrawalVersion, "email-updates-withdrawal-1");
   assert.equal(

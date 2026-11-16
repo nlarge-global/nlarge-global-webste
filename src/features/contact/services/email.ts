@@ -4,7 +4,7 @@ import { getServerEnv } from "@/lib/env";
 export type ContactEmailData = {
   name: string;
   email: string;
-  queryType: "general" | "support" | "business" | "careers";
+  queryType: "general" | "support" | "business" | "careers" | "privacy";
   subject: string;
   message: string;
 };
@@ -16,6 +16,7 @@ function getRecipients(): Record<ContactEmailData["queryType"], string> {
     support: env.CONTACT_SUPPORT_EMAIL,
     business: env.CONTACT_GENERAL_EMAIL,
     careers: env.CONTACT_GENERAL_EMAIL,
+    privacy: env.CONTACT_SUPPORT_EMAIL,
   };
 }
 

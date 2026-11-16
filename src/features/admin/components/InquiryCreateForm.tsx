@@ -56,6 +56,7 @@ export default function InquiryCreateForm({ onCreated }: { onCreated: () => void
             <option value="support">Support</option>
             <option value="business">Business</option>
             <option value="careers">Careers</option>
+            <option value="privacy">Privacy or data request</option>
           </Select>
         </label>
         <label className="block text-sm font-medium">Source

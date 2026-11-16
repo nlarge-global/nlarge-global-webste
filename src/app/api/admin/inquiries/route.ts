@@ -8,7 +8,7 @@ import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 const inquirySchema = z.object({
   name: z.string().trim().min(2).max(50),
   email: z.string().trim().email().max(254),
-  queryType: z.enum(["general", "support", "business", "careers"]),
+  queryType: z.enum(["general", "support", "business", "careers", "privacy"]),
   subject: z.string().trim().min(5).max(100).refine((value) => !/[\r\n]/.test(value)),
   message: z.string().trim().min(1).max(1000),
   source: z.enum(["whatsapp", "linkedin", "call", "friend", "personal", "referral", "other"]).default("other"),

@@ -48,7 +48,7 @@ export default function LegalDocumentPage({
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto px-5 pt-28 sm:px-8 lg:px-12 lg:pt-32"
+        className="mx-auto max-w-[92rem] px-5 pt-28 sm:px-8 lg:px-12 lg:pt-32"
       >
         <header className="border-b border-black pb-5">
           <h1 className="mt-5 text-[clamp(4rem,9vw,7.5rem)] leading-[0.86] tracking-[-0.055em]">
@@ -126,7 +126,7 @@ export default function LegalDocumentPage({
           </details>
         </header>
 
-        <div className="grid gap-12 pt-12 lg:grid-cols-[0.25fr_1fr]">
+        <div className="grid gap-12 pt-12 lg:grid-cols-[0.35fr_1fr]">
           <div className="space-y-10 leading-7 lg:sticky lg:top-28 lg:self-start">
             <p className="text-xl font-semibold">{document.summary}</p>
           </div>

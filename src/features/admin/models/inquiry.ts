@@ -5,7 +5,7 @@ import { addSoftDelete } from "./soft-delete";
 export type InquiryDocument = Document & {
   name: string;
   email: string;
-  queryType: "general" | "support" | "business" | "careers";
+  queryType: "general" | "support" | "business" | "careers" | "privacy";
   subject: string;
   message: string;
   privacyAcknowledgement?: {
@@ -39,7 +39,7 @@ export type InquiryDocument = Document & {
 const inquirySchema = new Schema<InquiryDocument>({
   name: { type: String, required: true, trim: true, maxlength: 50 },
   email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
-  queryType: { type: String, enum: ["general", "support", "business", "careers"], required: true },
+  queryType: { type: String, enum: ["general", "support", "business", "careers", "privacy"], required: true },
   subject: { type: String, required: true, trim: true, maxlength: 100 },
   message: { type: String, required: true, trim: true, maxlength: 1000 },
   privacyAcknowledgement: {

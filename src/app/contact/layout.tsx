@@ -4,8 +4,8 @@ import { safeJsonLd } from "@/lib/structured-data";
 import { organizationId, siteUrl, socialPreviewImage } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Discuss a Software Project",
-  description: "Contact NLarge Global about custom software, website or app development, website maintenance, bug fixes, redesigns, or adding features to an existing product.",
+  title: "Contact NLarge Global",
+  description: "Contact NLarge Global about a software project, support question, general enquiry, or privacy and personal-data request.",
   keywords: [
     "contact custom software developer",
     "website maintenance support",
@@ -13,11 +13,12 @@ export const metadata: Metadata = {
     "fix website bugs",
     "add features to an existing app",
     "web application development enquiry",
+    "privacy or personal data request",
   ],
   alternates: { canonical: "/contact" },
   openGraph: {
-    title: "Discuss a Software Project | NLarge Global",
-    description: "Tell NLarge Global about the software, website or app you want to build, improve, redesign or maintain.",
+    title: "Contact NLarge Global",
+    description: "Contact NLarge Global about projects, support, general questions, or privacy and personal-data requests.",
     url: "/contact",
     siteName: "NLarge Global",
     type: "website",
@@ -25,9 +26,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Discuss a Software Project | NLarge Global",
+    title: "Contact NLarge Global",
     description:
-      "Tell NLarge Global about the software, website or app you want to build, improve, redesign or maintain.",
+      "Contact NLarge Global about projects, support, general questions, or privacy and personal-data requests.",
     images: [socialPreviewImage.url],
   },
 };
