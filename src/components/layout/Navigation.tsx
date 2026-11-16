@@ -51,7 +51,7 @@ export default function Navigation() {
         </Link>
         <div className="hidden items-center gap-7 lg:flex">
           <Link href="/services" className="text-sm font-semibold transition-colors hover:text-[#602329]">Services</Link>
-          <Link href="/products" className="text-sm font-semibold transition-colors hover:text-[#602329]">Products</Link>
+          <Link href="/softwares" className="text-sm font-semibold transition-colors hover:text-[#602329]">Softwares</Link>
           <Link href="/guides" className="text-sm font-semibold transition-colors hover:text-[#602329]">Guides</Link>
           <Link href="/contact" className="rounded-full bg-[#602329] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black">Let’s talk</Link>
         </div>
@@ -71,7 +71,7 @@ export default function Navigation() {
         <div id="mobile-navigation" className="mx-auto mt-2 max-w-3xl rounded-[1.5rem] border border-black/10 bg-white px-5 py-6 shadow-[0_12px_40px_rgba(0,0,0,0.10)] lg:hidden">
           <div className="flex flex-col gap-5 text-lg font-semibold">
             <Link href="/services" onClick={closeMenu}>Services</Link>
-            <Link href="/products" onClick={closeMenu}>Products</Link>
+            <Link href="/softwares" onClick={closeMenu}>Softwares</Link>
             <Link href="/guides" onClick={closeMenu}>Guides</Link>
             <Link href="/contact" onClick={closeMenu} className="w-fit rounded-full bg-[#602329] px-5 py-3 text-white">Let’s talk</Link>
           </div>

@@ -4,7 +4,7 @@ import { FiArrowUpRight } from "react-icons/fi";
 const capabilities = [
   {
     name: "Build",
-    text: "Custom software, business platforms, individual solutions and ready-made products shaped around real needs.",
+    text: "Custom software, business platforms, individual solutions and ready-made softwares shaped around real needs.",
     link: "Explore development",
   },
   {

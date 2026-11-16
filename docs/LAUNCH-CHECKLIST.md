@@ -57,7 +57,8 @@ Cloudflare documents these controls in [AI Crawler and Agent access policies](ht
 Run these checks from a terminal or browser after DNS and deployment have settled:
 
 ```bash
-curl -sSIL https://www.nlargecorp.com/products
+curl -sSIL https://www.nlargecorp.com/softwares
+curl -sSIL https://nlargecorp.com/products
 curl -sSIL http://nlargecorp.com/services
 curl -sSIL http://www.nlargecorp.com/guides
 curl -sSI https://nlargecorp.com/og-image.png
@@ -65,7 +66,7 @@ curl -sS https://nlargecorp.com/robots.txt
 curl -sS https://nlargecorp.com/sitemap.xml
 ```
 
-Confirm that the first three URLs finish at the corresponding `https://nlargecorp.com/...` URL, the image returns `200` with `image/png`, robots names the canonical sitemap, and the sitemap contains the four guide URLs. Open the homepage, services, products, all guides, contact, support, and legal pages on desktop and a phone. Submit a real contact enquiry and confirm staff notification and visitor confirmation arrive. Do not use a real customer's sensitive data for this test.
+Confirm the first URL redirects to `/softwares` and the old `/products` URL redirects there permanently; the next two URLs finish at the corresponding `https://nlargecorp.com/...` URL. The image should return `200` with `image/png`, robots should name the canonical sitemap, and the sitemap should contain the four guide URLs and `/softwares`. Open the homepage, services, softwares page, all guides, contact, support, and legal pages on desktop and a phone. Submit a real contact enquiry and confirm staff notification and visitor confirmation arrive. Do not use a real customer's sensitive data for this test.
 
 Check HTTPS/TLS and response security headers on the deployed pages, including HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and Content Security Policy. The app sets these in `next.config.ts`; verify they survive the Cloudflare/Vercel path and that the CSP does not break the form or page. Confirm the admin login and protected admin routes require authentication; `robots.txt` and `noindex` are not access controls.
 
@@ -79,7 +80,7 @@ Do **not** delete or reset existing Search Console properties.
 2. Verify it by adding Google's DNS TXT record at the domain's DNS provider. Preserve existing DNS records.
 3. Keep the existing URL-prefix properties; the Domain property also covers `www`, HTTP, and HTTPS.
 4. Submit `https://nlargecorp.com/sitemap.xml` under the Domain property after the canonical redirects work.
-5. Use URL Inspection on `/`, `/services`, `/products`, `/guides`, and each new guide. Check Google's selected canonical, crawl/index status, and request indexing for the new guides if appropriate.
+5. Use URL Inspection on `/`, `/services`, `/softwares`, `/guides`, and each new guide. Check Google's selected canonical, crawl/index status, and request indexing for the new guides if appropriate.
 6. Review Page indexing, Manual actions, Security issues, and Performance reports periodically. Allow for reporting/indexing delays; submission does not guarantee indexing or rankings.
 
 The supplied six-month Search Console export (May 15–November 14, 2026) reported 9 clicks and 869 impressions. The `nlarge` query accounted for 8 clicks and 705 impressions. The homepage had 6 clicks/473 impressions; `/products` had 3/522; `/services` had 0/2. The report listed the homepage on the apex host but product/service URLs on `www`, reinforcing the need to normalize redirects and canonical URLs. It also showed 513 impressions from the Faroe Islands; do not infer intended market demand from that row alone—review future country/query/page combinations after canonicalization.

@@ -128,6 +128,15 @@ export default async function AdminSectionPage({
               <p className="mt-3 text-sm leading-6 text-black/55">
                 {check.message}
               </p>
+              {check.details && (
+                <pre
+                  aria-label={`${name} error details`}
+                  className="mt-4 max-h-48 overflow-auto rounded-lg bg-slate-950 p-3 font-mono text-xs leading-5 whitespace-pre-wrap break-words text-slate-100"
+                  tabIndex={0}
+                >
+                  <code>{check.details}</code>
+                </pre>
+              )}
             </Card>
           ))}
         </div>

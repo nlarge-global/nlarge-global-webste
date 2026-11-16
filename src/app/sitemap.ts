@@ -7,7 +7,7 @@ import { siteUrl } from "@/lib/site";
 const routes: { path: string; lastModified?: string }[] = [
   { path: "/", lastModified: "2026-11-16" },
   { path: "/services", lastModified: "2026-11-16" },
-  { path: "/products", lastModified: "2026-11-16" },
+  { path: "/softwares", lastModified: "2026-11-17" },
   { path: "/contact", lastModified: "2026-11-16" },
   { path: "/support", lastModified: "2026-11-16" },
   { path: "/guides", lastModified: "2026-11-16" },

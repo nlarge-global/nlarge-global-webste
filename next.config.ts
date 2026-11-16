@@ -8,6 +8,9 @@ const allowedDevOrigins = process.env.DEV_ALLOWED_ORIGINS
 
 const nextConfig: NextConfig = {
   ...(isDevelopment && allowedDevOrigins?.length ? { allowedDevOrigins } : {}),
+  async redirects() {
+    return [{ source: "/products", destination: "/softwares", permanent: true }];
+  },
   async headers() {
     return [{
       source: "/(.*)",

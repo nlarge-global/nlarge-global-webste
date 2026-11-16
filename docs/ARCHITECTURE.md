@@ -24,7 +24,7 @@ src/
 ├── app/
 │   ├── (marketing)/              # Marketing pages with transparent route-group URLs
 │   │   ├── page.tsx              # /
-│   │   ├── products/page.tsx     # /products
+│   │   ├── softwares/page.tsx    # /softwares
 │   │   ├── services/page.tsx     # /services
 │   │   └── guides/               # Practical editorial guides
 │   │       ├── page.tsx          # /guides
@@ -123,7 +123,7 @@ src/
 |---|---|---|
 | `/` | `src/app/(marketing)/page.tsx` | Marketing proof, showcases, services and team |
 | `/services` | `src/app/(marketing)/services/page.tsx` | Services presentation |
-| `/products` | `src/app/(marketing)/products/page.tsx` | Product presentation |
+| `/softwares` | `src/app/(marketing)/softwares/page.tsx` | Ready-made softwares presentation |
 | `/guides` | `src/app/(marketing)/guides/page.tsx` | Guide index |
 | `/guides/[slug]` | `src/app/(marketing)/guides/[slug]/page.tsx` | Static guide articles from `src/content/guides.ts` |
 | `/contact` | `src/app/contact/page.tsx` | Contact composition |
@@ -268,7 +268,7 @@ After creating a fresh MongoDB database, run `npm run seed:admin` to insert link
 - Client documents use private R2 object keys under `clients/{clientId}/documents/...`; uploads validate size, declared type, and file signature, while access uses five-minute signed URLs. Metadata and object deletion are coordinated with orphan cleanup on metadata failure.
 - Payments are client-scoped records with bounded amount/currency/method/status fields and optional references to private proof documents. Payment credentials are not accepted by the schema.
 - Audit events are append-only, indexed by time and resource, and carry a bounded request ID, a sanitized resource-label snapshot, and metadata filtered through an explicit safe-key allowlist. Stable resource IDs remain available for exact tracing; new writes exclude credentials, hashes, contact details, message bodies, and request payloads, and audit readers filter legacy metadata through the same allowlist.
-- Health checks are private and return only configured/ok/error summaries for environment, MongoDB, SMTP, and R2. Public contact submission does not call Health.
+- Health checks are private and return configured/ok/error summaries for environment, MongoDB, SMTP, R2, and Upstash Redis, with error details shown only for failed checks and configured credentials redacted. Partial SMTP, R2, or Upstash configuration is reported as an error with the missing variable names; connection failures include provider details. The Upstash check sends an authenticated `PING` when both REST credentials are configured. Public contact submission does not call Health.
 - Settings are a single dashboard preference record. Password hash generation returns a bcrypt hash once and never persists the plaintext or hash. Password generation, login, and re-auth reject passwords longer than bcrypt's 72-byte input limit.
 - Overview metrics are derived from current collections and do not have a separate collection. New inquiries use `status: new`, while recent inquiries use creation order across statuses; task/payment/secret signals use indexed collection queries.
 - Client exports are created through authenticated `POST /api/admin/exports`, exclude secret values, and optionally include private R2 document contents. ZIPs use random private object keys and short-lived `ExportJob` download tokens; creation is audited, while expired-object cleanup is deferred in `docs/FEATURES-LATER.md`.

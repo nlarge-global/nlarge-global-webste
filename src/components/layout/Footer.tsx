@@ -76,36 +76,36 @@ export default function Footer() {
           >
             <div className="flex sm:flex-col gap-2 sm:gap-3">
               <Link
+                href="/softwares"
+                className=" text-base hover:text-[#602329]"
+              >
+                Softwares
+              </Link>
+              <Link
                 href="/services"
                 className=" text-base hover:text-[#602329]"
               >
                 Services
               </Link>
-              <Link
-                href="/products"
-                className=" text-base hover:text-[#602329]"
-              >
-                Products
+              <Link href="/contact" className="text-base hover:text-[#602329]">
+                Contact
               </Link>
               <Link href="/guides" className="text-base hover:text-[#602329]">
                 Guides
               </Link>
-              <Link href="/contact" className="text-base hover:text-[#602329]">
-                Contact
-              </Link>
             </div>
             <div className="flex sm:flex-col gap-2 sm:gap-3 ">
-              <Link
-                href="/sitemap.xml"
-                className="text-sm text-black/60 hover:text-black"
-              >
-                Sitemap
-              </Link>
               <Link
                 href="/support"
                 className="text-sm text-black/60 hover:text-black"
               >
                 Support
+              </Link>
+              <Link
+                href="/unsubscribe"
+                className="text-sm text-black/60 hover:text-black"
+              >
+                Unsubscribe
               </Link>
               <Link
                 href="/privacy-policy"
@@ -125,12 +125,29 @@ export default function Footer() {
       </div>
 
       <div className="flex flex-col gap-3 pt-5 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} NLarge Global. All rights reserved.</p>
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+          <p>
+            © {new Date().getFullYear()} NLarge Global. All rights reserved.
+          </p>
+          {"|"}
+          <Link
+            href="/sitemap.xml"
+            className="text-xs hover:text-blue-500"
+          >
+            Sitemap
+          </Link>
+        </div>
         <button
           type="button"
           onClick={() => {
             document.getElementById("top")?.focus({ preventScroll: true });
-            window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+            window.scrollTo({
+              top: 0,
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "auto"
+                : "smooth",
+            });
           }}
           className="w-fit cursor-pointer font-semibold text-black hover:text-[#602329]"
         >
