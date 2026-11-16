@@ -3,32 +3,6 @@ import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import { socialPreviewImage } from "@/lib/site";
 
-/**
- * Legal page version record.
- *
- * Replace only by the owner of these documents. Every update must append one
- * entry to the version list below; do not edit existing entries.
- *
- * - current: true marks the active version.
- * - effective: the date this version took legal effect.
- * - change: short summary of what changed in this version.
- */
-// The owner keeps this list. Add a new entry only when a new version becomes active.
-const versionHistory = [
-  {
-    version: "1.0",
-    effective: "15 November 2026",
-    current: false,
-    change: "Initial published version.",
-  },
-  {
-    version: "1.1",
-    effective: "16 November 2026",
-    current: true,
-    change: "Clarified the available support and privacy request contact channel.",
-  },
-];
-
 export const metadata: Metadata = {
   title: "Support, Privacy & Data Requests",
   description: "Contact NLarge Global for website and software project support, privacy or personal-data requests, and security concerns.",
@@ -95,14 +69,6 @@ export default function SupportPage() {
             <section className={sectionClass}>
               <h2 className={headingClass}>Request access, correction or deletion</h2>
               <p>
-                If your website enquiry does not lead to a project, we keep its
-                contact-form information for no longer than 12 months after
-                submission, unless we need it for a legal obligation or dispute.
-                Client and project information is kept, returned or deleted
-                according to the applicable project agreement and legal
-                requirements.
-              </p>
-              <p>
                 To ask us to access, correct or delete personal information, email
                 <a className={linkClass} href="mailto:support@nlargecorp.com?subject=Privacy%20or%20data%20request">
                   support@nlargecorp.com
@@ -168,19 +134,13 @@ export default function SupportPage() {
 
             <section>
               <h2 className={headingClass}>How long is information kept?</h2>
-              <p className="leading-7">
-                We may update this page when our support process changes. The
-                current version took effect 16 November 2026; if it changes, we
-                will show the new effective date before that version is live.
-              </p>
-
               <p>
-                If your website enquiry does not lead to a project, we keep its
-                contact-form information for no longer than 12 months after
-                submission, unless we need it for a legal obligation or dispute.
-                Client and project information is kept, returned or deleted
-                according to the applicable project agreement and legal
-                requirements.
+                Retention depends on the type of information and why we hold it.
+                See the{" "}
+                <a className={linkClass} href="/privacy-policy">
+                  Privacy Policy
+                </a>{" "}
+                for current details.
               </p>
             </section>
 

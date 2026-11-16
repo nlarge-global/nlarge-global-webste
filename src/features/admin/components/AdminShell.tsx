@@ -16,6 +16,7 @@ import {
   FiTarget,
   FiUsers,
   FiMessageSquare,
+  FiMail,
   FiX,
 } from "react-icons/fi";
 import { VscLayoutSidebarRight } from "react-icons/vsc";
@@ -42,6 +43,7 @@ const navigation: AdminNavItem[] = [
   { label: "Clients", href: "/admin/clients", icon: FiUsers },
   { label: "Prospects", href: "/admin/prospects", icon: FiTarget },
   { label: "Inquiries", href: "/admin/inquiries", icon: FiMessageSquare },
+  { label: "Subscribers", href: "/admin/subscribers", icon: FiMail },
   { label: "Tasks", href: "/admin/overview/tasks", icon: FiCheckSquare },
   { label: "Audit log", href: "/admin/audit", icon: FiArchive },
   { label: "Health", href: "/admin/health", icon: FiActivity },
@@ -96,6 +98,7 @@ function HeaderBreadcrumbs() {
     payments: "Payments",
     prospects: "Prospects",
     inquiries: "Inquiries",
+    subscribers: "Subscribers",
     audit: "Audit log",
     health: "Health",
     settings: "Settings",

@@ -3,11 +3,15 @@
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowUpRight } from "react-icons/fi";
 
-import { contactSchema, type ContactFormData } from "@/features/contact/schemas/contact";
+import {
+  contactSchema,
+  type ContactFormData,
+  type ContactFormInput,
+} from "@/features/contact/schemas/contact";
 
 
 const queryTypes = [
@@ -16,25 +20,60 @@ const queryTypes = [
   { value: "support", label: "Technical support", email: "support@nlargecorp.com" },
 ];
 
-export default function ContactForm() {
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+export default function ContactForm({
+  privacyPolicyVersion,
+  privacyPolicyHash,
+  privacyAcknowledgement,
+  marketingConsentText,
+  marketingConsentVersion,
+}: {
+  privacyPolicyVersion: string;
+  privacyPolicyHash: string;
+  privacyAcknowledgement: { text: string; href?: string }[];
+  marketingConsentText: string;
+  marketingConsentVersion: string;
+}) {
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error" | "stale">("idle");
+  const submissionRef = useRef<{ key: string; payload: string } | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ContactFormData>({ resolver: zodResolver(contactSchema), mode: "onBlur" });
+  } = useForm<ContactFormInput, unknown, ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    mode: "onBlur",
+    defaultValues: { marketingConsent: false },
+  });
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("idle");
+    const submission = {
+      ...data,
+      privacyPolicyVersion,
+      privacyPolicyHash,
+      marketingConsentVersion,
+    };
+    const payload = JSON.stringify(submission);
+    if (submissionRef.current?.payload !== payload) {
+      submissionRef.current = { key: crypto.randomUUID(), payload };
+    }
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": submissionRef.current.key,
+        },
+        body: payload,
       });
       const result = await response.json();
+      if (response.status === 409) {
+        setSubmitStatus("stale");
+        return;
+      }
       if (!response.ok) throw new Error(result.error || "Failed to send message");
+      submissionRef.current = null;
       setSubmitStatus("success");
       reset();
     } catch (error) {
@@ -105,23 +144,49 @@ export default function ContactForm() {
                   {errors.message && <p id="message-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.message.message}</p>}
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 space-y-5">
+                  <div>
+                    <label className="flex items-start gap-3 text-sm leading-6 text-black/70">
+                    <input
+                      type="checkbox"
+                      required
+                      className="mt-1 size-4 shrink-0 accent-[#602329]"
+                      aria-invalid={Boolean(errors.privacyAcknowledgement)}
+                      aria-describedby={errors.privacyAcknowledgement ? "privacy-acknowledgement-error" : undefined}
+                      {...register("privacyAcknowledgement")}
+                    />
+                    <span>
+                      {privacyAcknowledgement.map((segment, index) =>
+                        segment.href ? (
+                          <a
+                            key={`${segment.href}-${index}`}
+                            href={segment.href}
+                            className="font-semibold text-[#602329] underline underline-offset-4"
+                          >
+                            {segment.text}
+                          </a>
+                        ) : (
+                          <span key={index}>{segment.text}</span>
+                        ),
+                      )}
+                      <span className="ml-1 text-xs font-semibold uppercase tracking-wide text-[#602329]">Required</span>
+                    </span>
+                    </label>
+                    {errors.privacyAcknowledgement && <p id="privacy-acknowledgement-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.privacyAcknowledgement.message}</p>}
+                    <p className="mt-3 text-sm text-black/60">
+                      Your details are stored so we can respond to your inquiry. See our{" "}
+                      <a href="/terms-of-service" className="font-semibold text-[#602329] underline underline-offset-4">Terms of Service</a>{" "}
+                      and visit <a href="/support" className="font-semibold text-[#602329] underline underline-offset-4">Support</a> to request access, correction or deletion.
+                    </p>
+                  </div>
                   <label className="flex items-start gap-3 text-sm leading-6 text-black/70">
                     <input
                       type="checkbox"
                       className="mt-1 size-4 shrink-0 accent-[#602329]"
-                      aria-invalid={Boolean(errors.consent)}
-                      aria-describedby={errors.consent ? "consent-error" : undefined}
-                      {...register("consent")}
+                      {...register("marketingConsent")}
                     />
-                    <span>
-                      I agree that NLarge Global may use these details to respond to my inquiry, as described in the{" "}
-                      <a href="/privacy-policy" className="font-semibold text-[#602329] underline underline-offset-4">Privacy Policy</a>. I also agree to the{" "}
-                      <a href="/terms-of-service" className="font-semibold text-[#602329] underline underline-offset-4">Terms of Service</a>.
-                    </span>
+                    <span>{marketingConsentText}</span>
                   </label>
-                  {errors.consent && <p id="consent-error" className="mt-2 text-sm text-[#602329]" role="alert">{errors.consent.message}</p>}
-                  <p className="mt-3 text-sm text-black/60">To ask us to access, correct or delete your information, visit <a href="/support" className="font-semibold text-[#602329] underline underline-offset-4">Support</a>.</p>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-5">
@@ -131,6 +196,7 @@ export default function ContactForm() {
                   </button>
                   {submitStatus === "success" && <p className="text-sm font-semibold text-[#602329]" role="status">Thanks—your message is on its way.</p>}
                   {submitStatus === "error" && <p className="text-sm font-semibold text-[#602329]" role="alert">Something went wrong. Please try again.</p>}
+                  {submitStatus === "stale" && <p className="text-sm font-semibold text-[#602329]" role="alert">The policy or consent wording has changed. Reload this page to review the current wording, then submit again.</p>}
                 </div>
               </form>
             </div>

@@ -19,6 +19,7 @@ const serverEnvSchema = z.object({
   ADMIN_DISPLAY_NAME: z.string().min(1).optional(),
   ADMIN_PASSWORD_HASH: z.string().min(1).optional(),
   ADMIN_SESSION_SECRET: z.string().min(32).optional(),
+  UNSUBSCRIBE_TOKEN_SECRET: z.string().min(32).optional(),
   MASTER_ENCRYPTION_KEY: z.string().min(32).optional(),
   MASTER_ENCRYPTION_KEY_VERSION: z.string().min(1).optional().default("v1"),
   R2_ENDPOINT: z.preprocess(emptyToUndefined, z.string().url().optional()),

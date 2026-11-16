@@ -1,0 +1,265 @@
+{
+  "privacyPolicy": [
+    {
+      "version": "1.0",
+      "effectiveAt": "2026-11-17T00:00:00+05:30",
+      "changeSummary": "Initial published version.",
+      "title": "Privacy Policy",
+      "summary": "What we collect, why we keep it, and how you can ask us to remove it.",
+      "metaDescription": "Privacy information for NLarge Global website enquiries and project work, including what we collect, retention, and how to request access, correction or deletion.",
+      "keywords": [
+        "NLarge Global privacy policy",
+        "personal data access request",
+        "personal data correction",
+        "personal data deletion",
+        "website enquiry data"
+      ],
+      "contactAcknowledgement": [
+        {
+          "text": "I understand that NLarge Global will store and use these details to respond to my inquiry, as explained in the "
+        },
+        { "text": "Privacy Policy", "href": "/privacy-policy" },
+        { "text": "." }
+      ],
+      "sections": [
+        {
+          "title": "Information we handle",
+          "paragraphs": [
+            "When you use our contact form, we collect your name, email address, enquiry type, subject and message. We process the network address of a contact-form request to limit abuse. Our hosting, security and email delivery providers may also create technical logs needed to operate and protect the website.",
+            "If you separately opt in to email updates, we keep your email address, the wording and version of the opt-in shown, when and where you opted in, and any later unsubscribe event. Marketing subscription status is kept separately from project enquiries; the originating enquiry may also retain its opt-in evidence. We use a keyed, non-reversible email reference to support unsubscribe links.",
+            "We record the privacy notice version, acknowledgement wording, time and form source with an enquiry. We do not add device or location details to these consent records.",
+            "For potential and current business relationships, we may keep business and contact details, public business or profile links, referral sources, notes, follow-up details, project and technical information, correspondence, files, payment records and related documents. If you provide credentials or other access details for agreed project work, we may keep them for that work."
+          ]
+        },
+        {
+          "title": "Why we use this information",
+          "paragraphs": [
+            "We use information to respond to enquiries, assess and manage potential business relationships, deliver projects and support, communicate with clients, maintain business and payment records, protect our systems, and meet legal obligations.",
+            "We use an email address for marketing updates only when the person has separately opted in. Submitting an enquiry alone does not subscribe someone to marketing."
+          ]
+        },
+        {
+          "title": "How long we keep it",
+          "paragraphs": [
+            "If an enquiry does not lead to a project, we keep its contact-form information for no longer than 12 months after submission, then delete or anonymise it unless we need to keep it to resolve a dispute or meet a legal obligation.",
+            "For client and project information, including files and any credentials you provide, the applicable project agreement sets the retention, return and deletion terms. We may keep records for longer when required by law or needed to resolve a dispute or protect our systems.",
+            "We review business prospect information and remove it when it is no longer needed to assess or manage a potential business relationship, unless a legal or security reason requires us to keep it.",
+            "We retain an active marketing subscription while it remains active. After unsubscribe, we retain the email address and relevant opt-in and withdrawal record only as needed to honor the opt-out and document the choice, then erase or anonymise it when no longer needed unless law requires otherwise.",
+            "Deleting a subscriber entry from our admin mailing list does not automatically delete a separate contact enquiry or the consent evidence attached to it. We retain enquiry records only as needed to respond, document choices, or meet legal and security requirements."
+          ]
+        },
+        {
+          "title": "Marketing email and withdrawal",
+          "paragraphs": [
+            "The marketing checkbox on the contact form is optional and unchecked by default. We record the selected wording, consent version, time and form source. We do not send marketing emails based only on an enquiry, and this email opt-in does not cover other marketing channels.",
+            "You can unsubscribe using the link in a marketing email or contact us. Unsubscribing stops marketing emails; it does not affect processing already carried out or communications needed to respond to an enquiry or provide an agreed service."
+          ]
+        },
+        {
+          "title": "Who may process it",
+          "paragraphs": [
+            "We use service providers for website hosting, data storage, private file storage and business email. They process information as needed to provide those services. We may also disclose information when required by law or when necessary to protect our rights, systems or users."
+          ]
+        },
+        {
+          "title": "Security",
+          "paragraphs": [
+            "We use access controls and technical safeguards to protect information. Client credentials stored for project work are encrypted and access is limited to the administrator. No method of online storage or transmission can be guaranteed to be completely secure."
+          ]
+        },
+        {
+          "title": "Security incidents",
+          "paragraphs": [
+            "If we confirm a personal-data breach affecting your information, we will notify you promptly and explain what happened and the steps you can take. We will notify regulators or other authorities within any deadline that applies to us. Some laws set a 72-hour deadline for reporting a breach to a regulator; that is not a universal deadline for notifying affected people. We will contact affected people, rather than every website visitor, when an incident does not affect everyone."
+          ]
+        },
+        {
+          "title": "Your rights and how long we keep data",
+          "paragraphs": [
+            "You may have the right to access, correct, delete, restrict or port personal information we hold about you, and to object to processing where we rely on legitimate interests.",
+            [
+              {
+                "text": "To exercise these rights, email  "
+              },
+              {
+                "text": "support@nlargecorp.com",
+                "href": "mailto:support@nlargecorp.com"
+              },
+              { "text": " with your name, the email address or business associated with the information, and the project or record you are asking about. We may ask for information to verify your identity and locate the relevant records." }
+            ],
+            "After a successful request we will confirm the action, the date it was completed, and, where we did not act immediately, the date we completed it. Where we decline a request, we will explain the legal reason. We will not keep your personal information for longer than the retention periods above after the request is completed, unless we need to keep it to resolve a dispute, defend legal claims, or meet another legal obligation."
+          ]
+        },
+        {
+          "title": "Cookies and similar technologies",
+          "paragraphs": [
+            "The private admin area uses essential cookies for administrator login and request security. We do not currently use analytics or advertising cookies on the public website."
+          ]
+        },
+        {
+          "title": "Updates and contact",
+          "paragraphs": [
+            "We may update this policy when our practices change. We will show the effective date before a revised version takes effect.",
+            [
+              { "text": "For privacy questions, email " },
+              {
+                "text": "support@nlargecorp.com",
+                "href": "mailto:support@nlargecorp.com"
+              },
+              { "text": "." }
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "termsOfService": [
+    {
+      "version": "1.0",
+      "effectiveAt": "2026-11-15T00:00:00+05:30",
+      "changeSummary": "Initial published version.",
+      "title": "Terms of Service",
+      "summary": "Rules for using this website and beginning a project enquiry.",
+      "metaDescription": "Terms for using the NLarge Global website, submitting project enquiries, and understanding how separate project and product agreements apply.",
+      "keywords": [
+        "NLarge Global terms of service",
+        "website terms of use",
+        "software project terms",
+        "ready-made software product terms",
+        "software purchase agreement"
+      ],
+      "sections": [
+        {
+          "title": "Using the website",
+          "paragraphs": [
+            "You may use this website for lawful informational and business purposes. You must not interfere with its operation, attempt unauthorized access, introduce malicious code, scrape it in a way that disrupts service, or use its content in a manner that infringes our rights or another party's rights."
+          ]
+        },
+        {
+          "title": "Website information",
+          "paragraphs": [
+            "Website content describes NLarge Global's capabilities and available information about products and services. It is provided for general purposes and does not constitute a binding proposal, professional advice or guarantee of a result. Product availability and scope may change."
+          ]
+        },
+        {
+          "title": "Project enquiries",
+          "paragraphs": [
+            "Submitting an enquiry does not create an agreement or obligation to provide services. Any project begins only after the parties agree to applicable scope, timing, fees, deliverables and commercial terms in a separate written agreement."
+          ]
+        },
+        {
+          "title": "Client and project information",
+          "paragraphs": [
+            [
+              {
+                "text": "If a project requires us to handle client information or credentials, the separate written agreement will describe the agreed handling, retention, return and deletion terms. Our "
+              },
+              { "text": "Privacy Policy", "href": "/privacy-policy" },
+              {
+                "text": " explains our general handling of personal information."
+              }
+            ]
+          ]
+        },
+        {
+          "title": "Products",
+          "paragraphs": [
+            "The website and products described here, including NLarge Global software products, are offered subject to these terms and the separate written agreements that govern each product or engagement. Product-specific ownership, licensing, support and service terms are described in those separate agreements, not in this page alone. Any product documentation, pricing, or service proposal you receive is part of that separate agreement once you accept it."
+          ]
+        },
+        {
+          "title": "Intellectual property",
+          "paragraphs": [
+            "Unless otherwise stated, the website, branding, design and original content are owned by or licensed to NLarge Global and are protected by applicable intellectual property laws. Project-specific ownership and licensing are governed by the relevant signed agreement."
+          ]
+        },
+        {
+          "title": "Availability and liability",
+          "paragraphs": [
+            "We aim to keep the website accurate and available, but do not guarantee uninterrupted access or that every item of information is complete or current. To the maximum extent permitted by law, NLarge Global is not liable for indirect, incidental or consequential losses arising from use of the website."
+          ]
+        },
+        {
+          "title": "Third-party links",
+          "paragraphs": [
+            "Links to external websites are provided for convenience. We are not responsible for their content, availability or practices, and accessing them is at your own discretion."
+          ]
+        },
+        {
+          "title": "Changes and governing terms",
+          "paragraphs": [
+            [
+              {
+                "text": "We may update these terms at any time. Continued use after an update constitutes acceptance of the revised terms. Questions about these terms can be sent to "
+              },
+              {
+                "text": "info@nlargecorp.com",
+                "href": "mailto:info@nlargecorp.com"
+              },
+              { "text": "." }
+            ]
+          ]
+        },
+        {
+          "title": "Governing law and dispute resolution",
+          "paragraphs": [
+            "These terms are governed by the laws of the jurisdiction in which NLarge Global operates, without regard to its conflict of laws rules. Where the law of that jurisdiction does not allow arbitration, then any dispute arising from or relating to these terms must first be attempted in good faith through mediation before court proceedings. If that jurisdiction requires arbitration, then each dispute, except those involving allegations of fraud, theft, assault, or deliberate bodily harm, will be resolved by binding arbitration in the agreed venue. Each party may still seek urgent injunctive relief from a court of competent jurisdiction at any time."
+          ]
+        },
+        {
+          "title": "Entire agreement and amendments",
+          "paragraphs": [
+            "These terms, together with the separate written agreements that govern a specific project or product, form the entire agreement between you and NLarge Global about that project or product. If a separate written agreement and these terms conflict, the written agreement controls for that project or product. We may update these terms, but we will only change the terms that apply to you by giving you notice that the updated terms take effect on the stated date."
+          ]
+        },
+        {
+          "title": "Changes to the website and products",
+          "paragraphs": [
+            "NLarge Global may update the website, products or pricing at any time. We will make reasonable efforts to tell you before a change affects an active project, pending enquiry or paid service, and to give you time to decide whether to continue."
+          ]
+        },
+        {
+          "title": "Electronic signatures and records",
+          "paragraphs": [
+            "You may sign these terms, and any separate written agreement, by electronic means, including a typed name, an electronic signature service, or an accepted digital record. Our records of your agreement, including any enrolment, acceptance or payment confirmation, are kept in a way that lets us prove the date and content of the agreement."
+          ]
+        },
+        {
+          "title": "Severability and waiver",
+          "paragraphs": [
+            "If any provision of these terms is found to be unenforceable, that provision will be limited or removed without changing the rest of the terms. No failure to enforce a provision is a waiver of that provision."
+          ]
+        },
+        {
+          "title": "Contact",
+          "paragraphs": [
+            [
+              { "text": "Questions about these terms can be sent to " },
+              {
+                "text": "info@nlargecorp.com",
+                "href": "mailto:info@nlargecorp.com"
+              },
+              { "text": "." }
+            ]
+          ]
+        },
+        {
+          "title": "Updates and contact",
+          "paragraphs": [
+            "We may update these terms at any time. When a new version takes effect, its governing-law, dispute-resolution and agreement sections will state the effective date."
+          ]
+        }
+      ]
+    }
+  ],
+  "marketingConsent": [
+    {
+      "version": "email-updates-1",
+      "effectiveAt": "2026-11-17T00:00:00+05:30",
+      "changeSummary": "Initial email marketing opt-in wording.",
+      "text": "Yes, email me occasional news and updates from NLarge Global. This is optional, and I can unsubscribe at any time.",
+      "withdrawalVersion": "email-updates-withdrawal-1",
+      "withdrawalText": "Unsubscribe"
+    }
+  ]
+}

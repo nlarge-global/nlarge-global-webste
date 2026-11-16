@@ -8,6 +8,20 @@ export type InquiryDocument = Document & {
   queryType: "general" | "support" | "business" | "careers";
   subject: string;
   message: string;
+  privacyAcknowledgement?: {
+    version: string;
+    hash?: string;
+    text: string;
+    acknowledgedAt: Date;
+    source: string;
+  };
+  marketingConsent?: {
+    version: string;
+    text: string;
+    grantedAt: Date;
+    source: string;
+  };
+  marketingSubscriptionRecordedAt?: Date;
   consent?: true;
   origin?: "public" | "manual";
   source: "website" | "whatsapp" | "linkedin" | "call" | "friend" | "personal" | "referral" | "other";
@@ -28,6 +42,24 @@ const inquirySchema = new Schema<InquiryDocument>({
   queryType: { type: String, enum: ["general", "support", "business", "careers"], required: true },
   subject: { type: String, required: true, trim: true, maxlength: 100 },
   message: { type: String, required: true, trim: true, maxlength: 1000 },
+  privacyAcknowledgement: {
+    type: new Schema({
+      version: { type: String, required: true },
+      hash: { type: String, match: /^[a-f\d]{64}$/i },
+      text: { type: String, required: true },
+      acknowledgedAt: { type: Date, required: true },
+      source: { type: String, required: true },
+    }, { _id: false }),
+  },
+  marketingConsent: {
+    type: new Schema({
+      version: { type: String, required: true },
+      text: { type: String, required: true },
+      grantedAt: { type: Date, required: true },
+      source: { type: String, required: true },
+    }, { _id: false }),
+  },
+  marketingSubscriptionRecordedAt: { type: Date },
   consent: { type: Boolean, default: undefined },
   origin: { type: String, enum: ["public", "manual"], default: "public" },
   source: { type: String, enum: ["website", "whatsapp", "linkedin", "call", "friend", "personal", "referral", "other"], default: "website" },

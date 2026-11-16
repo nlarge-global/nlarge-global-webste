@@ -45,9 +45,39 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
           initialPriority={inquiry.priority}
         />
         <p className="mt-4 text-xs text-black/50">
-          {inquiry.consent ? "Public contact-form consent recorded." : "Public contact-form consent was not collected."}
+          {inquiry.privacyAcknowledgement
+            ? `Privacy notice ${inquiry.privacyAcknowledgement.version} acknowledged on ${inquiry.privacyAcknowledgement.acknowledgedAt.toLocaleString()}.`
+            : inquiry.consent
+              ? "Legacy public contact-form acknowledgement recorded."
+              : "No public contact-form acknowledgement recorded."}
+          {inquiry.marketingConsent
+            ? ` Marketing consent ${inquiry.marketingConsent.version} recorded on ${inquiry.marketingConsent.grantedAt.toLocaleString()}.`
+            : inquiry.origin !== "manual" && inquiry.privacyAcknowledgement
+              ? " Marketing updates were not selected."
+              : ""}
           {inquiry.origin === "manual" ? " · Manually entered" : ""}
         </p>
+        {inquiry.privacyAcknowledgement && (
+          <div className="mt-3 max-w-3xl rounded-xl bg-[#f1efea] p-4 text-sm leading-6 text-black/70">
+            <blockquote>{inquiry.privacyAcknowledgement.text}</blockquote>
+            <p className="mt-2">
+              <Link
+                href={`/privacy-policy/${encodeURIComponent(inquiry.privacyAcknowledgement.version)}`}
+                className="font-semibold text-[#602329] underline underline-offset-4"
+              >
+                View acknowledged policy version
+              </Link>
+              {inquiry.privacyAcknowledgement.hash
+                ? ` · SHA-256 ${inquiry.privacyAcknowledgement.hash}`
+                : " · Legacy record without a document fingerprint"}
+            </p>
+          </div>
+        )}
+        {inquiry.marketingConsent && (
+          <blockquote className="mt-3 max-w-3xl rounded-xl bg-[#f1efea] p-4 text-sm leading-6 text-black/70">
+            {inquiry.marketingConsent.text}
+          </blockquote>
+        )}
         <InquiryClientLink
           inquiryId={String(inquiry._id)}
           currentClientId={inquiry.clientId ? String(inquiry.clientId) : undefined}
