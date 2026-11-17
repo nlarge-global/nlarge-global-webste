@@ -1,6 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond, Dancing_Script } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "@/styles/globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { safeJsonLd } from "@/lib/structured-data";
@@ -16,13 +16,6 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-cormorant",
-  display: "swap",
-});
-
-const dancingScript = Dancing_Script({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-dancing",
   display: "swap",
 });
 
@@ -64,7 +57,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${cormorant.variable} ${dancingScript.variable} scroll-smooth`}
+      className={`${inter.variable} ${cormorant.variable} scroll-smooth`}
     >
       <head>
         <meta name="apple-mobile-web-app-title" content="NLarge Global" />

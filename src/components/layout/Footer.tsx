@@ -75,7 +75,7 @@ export default function Footer() {
             className="flex divide-x h-full gap-4 justify-between items-end border-t border-black sm:border-l sm:border-t-0"
           >
             <div className="size-full flex flex-col items-center justify-center py-5">
-              <p className="text-start relative -left-0.5 lg:-left-2 mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/50">
+              <p className="text-start relative -left-0.5 lg:-left-2 mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/70">
                 Explore
               </p>
               <div className="grid gap-[1rem]">
@@ -96,7 +96,7 @@ export default function Footer() {
               </div>
             </div>
             <div className="size-full flex flex-col items-center justify-center py-5">
-              <p className="mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/50">
+              <p className="mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/70">
                 Help &amp; policies
               </p>
               <div className="grid gap-[1rem]">

@@ -100,7 +100,7 @@ export default function TestimonialsSection() {
             <br /> Because Others Do.
           </h2>
           <h2
-            id="testimonials-title"
+            id="testimonials-title-sr-only"
             className="text-[clamp(2.7rem,5vw,4.8rem)] leading-[0.92] tracking-[-0.05em] sr-only"
           >
             What clients say
@@ -134,6 +134,7 @@ export default function TestimonialsSection() {
             </figcaption>
             <div
               className="mt-6 flex items-center justify-center gap-1 text-[#80353d]"
+              role="img"
               aria-label={`${testimonial.stars} out of 5 stars`}
             >
               {Array.from({ length: 5 }, (_, index) => (

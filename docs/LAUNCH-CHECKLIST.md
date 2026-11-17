@@ -85,6 +85,17 @@ Do **not** delete or reset existing Search Console properties.
 5. Use URL Inspection on `/`, `/services`, `/softwares`, `/guides`, and each new guide. Check Google's selected canonical, crawl/index status, and request indexing for the new guides if appropriate.
 6. Review Page indexing, Manual actions, Security issues, and Performance reports periodically. Allow for reporting/indexing delays; submission does not guarantee indexing or rankings.
 
+### Next-day follow-up: request indexing for the four guide URLs
+
+Search Console allows only a limited number of indexing requests per day, so this step is deliberately left for the next day after the canonical fix is live. Once the daily quota resets, request indexing for these four URLs only:
+
+- `https://www.nlargecorp.com/guides/website-maintenance-checklist`
+- `https://www.nlargecorp.com/guides/taking-over-an-existing-codebase`
+- `https://www.nlargecorp.com/guides/why-is-my-website-slow`
+- `https://www.nlargecorp.com/guides/website-redesign-or-new-feature`
+
+Request each one once. Google states that submitting a page again does not change its queue position or priority, and repeated requests only consume the daily quota. Never submit the apex (`https://nlargecorp.com/...`) form of a URL, and do not re-request URLs that are already indexed or already queued.
+
 The supplied six-month Search Console export (May 15–November 14, 2026) reported 9 clicks and 869 impressions. The `nlarge` query accounted for 8 clicks and 705 impressions. The homepage had 6 clicks/473 impressions; `/products` had 3/522; `/services` had 0/2. The report listed the homepage on the apex host but product/service URLs on `www`, reinforcing the need to normalize redirects and canonical URLs. It also showed 513 impressions from the Faroe Islands; do not infer intended market demand from that row alone—review future country/query/page combinations after canonicalization.
 
 Google says its normal SEO fundamentals apply to AI Overviews and AI Mode; no special AI file or schema guarantees appearance. Keep the guides useful and accurate, link them from relevant pages, make important content visible in HTML, and avoid unsupported claims. See [Google's AI features guidance](https://developers.google.com/search/docs/appearance/ai-features).

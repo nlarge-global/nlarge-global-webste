@@ -56,7 +56,7 @@ export default function ServiceExplorer({
             key={service.name}
             type="button"
             aria-haspopup="dialog"
-            aria-label={`View details for ${service.name}`}
+            aria-label={`${service.name} — view details`}
             onClick={(event) => {
               triggerRef.current = event.currentTarget;
               const bounds = event.currentTarget.getBoundingClientRect();

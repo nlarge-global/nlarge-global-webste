@@ -77,11 +77,11 @@ export default function DeviceShowcase() {
           }`}
         />
         <Image
-          src="/images/device-mockup1.svg"
+          src="/images/device-mockup.webp"
           alt="Laptop, tablet, and phone mockups showing a school website, school management dashboard, and fitness app"
           fill
           sizes="(max-width: 1023px) 100vw, 58vw"
-          loading="eager"
+          preload
           ref={imageRef}
           onLoad={() => setImageLoaded(true)}
           className={`pointer-events-none object-contain transition-opacity duration-200 ${
