@@ -9,8 +9,9 @@ import {
   BCRYPT_PASSWORD_TOO_LONG,
   isWithinBcryptPasswordLimit,
 } from "@/features/admin/auth/bcrypt-password";
-import { isAdminLoginRateLimited } from "@/features/admin/auth/rate-limit";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
+import { RATE_LIMITS } from "@/lib/rate-limit-config";
+import { isRateLimited } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -25,48 +26,35 @@ export async function POST(request: NextRequest) {
   const requestId = getRequestId(request);
   let stage = "request received";
   console.info("[admin-login]", { requestId, stage });
-
   const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isAdminLoginRateLimited(ip)) {
-    console.warn("[admin-login]", {
-      requestId,
-      stage: "IP rate limit exceeded",
-    });
-    return NextResponse.json(
-      { error: "Too many login attempts. Try again later." },
-      { status: 429 },
-    );
-  }
+    request.headers.get("cf-connecting-ip")
+    || request.headers.get("x-real-ip")
+    || request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
+    || "unknown";
 
   try {
+    stage = "checking login rate limit";
+    if (await isRateLimited("adminLogin", ip)) {
+      console.warn("[admin-login]", { requestId, stage: "IP rate limit exceeded" });
+      return NextResponse.json(
+        { error: "Too many login attempts. Try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(RATE_LIMITS.adminLogin.windowMs / 1000)),
+          },
+        },
+      );
+    }
+
     stage = "validating request";
     const data = loginSchema.parse(await request.json());
     stage = "loading admin credentials";
     const credentials = getAdminCredentials();
-    const accountKey = credentials.email.toLowerCase();
-    if (
-      data.email.toLowerCase() === accountKey &&
-      isAdminLoginRateLimited(`account:${accountKey}`)
-    ) {
-      console.warn("[admin-login]", {
-        requestId,
-        stage: "account rate limit exceeded",
-      });
-      return NextResponse.json(
-        { error: "Too many login attempts. Try again later." },
-        { status: 429 },
-      );
-    }
     stage = "verifying credentials";
     console.info("[admin-login]", {
       requestId,
-      stage: "verifying credentials",
-      email: data.email,
-      ip,
-      accountKey,
-      credentialsEmail: credentials.email,
-      credentialsPasswordHash: credentials.passwordHash,
+      stage,
     });
     const valid =
       data.email.toLowerCase() === credentials.email.toLowerCase() &&

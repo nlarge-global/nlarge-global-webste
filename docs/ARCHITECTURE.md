@@ -14,7 +14,7 @@ This repository is the NLarge Global marketing website. Next.js App Router rende
 | Fonts | Inter, Cormorant Garamond and Dancing Script through `next/font` |
 | Forms | React Hook Form, resolver and shared Zod schema |
 | Email | Nodemailer |
-| Rate limiting | Optional Upstash Redis REST API with a process-memory fallback |
+| Rate limiting | Centralized thresholds in `src/lib/rate-limit-config.ts`; Upstash Redis REST API with a process-memory fallback |
 | Icons | React Icons |
 
 ## Folder structure
@@ -43,6 +43,7 @@ src/
 │   │   ├── page.tsx              # /admin overview placeholder
 │   │   └── [section]/page.tsx    # Planned admin section placeholders
 │   ├── api/admin/subscribers/   # Authenticated subscriber export and deletion
+├── proxy.ts                      # Global rate limit for API routes
 ├── api/admin/auth/
 │   │   ├── login/route.ts        # Login boundary
 │   │   └── logout/route.ts       # CSRF-protected logout boundary
@@ -74,7 +75,6 @@ src/
 │           └── TestimonialsSection.tsx
 │   └── admin/
 │       └── auth/
-│           ├── rate-limit.ts
 │           └── session.ts
 │       ├── models/
 │       │   ├── inquiry.ts
@@ -104,6 +104,8 @@ src/
 ├── lib/
 │   ├── env.ts
 │   ├── mongodb.ts                 # Cached Mongoose connection adapter
+│   ├── rate-limit-config.ts       # Central thresholds for all rate limits
+│   ├── rate-limit.ts              # Shared Upstash/memory rate-limit service
 │   ├── mongoose-model.ts          # Development-safe model registration
 │   └── email/                    # Reserved for a generic email provider boundary
 ├── styles/
@@ -120,6 +122,10 @@ src/
 - `features/contact/` owns all implementation that is specific to contact enquiries: form UI, validation and SMTP delivery.
 - `content/` owns structured local editorial content. It must not contain executable behavior.
 - `lib/` owns small infrastructure services shared outside one feature.
+
+## Rate limiting
+
+Edit `src/lib/rate-limit-config.ts` to manage all rate limits in one place. The global limit is 300 API requests per IP per 15 minutes; admin login has an additional 10-per-IP limit, and the contact form and unsubscribe-link request each also have a 5-per-IP limit per 15 minutes. The global limit runs in `src/proxy.ts` for every `/api/*` route. When Upstash is configured, its Redis REST API is used; otherwise, the process-memory fallback applies. If a configured Upstash check fails, the global API proxy returns `503` rather than allowing an unchecked request.
 
 ## Route map
 
@@ -175,6 +181,7 @@ flowchart TD
     ContactForm -->|POST /api/contact| ContactAPI[Contact route]
     ContactAPI --> ContactSchema
     ContactAPI --> RateLimit[Redis or memory limiter]
+    Proxy[API Proxy global limit] --> RateLimit
     ContactAPI --> Inquiry[(MongoDB Inquiry)]
     LegalContent[(Local legal-documents.json)] --> ContactForm
     LegalContent --> ContactAPI
@@ -196,6 +203,7 @@ sequenceDiagram
     Visitor->>Form: Submit enquiry
     Form->>Form: Validate shared Zod schema
     Form->>API: POST JSON with privacy acknowledgement and optional marketing choice
+    API->>API: Pass global API IP rate limit in Proxy
     API->>API: Validate shared schema
     API->>API: Check IP rate limit
     API->>API: Validate active policy version and SHA-256
