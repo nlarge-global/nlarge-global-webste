@@ -11,6 +11,7 @@ export default function HomePage() {
   return (
     <div className="w-full bg-white text-black">
       <Navigation />
+      <meta name="msvalidate.01" content="06614FCDF52553FFF5442EAD68222002" />
       <main id="main-content" tabIndex={-1}>
         <section
           aria-labelledby="proof-title"
