@@ -110,7 +110,7 @@ export default function ContactForm({
                 Start a conversation
               </p>
               <div>
-                <h1 className="max-w-[8ch] text-[clamp(4rem,9vw,8rem)] leading-[0.84] tracking-[-0.055em]">
+                <h1 className="max-w-[8ch] text-[3.5rem] lg:text-[clamp(4rem,9vw,8rem)] leading-[0.84] tracking-[-0.055em] mt-5">
                   Let’s build what’s next.
                 </h1>
                 <p className="mt-7 max-w-md text-lg leading-8 text-white/70">
@@ -136,7 +136,7 @@ export default function ContactForm({
 
             <div className="bg-[#f1efea] px-6 py-8 sm:px-10 lg:px-12 lg:py-12">
               <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                <div className="grid gap-x-8 sm:grid-cols-2">
+                <div className="grid gap-8 sm:grid-cols-2">
                   <div>
                     <label htmlFor="name" className="text-sm font-semibold">
                       Your name
@@ -188,7 +188,7 @@ export default function ContactForm({
                   </div>
                 </div>
 
-                <div className="mt-8 grid gap-x-8 sm:grid-cols-2">
+                <div className="mt-8 grid gap-8 sm:grid-cols-2">
                   <div>
                     <label
                       htmlFor="queryType"

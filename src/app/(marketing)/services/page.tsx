@@ -281,7 +281,7 @@ export default function ServicesPage() {
                 Services · Built to last
               </p>
               <div>
-                <h1 className="text-[clamp(4rem,3vw,6rem)] leading-[0.84] tracking-[-0.055em]">
+                <h1 className=" text-[2.5rem] lg:text-[clamp(4rem,3vw,6rem)] leading-[0.84] tracking-[-0.055em] mt-5">
                   Custom software, websites and apps.
                 </h1>
                 <p className="mt-7 max-w-md text-lg leading-8 text-white/70">
@@ -357,7 +357,7 @@ export default function ServicesPage() {
 
         <section
           aria-labelledby="services-faq-title"
-          className="px-5 pb-20 sm:px-8 sm:pb-24 lg:px-12 lg:pb-28"
+          className="px-5 pb-20 pt-16 sm:px-8 sm:pb-24 lg:px-12 lg:pb-28"
         >
           <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
             <h2

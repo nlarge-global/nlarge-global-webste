@@ -86,7 +86,7 @@ export default async function GuidePage({
             >
               All guides
             </Link>
-            <h1 className="mt-7 text-[clamp(3rem,6vw,5rem)] leading-[0.9] tracking-[-0.055em]">
+            <h1 className="mt-7 text-[2rem] lg:text-[clamp(3rem,6vw,5rem)] leading-[0.9] tracking-[-0.055em]">
               {guide.title}
             </h1>
             <p className="mt-6  text-lg leading-8 text-black/65">

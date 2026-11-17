@@ -58,9 +58,9 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-[1fr_auto]">
-          <div className="min-w-0 py-8 sm:py-10 sm:pr-10 lg:pl-12">
-            <p className="max-w-[12ch] text-[clamp(2.8rem,11vw,4.5rem)] leading-[0.86] tracking-[-0.06em] sm:text-[clamp(3rem,6.7vw,6.5rem)]">
+        <div className="grid  sm:grid-cols-[0.85fr_auto]">
+          <div className="min-w-0 py-8 sm:py-10 sm:pr-10 pl-3 md:pl-12">
+            <p className="max-w-[12ch] text-[clamp(3rem,10vw,7rem)] leading-[0.86] tracking-[-0.06em] ">
               Have something in mind?
             </p>
             <a
@@ -72,53 +72,50 @@ export default function Footer() {
           </div>
           <nav
             aria-label="Footer navigation"
-            className="flex min-w-44 gap-4 flex-col justify-between border-t border-black py-5 sm:border-l sm:border-t-0 sm:px-8 sm:py-10"
+            className="flex divide-x h-full gap-4 justify-between items-end border-t border-black sm:border-l sm:border-t-0"
           >
-            <div className="flex sm:flex-col gap-2 sm:gap-3">
-              <Link
-                href="/softwares"
-                className=" text-base hover:text-[#602329]"
-              >
-                Softwares
-              </Link>
-              <Link
-                href="/services"
-                className=" text-base hover:text-[#602329]"
-              >
-                Services
-              </Link>
-              <Link href="/contact" className="text-base hover:text-[#602329]">
-                Contact
-              </Link>
-              <Link href="/guides" className="text-base hover:text-[#602329]">
-                Guides
-              </Link>
+            <div className="size-full flex flex-col items-center justify-center py-5">
+              <p className="text-start relative -left-0.5 lg:-left-2 mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/50">
+                Explore
+              </p>
+              <div className="grid gap-[1rem]">
+                {[
+                  ["Softwares", "/softwares"],
+                  ["Services", "/services"],
+                  ["Contact", "/contact"],
+                  ["Guides", "/guides"],
+                ].map(([label, href]) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="flex  items-center text-sm font-medium text-black/75 transition-colors hover:text-[#602329] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] sm:text-base"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className="flex sm:flex-col gap-2 sm:gap-3 ">
-              <Link
-                href="/support"
-                className="text-sm text-black/60 hover:text-black"
-              >
-                Support
-              </Link>
-              <Link
-                href="/unsubscribe"
-                className="text-sm text-black/60 hover:text-black"
-              >
-                Unsubscribe
-              </Link>
-              <Link
-                href="/privacy-policy"
-                className="text-sm text-black/60 hover:text-black"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/terms-of-service"
-                className=" text-sm text-black/60 hover:text-black"
-              >
-                Terms of Service
-              </Link>
+            <div className="size-full flex flex-col items-center justify-center py-5">
+              <p className="mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-black/50">
+                Help &amp; policies
+              </p>
+              <div className="grid gap-[1rem]">
+                {[
+                  ["Sitemap", "/sitemap"],
+                  ["Support", "/support"],
+                  ["Unsubscribe", "/unsubscribe"],
+                  ["Privacy Policy", "/privacy-policy"],
+                  ["Terms of Service", "/terms-of-service"],
+                ].map(([label, href]) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="flex items-center text-sm text-black/70 transition-colors hover:text-[#602329] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329]"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </nav>
         </div>
@@ -129,13 +126,6 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} NLarge Global. All rights reserved.
           </p>
-          {"|"}
-          <Link
-            href="/sitemap.xml"
-            className="text-xs hover:text-blue-500"
-          >
-            Sitemap
-          </Link>
         </div>
         <button
           type="button"

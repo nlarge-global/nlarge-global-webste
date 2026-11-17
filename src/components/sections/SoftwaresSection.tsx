@@ -12,7 +12,7 @@ export default function SoftwaresSection() {
               Softwares made by NLarge
             </p>
             <div>
-              <h1 className="text-[clamp(4rem,12vw,6.2rem)] leading-[0.84] tracking-[-0.055em] mt-6">
+              <h1 className="text-[clamp(4rem,12vw,6.2rem)] leading-[0.84] tracking-[-0.04em] mt-6">
                 Ready-made softwares
               </h1>
               <h2 className="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
