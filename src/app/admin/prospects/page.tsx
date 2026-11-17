@@ -4,6 +4,7 @@ import { FiArrowUpRight, FiCalendar, FiMapPin } from "react-icons/fi";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import ProspectCreateDialog from "@/features/admin/components/ProspectCreateDialog";
 import RestoreProspectButton from "@/features/admin/components/RestoreProspectButton";
+import ProspectShareConfirmation from "@/features/admin/components/ProspectShareConfirmation";
 import ProspectShareFeedback from "@/features/admin/components/ProspectShareFeedback";
 import { AdminPagination } from "@/components/ui/pagination";
 import { Prospect, type ProspectSource, type ProspectStatus } from "@/features/admin/models/prospect";
@@ -37,9 +38,10 @@ function escapeRegex(value: string) {
 export default async function ProspectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string; source?: string; followUp?: string; archived?: string; q?: string; share?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; source?: string; followUp?: string; archived?: string; q?: string; share?: string; shareError?: string }>;
 }) {
-  if (!(await getCurrentAdminSession())) redirect("/admin/login");
+  const session = await getCurrentAdminSession();
+  if (!session) redirect("/admin/login");
   await connectToDatabase();
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
@@ -86,7 +88,15 @@ export default async function ProspectsPage({
         </div>
         <ProspectCreateDialog />
       </div>
-      <ProspectShareFeedback result={params.share} />
+      {params.share === "confirm" &&
+        session.pendingShare &&
+        session.pendingShare.expiresAt > new Date() && (
+        <ProspectShareConfirmation pendingShare={session.pendingShare} />
+      )}
+      <ProspectShareFeedback
+        result={params.share === "confirm" && session.pendingShare ? undefined : params.share}
+        reason={params.shareError}
+      />
 
       <section aria-labelledby="prospects-list-heading" className="mt-7 overflow-hidden rounded-2xl border border-[#e8e0da] bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eee8e2] px-5 py-4">

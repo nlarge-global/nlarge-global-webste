@@ -11,7 +11,14 @@ import { Client } from "@/features/admin/models/client";
 import ExportManager from "@/features/admin/components/ExportManager";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Pagination from "@/features/admin/components/Pagination";
 import { sanitizeAuditMetadata } from "@/features/admin/services/audit";
 
@@ -52,7 +59,11 @@ export default async function AdminSectionPage({
     await connectToDatabase();
     const pageSize = 10;
     const [events, total] = await Promise.all([
-      AuditEvent.find().sort({ createdAt: -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize).lean(),
+      AuditEvent.find()
+        .sort({ createdAt: -1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
       AuditEvent.countDocuments(),
     ]);
     return (
@@ -62,38 +73,63 @@ export default async function AdminSectionPage({
             <FiShield aria-hidden="true" className="size-5" />
           </span>
           <div className="min-w-0">
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Audit log</h1>
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+              Audit log
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
               Append-only records of authenticated and public operations.
             </p>
           </div>
         </header>
         <Card className="mt-6 overflow-hidden">
-          <Table>
-            <TableHeader><TableRow><TableHead>Action</TableHead><TableHead>Resource</TableHead><TableHead>Details</TableHead><TableHead className="text-right">Time</TableHead></TableRow></TableHeader>
-            <TableBody>
-            {events.length === 0 && (
-              <TableRow><TableCell colSpan={4}>No audit events yet.</TableCell></TableRow>
-            )}
-            {events.map((event) => (
-              <TableRow key={String(event._id)}>
-                <TableCell className="font-medium">{event.action}</TableCell>
-                <TableCell>
-                  <p className="font-medium">{event.resourceLabel || event.resourceType}</p>
-                  <p className="mt-1 text-xs text-black/45">{event.resourceType}{event.resourceId ? ` · ${event.resourceId}` : ""}</p>
-                </TableCell>
-                <TableCell className="text-sm text-black/55">
-                  {Object.entries(sanitizeAuditMetadata(event.metadata))
-                    .map(([key, value]) => `${key}: ${String(value)}`)
-                    .join(" · ") || "—"}
-                </TableCell>
-                <TableCell className="text-right text-xs text-black/45"><time>{event.createdAt.toLocaleString()}</time></TableCell>
+          <div className="overflow-x-auto">
+          <Table className="min-w-[680px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Action</TableHead>
+                <TableHead>Resource</TableHead>
+                <TableHead className="w-[35%] min-w-[280px]">Details</TableHead>
+                <TableHead className="text-right">Time</TableHead>
               </TableRow>
-            ))}
+            </TableHeader>
+            <TableBody>
+              {events.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4}>No audit events yet.</TableCell>
+                </TableRow>
+              )}
+              {events.map((event) => (
+                <TableRow key={String(event._id)}>
+                  <TableCell className="font-medium">{event.action}</TableCell>
+                  <TableCell>
+                    <p className="font-medium">
+                      {event.resourceLabel || event.resourceType}
+                    </p>
+                    <p className="mt-1 text-xs text-black/45">
+                      {event.resourceType}
+                      {event.resourceId ? ` · ${event.resourceId}` : ""}
+                    </p>
+                  </TableCell>
+                  <TableCell className="w-[35%] min-w-[280px] text-sm text-black/55">
+                    {Object.entries(sanitizeAuditMetadata(event.metadata))
+                      .map(([key, value]) => `${key}: ${String(value)}`)
+                      .join(" · ") || "—"}
+                  </TableCell>
+                  <TableCell className="text-right text-xs text-black/45">
+                    <time>{event.createdAt.toLocaleString()}</time>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
+          </div>
         </Card>
-        <Pagination page={pageNumber} total={total} pageSize={pageSize} basePath="/admin/audit" />
+        <Pagination
+          page={pageNumber}
+          total={total}
+          pageSize={pageSize}
+          basePath="/admin/audit"
+        />
       </div>
     );
   }
@@ -107,7 +143,9 @@ export default async function AdminSectionPage({
             <FiActivity aria-hidden="true" className="size-5" />
           </span>
           <div className="min-w-0">
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Health</h1>
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+              Health
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
               Safe service summaries for the private workspace.
             </p>
@@ -115,13 +153,18 @@ export default async function AdminSectionPage({
         </header>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {Object.entries(checks).map(([name, check]) => (
-            <Card
-              key={name}
-              className="p-5"
-            >
+            <Card key={name} className="p-5">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-semibold capitalize">{name}</h2>
-                <Badge variant={check.status === "ok" ? "success" : check.status === "error" ? "destructive" : "warning"}>
+                <Badge
+                  variant={
+                    check.status === "ok"
+                      ? "success"
+                      : check.status === "error"
+                        ? "destructive"
+                        : "warning"
+                  }
+                >
                   {check.status}
                 </Badge>
               </div>
@@ -155,7 +198,9 @@ export default async function AdminSectionPage({
             <FiSettings aria-hidden="true" className="size-5" />
           </span>
           <div className="min-w-0">
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Settings</h1>
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+              Settings
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
               Preferences affect dashboard display and reply defaults only.
             </p>
@@ -194,7 +239,9 @@ export default async function AdminSectionPage({
           <FiDownload aria-hidden="true" className="size-5" />
         </span>
         <div className="min-w-0">
-          <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Client exports</h1>
+          <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+            Client exports
+          </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
             Prepare authenticated client handover packages.
           </p>

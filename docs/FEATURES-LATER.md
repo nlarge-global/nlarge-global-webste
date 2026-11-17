@@ -12,6 +12,20 @@ This document tracks approved work intentionally deferred from the current imple
 - Add an About page introducing the company and its team.
 - Integrate both pages with public navigation, metadata, and the sitemap when implemented.
 
+## Private mobile business copilot
+
+Explore a privately distributed native mobile app that connects securely to the admin workspace and helps manage prospects, clients, projects, tasks, and follow-ups. This is a product direction, not approval for autonomous access or changes.
+
+Potential capabilities, in increasing order of automation:
+
+- Capture prospects by sharing a link, voice note, or business-card photo; extract a draft for review.
+- Schedule push reminders, snooze or reschedule follow-ups, and provide a daily briefing of due tasks and recent activity.
+- Answer questions against the user's business data and prepare summaries, tasks, project updates, and follow-up drafts.
+- Research leads from permitted public sources, retaining source links and retrieval dates; present findings for human review.
+- Evaluate local AI for lightweight/private tasks and server-side AI for heavier research or scheduled jobs, accounting for mobile background-execution limits.
+
+Require explicit confirmation for creating or changing business records, contacting prospects, and any payment or financial action. Keep changes auditable and undoable where practical. Respect source-site terms, rate limits, privacy, and consent; do not build stealth scraping, autonomous unsolicited outreach, or an always-running mobile agent. Start by validating the capture-to-reminder workflow before investing in background agents or a broader native app.
+
 ## Admin-managed legal content and notifications
 
 The current legal documents are local, source-controlled records in `src/content/legal-documents.json`. This file is the single source for published text, effective dates, version summaries, SEO descriptions/keywords, privacy acknowledgement wording, and marketing consent wording.

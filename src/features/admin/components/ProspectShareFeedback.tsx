@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FiCheckCircle, FiInfo, FiXCircle, FiX } from "react-icons/fi";
 
-export default function ProspectShareFeedback({ result }: { result?: string }) {
+export default function ProspectShareFeedback({ result, reason }: { result?: string; reason?: string }) {
   const [visible, setVisible] = useState(Boolean(result));
   if (!result || !visible) return null;
 
@@ -11,7 +11,11 @@ export default function ProspectShareFeedback({ result }: { result?: string }) {
     ? "Shared link saved as a prospect. It’s ready for review."
     : result === "signin"
       ? "Sign in first, then share the link again from your phone."
-      : "We couldn’t save that link. Share an http or https URL while signed in.";
+      : result === "confirm"
+        ? "This shared link has expired. Share it again to continue."
+      : process.env.NODE_ENV === "development" && reason
+        ? reason
+        : "We couldn’t save that link. Share an http or https URL while signed in.";
   const Icon = result === "created" ? FiCheckCircle : result === "signin" ? FiInfo : FiXCircle;
 
   return (

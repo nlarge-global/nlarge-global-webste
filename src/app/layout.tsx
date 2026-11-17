@@ -129,7 +129,7 @@ export default function RootLayout({
             }),
           }}
         />
-        <a href="#main-content" className="fixed left-4 top-0 z-[100] -translate-y-full rounded-b-md bg-[#602329] px-4 py-3 text-sm font-semibold text-white focus:translate-y-0">Skip to main content</a>
+        <a href="#main-content" className="fixed left-4 -top-1 z-[100] -translate-y-full rounded-b-md bg-[#602329] px-4 py-3 text-sm font-semibold text-white focus:translate-y-0">Skip to main content</a>
         <NextTopLoader
           color="#000000"
          />

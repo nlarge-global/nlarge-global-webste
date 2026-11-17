@@ -183,7 +183,7 @@ function AdminSidebar({
               type="button"
               onClick={onClose}
               aria-label="Close admin navigation"
-              className="grid size-11 place-items-center rounded-xl border border-[#e8e0da] hover:bg-[#faf2ec]"
+              className="ml-auto grid size-11 place-items-center rounded-xl border border-[#e8e0da] hover:bg-[#faf2ec]"
             >
               <FiX aria-hidden="true" />
             </Button>
@@ -216,6 +216,15 @@ export default function AdminShell({
   const router = useRouter();
   const pathname = usePathname();
 
+  useEffect(() => {
+    if (!mobileOpen || pathname === "/admin/login") return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen, pathname]);
 
   if (pathname === "/admin/login") {
     return (
@@ -244,24 +253,35 @@ export default function AdminShell({
           <div className="hidden lg:block">
             <AdminSidebar onLogout={logout} />
           </div>
-          {mobileOpen && (
-            <div className="fixed inset-0 z-50 lg:hidden">
-              <Button
-                type="button"
-                aria-label="Close admin navigation"
-                onClick={() => setMobileOpen(false)}
-                className="absolute inset-0 bg-black/30"
+          <div
+            aria-hidden={!mobileOpen}
+            inert={!mobileOpen}
+            className={`fixed inset-0 z-50 transition-[visibility] duration-1000 lg:hidden ${
+              mobileOpen
+                ? "visible pointer-events-auto"
+                : "invisible pointer-events-none delay-300"
+            }`}
+          >
+            <Button
+              type="button"
+              aria-label="Close admin navigation"
+              onClick={() => setMobileOpen(false)}
+              className={`absolute inset-0 bg-black/30 transition-opacity duration-1000 motion-reduce:transition-none ${
+                mobileOpen ? "opacity-100" : "opacity-0"
+              }`}
+            />
+            <div
+              className={`relative h-full w-[min(19rem,88vw)] shadow-2xl transition-transform duration-400 ease-out motion-reduce:transition-none ${
+                mobileOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
+              <AdminSidebar
+                mobile
+                onClose={() => setMobileOpen(false)}
+                onLogout={logout}
               />
-              <div className="relative h-full w-[min(19rem,88vw)] shadow-2xl">
-                <AdminSidebar
-                  mobile
-                  onClose={() => setMobileOpen(false)}
-                  onLogout={logout}
-
-                />
-              </div>
             </div>
-          )}
+          </div>
           <div className="min-w-0 flex-1">
             <header className="sticky top-0 z-30 border-b border-[#ece5df] bg-[#fffdfb]/95 backdrop-blur">
               <div className="flex min-h-16 items-center justify-between gap-4 px-4">

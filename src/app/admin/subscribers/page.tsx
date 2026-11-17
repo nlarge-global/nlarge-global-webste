@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FiDownload } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
@@ -38,13 +37,13 @@ export default async function AdminSubscribersPage({
             Only opted-in addresses are included in the marketing export.
           </p>
         </div>
-        <Link
+        <a
           href="/api/admin/subscribers/export"
           className="inline-flex min-h-11 w-fit items-center gap-2 rounded-full bg-[#602329] px-5 text-sm font-semibold text-white hover:bg-[#481a1e] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#602329]"
         >
           <FiDownload aria-hidden="true" />
           Export subscribed CSV
-        </Link>
+        </a>
       </header>
 
       <Card className="mt-6 overflow-hidden">
