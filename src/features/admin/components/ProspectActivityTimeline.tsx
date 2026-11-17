@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useEffect, useState } from "react";
 import { FiActivity, FiCalendar, FiCheckCircle, FiMail, FiMessageCircle, FiPhone, FiPlus } from "react-icons/fi";
@@ -67,8 +68,8 @@ export default function ProspectActivityTimeline({
       }
       setActivities((current) => [result.activity!, ...current]);
       form.reset();
-    } catch {
-      setError("Unable to save activity. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to save activity. Check your connection and try again."));
     } finally {
       setPending(false);
     }
@@ -88,8 +89,8 @@ export default function ProspectActivityTimeline({
       }
       setActivities((current) => [...current, ...result.activities!]);
       setHasMore(Boolean(result.hasMore));
-    } catch {
-      setError("Unable to load older activity. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to load older activity. Check your connection and try again."));
     } finally {
       setLoadingMore(false);
     }

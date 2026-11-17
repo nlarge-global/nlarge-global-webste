@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -34,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Reply defaults read failed:", error);
-    return NextResponse.json({ error: "Unable to load reply defaults." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load reply defaults.") }, { status: 500 });
   }
 }
 
@@ -85,6 +86,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid reply." }, { status: 400 });
     console.error("Dashboard reply failed:", error);
-    return NextResponse.json({ error: "Unable to send reply." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to send reply.") }, { status: 500 });
   }
 }

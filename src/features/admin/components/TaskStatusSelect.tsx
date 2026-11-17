@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -42,12 +43,13 @@ export default function TaskStatusSelect({
         },
         body: JSON.stringify({ taskId, status: nextStatus }),
       });
-      if (!response.ok) throw new Error("Unable to update task status.");
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? "Unable to update task status.");
       router.refresh();
-    } catch {
+    } catch (error) {
       setValue(previous);
       onOptimisticChange?.(previous);
-      setError("Unable to update");
+      setError(getDisplayErrorMessage(error, "Unable to update"));
     } finally {
       setPending(false);
     }

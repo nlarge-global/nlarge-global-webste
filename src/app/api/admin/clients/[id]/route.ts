@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -32,7 +33,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Client read failed:", error);
-    return NextResponse.json({ error: "Unable to load client." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load client.") }, { status: 500 });
   }
 }
 
@@ -52,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid client details." }, { status: 400 });
     console.error("Client update failed:", error);
-    return NextResponse.json({ error: "Unable to update client." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to update client.") }, { status: 500 });
   }
 }
 
@@ -83,6 +84,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
       console.error("Client deletion failed:", error);
-      return NextResponse.json({ error: "Unable to archive client." }, { status: 500 });
+      return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to archive client.") }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -39,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid secret details." }, { status: 400 });
     console.error("Secret update failed:", error);
-    return NextResponse.json({ error: "Unable to update secret." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to update secret.") }, { status: 500 });
   }
 }
 
@@ -58,6 +59,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     console.error("Secret deletion failed:", error);
-    return NextResponse.json({ error: "Unable to delete secret." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to delete secret.") }, { status: 500 });
   }
 }

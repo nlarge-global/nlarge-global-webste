@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,8 +35,8 @@ export default function InquiryCreateForm({ onCreated }: { onCreated: () => void
       onCreated();
       router.push(`/admin/inquiries/${result.id}`);
       router.refresh();
-    } catch {
-      setError("Unable to create inquiry. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to create inquiry. Check your connection and try again."));
     } finally {
       setPending(false);
     }

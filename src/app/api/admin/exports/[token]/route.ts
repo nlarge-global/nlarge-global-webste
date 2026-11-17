@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/features/admin/auth/session";
@@ -21,6 +22,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Client export download failed:", error);
-    return NextResponse.json({ error: "Unable to access export." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to access export.") }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,8 +27,8 @@ export default function RestoreProspectButton({ id }: { id: string }) {
       }
       router.replace("/admin/prospects");
       router.refresh();
-    } catch {
-      setError("Unable to restore this prospect. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to restore this prospect. Check your connection and try again."));
     } finally {
       setPending(false);
     }

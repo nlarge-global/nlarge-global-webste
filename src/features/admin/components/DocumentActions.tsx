@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,7 @@ export default function DocumentActions({
       window.open(result.url, "_blank", "noopener,noreferrer");
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : "Unable to open document.",
+        getDisplayErrorMessage(reason, "Unable to open document."),
       );
     }
   }

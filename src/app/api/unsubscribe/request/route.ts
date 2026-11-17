@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isUnsubscribeRequestRateLimited } from "@/features/contact/api/rate-limit";
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
     console.error("Unsubscribe link request failed:", error);
     return NextResponse.json(
-      { error: "Unable to send an email preferences link. Please try again." },
+      { error: getDisplayErrorMessage(error, "Unable to send an email preferences link. Please try again.") },
       { status: 500, headers: { "Cache-Control": "no-store" } },
     );
   }

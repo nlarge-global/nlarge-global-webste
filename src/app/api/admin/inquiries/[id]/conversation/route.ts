@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ConversationEntry } from "@/features/admin/models/conversation-entry";
@@ -67,7 +68,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     console.error("Conversation timeline read failed:", error);
-    return NextResponse.json({ error: "Unable to load conversation." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load conversation.") }, { status: 500 });
   }
 }
 
@@ -92,6 +93,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid conversation entry." }, { status: 400 });
     console.error("Conversation timeline write failed:", error);
-    return NextResponse.json({ error: "Unable to save conversation entry." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to save conversation entry.") }, { status: 500 });
   }
 }

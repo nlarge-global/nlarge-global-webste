@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -42,6 +43,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Check the inquiry details and try again." }, { status: 400 });
     console.error("Manual inquiry creation failed:", error);
-    return NextResponse.json({ error: "Unable to create inquiry." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create inquiry.") }, { status: 500 });
   }
 }

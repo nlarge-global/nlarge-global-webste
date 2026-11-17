@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { Select } from "@/components/ui/select";
@@ -49,8 +50,8 @@ export default function AddTimelineEntryForm({
       }
       formElement.reset();
       onSaved(result.entry);
-    } catch {
-      setError("Unable to save entry. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to save entry. Check your connection and try again."));
     } finally {
       setPending(false);
     }

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 export default function UnsubscribeRequestForm() {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
   const [pending, setPending] = useState(false);
 
   async function requestLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setStatus("idle");
+    setErrorMessage("");
 
     const formData = new FormData(event.currentTarget);
     try {
@@ -23,6 +26,12 @@ export default function UnsubscribeRequestForm() {
       setStatus("sent");
     } catch (error) {
       console.error("Unsubscribe link request failed:", error);
+      setErrorMessage(
+        getDisplayErrorMessage(
+          error,
+          "We could not send the link. Please try again or contact support.",
+        ),
+      );
       setStatus("error");
     } finally {
       setPending(false);
@@ -57,7 +66,7 @@ export default function UnsubscribeRequestForm() {
       )}
       {status === "error" && (
         <p role="alert" className="mt-4 text-sm leading-6 text-[#602329]">
-          We could not send the link. Please try again or contact support.
+          {errorMessage || "We could not send the link. Please try again or contact support."}
         </p>
       )}
     </form>

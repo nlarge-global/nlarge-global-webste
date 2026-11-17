@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { Inquiry } from "@/features/admin/models/inquiry";
@@ -34,7 +35,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Choose a valid status or priority." }, { status: 400 });
     console.error("Inquiry update failed:", error);
-    return NextResponse.json({ error: "Unable to update inquiry." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to update inquiry.") }, { status: 500 });
   }
 }
 
@@ -53,6 +54,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     console.error("Inquiry deletion failed:", error);
-    return NextResponse.json({ error: "Unable to archive inquiry." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to archive inquiry.") }, { status: 500 });
   }
 }

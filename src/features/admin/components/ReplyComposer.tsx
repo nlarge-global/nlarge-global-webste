@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "./ui/Button";
@@ -40,7 +41,7 @@ export default function ReplyComposer({
       })
       .catch((cause: unknown) => {
         if (cause instanceof Error && cause.name === "AbortError") return;
-        setError(cause instanceof Error ? cause.message : "Unable to load reply defaults.");
+        setError(getDisplayErrorMessage(cause, "Unable to load reply defaults."));
       });
     return () => controller.abort();
   }, [inquiryId, loadAttempt]);
@@ -65,8 +66,8 @@ export default function ReplyComposer({
         return;
       }
       onSent(result.entry);
-    } catch {
-      setError("Unable to send reply. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to send reply. Check your connection and try again."));
     } finally {
       setPending(false);
     }

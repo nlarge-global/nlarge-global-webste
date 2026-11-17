@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -68,7 +69,7 @@ export default function TaskList({
       return null;
     } catch (error) {
       updateTask(taskId, previous);
-      return error instanceof Error ? error.message : "Unable to update task.";
+      return getDisplayErrorMessage(error, "Unable to update task.");
     }
   }
 

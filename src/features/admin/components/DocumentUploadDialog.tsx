@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -47,7 +48,7 @@ export default function DocumentUploadDialog({
       router.refresh();
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : "Unable to upload document.",
+        getDisplayErrorMessage(reason, "Unable to upload document."),
       );
     } finally {
       setPending(false);

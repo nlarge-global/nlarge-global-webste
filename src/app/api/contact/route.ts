@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { contactSubmissionSchema } from "@/features/contact/schemas/contact";
@@ -96,6 +97,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: "Inquiry received" });
       }
     }
-    return NextResponse.json({ error: "Failed to save inquiry. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Failed to save inquiry. Please try again.") }, { status: 500 });
   }
 }

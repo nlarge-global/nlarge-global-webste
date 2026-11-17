@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,8 +30,8 @@ export default function ProspectArchiveButton({ id }: { id: string }) {
       }
       router.push("/admin/prospects");
       router.refresh();
-    } catch {
-      setError("Unable to archive prospect. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to archive prospect. Check your connection and try again."));
     } finally {
       setPending(false);
     }

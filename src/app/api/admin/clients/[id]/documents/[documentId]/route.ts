@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { ClientDocument } from "@/features/admin/models/document";
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Document access failed:", error);
-    return NextResponse.json({ error: "Unable to create document access." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create document access.") }, { status: 500 });
   }
 }
 
@@ -39,6 +40,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     console.error("Document deletion failed:", error);
-    return NextResponse.json({ error: "Unable to delete document." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to delete document.") }, { status: 500 });
   }
 }

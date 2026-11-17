@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { Button } from "./ui/Button";
@@ -72,9 +73,9 @@ export default function TaskForm({
         formElement.reset();
         onCreated(temporaryId, result.task);
       }
-    } catch {
+    } catch (error) {
       onCreateFailed(temporaryId);
-      setError("Unable to create task. Please try again.");
+      setError(getDisplayErrorMessage(error, "Unable to create task. Please try again."));
     } finally {
       setPending(false);
     }

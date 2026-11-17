@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Prospect list failed:", error);
-    return NextResponse.json({ error: "Unable to load prospects." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load prospects.") }, { status: 500 });
   }
 }
 
@@ -117,6 +118,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: error.issues[0]?.message ?? "Check the prospect details." }, { status: 400 });
     console.error("Prospect creation failed:", error);
-    return NextResponse.json({ error: "Unable to create prospect." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create prospect.") }, { status: 500 });
   }
 }

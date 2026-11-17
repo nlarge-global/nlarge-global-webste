@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowUpRight } from "react-icons/fi";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import {
   contactSchema,
@@ -48,6 +49,7 @@ export default function ContactForm({
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error" | "stale"
   >("idle");
+  const [submitError, setSubmitError] = useState("");
   const submissionRef = useRef<{ key: string; payload: string } | null>(null);
   const {
     register,
@@ -62,6 +64,7 @@ export default function ContactForm({
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("idle");
+    setSubmitError("");
     const submission = {
       ...data,
       privacyPolicyVersion,
@@ -93,6 +96,9 @@ export default function ContactForm({
       reset();
     } catch (error) {
       console.error("Contact form error:", error);
+      setSubmitError(
+        getDisplayErrorMessage(error, "Something went wrong. Please try again."),
+      );
       setSubmitStatus("error");
     }
   };
@@ -377,7 +383,7 @@ export default function ContactForm({
                       className="text-sm font-semibold text-[#602329]"
                       role="alert"
                     >
-                      Something went wrong. Please try again.
+                      {submitError || "Something went wrong. Please try again."}
                     </p>
                   )}
                   {submitStatus === "stale" && (

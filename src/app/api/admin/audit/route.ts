@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/features/admin/auth/session";
 import { AuditEvent } from "@/features/admin/models/audit-event";
@@ -39,6 +40,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Audit log read failed:", error);
-    return NextResponse.json({ error: "Unable to load audit events." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load audit events.") }, { status: 500 });
   }
 }

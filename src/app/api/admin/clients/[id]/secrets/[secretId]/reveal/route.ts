@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -45,6 +46,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: passwordTooLong ? BCRYPT_PASSWORD_TOO_LONG : "Password is required." }, { status: 400 });
     }
     console.error("Secret reveal failed:", error);
-    return NextResponse.json({ error: "Unable to reveal secret." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to reveal secret.") }, { status: 500 });
   }
 }

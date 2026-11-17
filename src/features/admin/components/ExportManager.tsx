@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState, type FormEvent } from "react";
 import {
@@ -70,7 +71,7 @@ export default function ExportManager({
       });
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : "Unable to create export.",
+        getDisplayErrorMessage(reason, "Unable to create export."),
       );
     } finally {
       setCreating(false);
@@ -93,9 +94,7 @@ export default function ExportManager({
       window.open(result.url, "_blank", "noopener,noreferrer");
     } catch (reason) {
       setError(
-        reason instanceof Error
-          ? reason.message
-          : "Export expired or could not be downloaded.",
+        getDisplayErrorMessage(reason, "Export expired or could not be downloaded."),
       );
     } finally {
       setDownloading(false);

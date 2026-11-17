@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 export default function UnsubscribeForm({ token }: { token: string }) {
   const [status, setStatus] = useState<"idle" | "done" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
   const [pending, setPending] = useState(false);
 
   async function unsubscribe() {
     setPending(true);
     setStatus("idle");
+    setErrorMessage("");
     try {
       const response = await fetch("/api/unsubscribe", {
         method: "POST",
@@ -20,6 +23,9 @@ export default function UnsubscribeForm({ token }: { token: string }) {
       setStatus("done");
     } catch (error) {
       console.error("Unsubscribe form error:", error);
+      setErrorMessage(
+        getDisplayErrorMessage(error, "We could not update your subscription. Please try again."),
+      );
       setStatus("error");
     } finally {
       setPending(false);
@@ -43,7 +49,7 @@ export default function UnsubscribeForm({ token }: { token: string }) {
       )}
       {status === "error" && (
         <p role="alert" className="mt-4 text-sm text-[#602329]">
-          We could not update your subscription. Please try again.
+          {errorMessage || "We could not update your subscription. Please try again."}
         </p>
       )}
     </div>

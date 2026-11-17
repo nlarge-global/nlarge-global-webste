@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { useState } from "react";
 import { Select } from "@/components/ui/select";
@@ -43,7 +44,7 @@ export default function InquiryProperties({
     } catch (cause) {
       if (field === "status") setStatus(previous as Status);
       else setPriority(previous as Priority);
-      setError(cause instanceof Error ? cause.message : "Unable to update inquiry.");
+      setError(getDisplayErrorMessage(cause, "Unable to update inquiry."));
     } finally {
       setPending(false);
     }

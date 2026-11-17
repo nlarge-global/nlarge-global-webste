@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -35,8 +36,8 @@ export default function ProspectCreateForm({ onCreated }: { onCreated: () => voi
       onCreated();
       router.push(`/admin/prospects/${result.id}`);
       router.refresh();
-    } catch {
-      setError("Unable to add this prospect. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to add this prospect. Check your connection and try again."));
     } finally {
       setPending(false);
     }

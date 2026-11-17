@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentAdminSession, revokeCurrentAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
@@ -15,6 +16,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     }
     console.error("Admin logout failed:", error);
-    return NextResponse.json({ error: "Unable to sign out." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to sign out.") }, { status: 500 });
   }
 }

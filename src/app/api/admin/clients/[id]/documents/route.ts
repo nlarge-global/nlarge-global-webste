@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -37,7 +38,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Document list failed:", error);
-    return NextResponse.json({ error: "Unable to load documents." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load documents.") }, { status: 500 });
   }
 }
 
@@ -72,12 +73,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       } catch (cleanupError) {
         console.error("Document orphan cleanup failed:", cleanupError);
       }
-      return NextResponse.json({ error: "Document metadata could not be saved." }, { status: 500 });
+      return NextResponse.json({ error: getDisplayErrorMessage(error, "Document metadata could not be saved.") }, { status: 500 });
     }
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     console.error("Document upload failed:", error);
-    return NextResponse.json({ error: "Unable to upload document." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to upload document.") }, { status: 500 });
   }
 }

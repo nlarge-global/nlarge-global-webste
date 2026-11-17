@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useEffect, useState } from "react";
 import { FiCheck, FiX } from "react-icons/fi";
@@ -184,9 +185,12 @@ export default function SecretManager({
     try {
       await navigator.clipboard.writeText(revealed);
       setCopied(true);
-    } catch {
+    } catch (error) {
       setRevealError(
-        "Could not copy the secret. Check your browser clipboard permissions.",
+        getDisplayErrorMessage(
+          error,
+          "Could not copy the secret. Check your browser clipboard permissions.",
+        ),
       );
     }
   }

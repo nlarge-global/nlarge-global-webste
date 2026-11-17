@@ -16,6 +16,7 @@ import {
   verifySubscriberToken,
 } from "../src/features/contact/services/unsubscribe-token-signature.ts";
 import { generateDeploymentSecret } from "../src/features/admin/auth/deployment-secret.ts";
+import { getDisplayErrorMessage } from "../src/lib/error-message.ts";
 
 const inquiry = {
   name: "Jane Smith",
@@ -124,4 +125,25 @@ test("deployment secret generator returns correctly encoded independent 256-bit 
     generateDeploymentSecret("ADMIN_SESSION_SECRET"),
     generateDeploymentSecret("ADMIN_SESSION_SECRET"),
   );
+});
+
+test("error messages are detailed only in development", () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+
+  try {
+    process.env.NODE_ENV = "development";
+    assert.equal(
+      getDisplayErrorMessage(new Error("Database connection refused"), "Please try again."),
+      "Database connection refused",
+    );
+
+    process.env.NODE_ENV = "production";
+    assert.equal(
+      getDisplayErrorMessage(new Error("Database connection refused"), "Please try again."),
+      "Please try again.",
+    );
+  } finally {
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+  }
 });

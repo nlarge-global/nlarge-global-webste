@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import crypto from "node:crypto";
 import * as archiver from "archiver";
 import { NextRequest, NextResponse } from "next/server";
@@ -110,6 +111,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid export options." }, { status: 400 });
     console.error("Client export failed:", error);
-    return NextResponse.json({ error: "Unable to create export." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create export.") }, { status: 500 });
   }
 }

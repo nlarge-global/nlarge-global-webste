@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/features/admin/auth/session";
 import { Subscriber } from "@/features/contact/models/subscriber";
@@ -61,6 +62,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     console.error("Subscriber export failed:", error);
-    return NextResponse.json({ error: "Unable to export subscribers." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to export subscribers.") }, { status: 500 });
   }
 }

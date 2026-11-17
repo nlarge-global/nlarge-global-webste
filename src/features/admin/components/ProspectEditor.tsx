@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -66,8 +67,8 @@ export default function ProspectEditor({ prospect }: { prospect: Prospect }) {
       }
       setSaved(true);
       router.refresh();
-    } catch {
-      setError("Unable to update this prospect. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to update this prospect. Check your connection and try again."));
     } finally {
       setPending(false);
     }

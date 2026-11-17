@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task details." }, { status: 400 });
     console.error("Task creation failed:", error);
-    return NextResponse.json({ error: "Unable to create task." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create task.") }, { status: 500 });
   }
 }
 
@@ -74,7 +75,7 @@ export async function PATCH(request: NextRequest) {
       if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
       if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task details." }, { status: 400 });
       console.error("Task update failed:", error);
-      return NextResponse.json({ error: "Unable to update task." }, { status: 500 });
+      return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to update task.") }, { status: 500 });
   }
 }
 
@@ -94,6 +95,6 @@ export async function DELETE(request: NextRequest) {
       if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
       if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid task." }, { status: 400 });
       console.error("Task deletion failed:", error);
-      return NextResponse.json({ error: "Unable to archive task." }, { status: 500 });
+      return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to archive task.") }, { status: 500 });
   }
 }

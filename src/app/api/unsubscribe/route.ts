@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
@@ -55,6 +56,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This unsubscribe link is invalid." }, { status: 400 });
     }
     console.error("Unsubscribe request failed:", error);
-    return NextResponse.json({ error: "Unable to update your subscription. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to update your subscription. Please try again.") }, { status: 500 });
   }
 }

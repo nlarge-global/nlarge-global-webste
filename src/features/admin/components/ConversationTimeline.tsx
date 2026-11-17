@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
@@ -92,7 +93,7 @@ export default function ConversationTimeline({
       })
       .catch((cause: unknown) => {
         if (cause instanceof Error && cause.name === "AbortError") return;
-        setError(cause instanceof Error ? cause.message : "Unable to load timeline.");
+        setError(getDisplayErrorMessage(cause, "Unable to load timeline."));
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -119,7 +120,7 @@ export default function ConversationTimeline({
       setEntries((current) => [...current, ...(result.entries ?? [])]);
       setHasMore(result.hasMore ?? false);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to load older entries.");
+      setError(getDisplayErrorMessage(cause, "Unable to load older entries."));
     } finally {
       setLoadingOlder(false);
     }

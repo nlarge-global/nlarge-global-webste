@@ -139,5 +139,8 @@ export async function getHealthChecks(): Promise<Record<string, Check>> {
       }
     }
   }
+  if (process.env.NODE_ENV !== "development") {
+    for (const check of Object.values(checks)) delete check.details;
+  }
   return checks;
 }

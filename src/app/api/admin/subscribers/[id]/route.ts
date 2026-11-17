@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { Subscriber } from "@/features/contact/models/subscriber";
@@ -43,6 +44,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     }
     console.error("Subscriber deletion failed:", error);
-    return NextResponse.json({ error: "Unable to delete subscriber." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to delete subscriber.") }, { status: 500 });
   }
 }

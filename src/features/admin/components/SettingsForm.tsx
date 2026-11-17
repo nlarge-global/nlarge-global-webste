@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import { FormEvent, useState } from "react";
 import { FiCheck, FiKey, FiMail, FiSave, FiSettings } from "react-icons/fi";
@@ -67,8 +68,8 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
       const result = await response.json() as { error?: string; secret?: string };
       if (!response.ok) setError(result.error ?? "Unable to generate secret.");
       else { setSecret(result.secret ?? ""); setError(""); }
-    } catch {
-      setError("Unable to reach the server. Check your connection and try again.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Unable to reach the server. Check your connection and try again."));
     }
   }
 
@@ -77,8 +78,8 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
       await navigator.clipboard.writeText(secret);
       setCopied(true);
       setError("");
-    } catch {
-      setError("Could not copy the secret. Select it and copy it manually.");
+    } catch (error) {
+      setError(getDisplayErrorMessage(error, "Could not copy the secret. Select it and copy it manually."));
     }
   }
 

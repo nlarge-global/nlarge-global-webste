@@ -1,3 +1,4 @@
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -36,7 +37,7 @@ export async function GET() {
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Settings read failed:", error);
-    return NextResponse.json({ error: "Unable to load settings." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load settings.") }, { status: 500 });
   }
 }
 
@@ -54,7 +55,7 @@ export async function PATCH(request: NextRequest) {
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
     if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid settings." }, { status: 400 });
     console.error("Settings update failed:", error);
-    return NextResponse.json({ error: "Unable to save settings." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to save settings.") }, { status: 500 });
   }
 }
 
@@ -88,6 +89,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: passwordTooLong ? BCRYPT_PASSWORD_TOO_LONG : "Invalid generation request." }, { status: 400 });
     }
     console.error("Settings generation failed:", error);
-    return NextResponse.json({ error: "Unable to generate the requested value." }, { status: 500 });
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to generate the requested value.") }, { status: 500 });
   }
 }

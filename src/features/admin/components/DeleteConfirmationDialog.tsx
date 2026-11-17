@@ -1,4 +1,5 @@
 "use client";
+import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import {
   useEffect,
@@ -45,7 +46,7 @@ export default function DeleteConfirmationDialog({
         setDeleted(true);
       } catch (reason) {
         setError(
-          reason instanceof Error ? reason.message : "Unable to complete this action.",
+          getDisplayErrorMessage(reason, "Unable to complete this action."),
         );
       } finally {
         setConfirming(false);
