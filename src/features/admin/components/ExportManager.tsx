@@ -4,8 +4,6 @@ import { getDisplayErrorMessage } from "@/lib/error-message";
 import { useState, type FormEvent } from "react";
 import {
   FiAlertCircle,
-  FiCheck,
-  FiClock,
   FiDownload,
   FiFileText,
   FiFolder,
@@ -16,28 +14,21 @@ import {
 import { Button } from "./ui/Button";
 import { Select } from "@/components/ui/select";
 
-type ExportResult = {
-  downloadUrl: string;
-  expiresAt?: string;
-  unavailableDocuments: string[];
-};
-
 export default function ExportManager({
   clients,
 }: {
   clients: Array<{ _id: string; name: string }>;
 }) {
-  const [exportResult, setExportResult] = useState<ExportResult | null>(null);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [unavailableDocumentCount, setUnavailableDocumentCount] = useState(0);
 
-  async function create(event: FormEvent<HTMLFormElement>) {
+  async function download(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setCreating(true);
-    setExportResult(null);
     setError("");
+    setUnavailableDocumentCount(0);
 
     try {
       const csrfToken = document.cookie
@@ -55,56 +46,32 @@ export default function ExportManager({
           includeDocuments: form.get("includeDocuments") === "on",
         }),
       });
-      const result = (await response.json()) as {
-        downloadUrl?: string;
-        expiresAt?: string;
-        unavailableDocuments?: string[];
-        error?: string;
-      };
-      if (!response.ok || !result.downloadUrl) {
-        throw new Error(result.error ?? "Unable to create export.");
+      if (!response.ok) {
+        const result = (await response.json()) as { error?: string };
+        throw new Error(result.error ?? "Unable to download export.");
       }
-      setExportResult({
-        downloadUrl: result.downloadUrl,
-        expiresAt: result.expiresAt,
-        unavailableDocuments: result.unavailableDocuments ?? [],
-      });
-    } catch (reason) {
-      setError(
-        getDisplayErrorMessage(reason, "Unable to create export."),
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = "client-export.zip";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      setUnavailableDocumentCount(
+        Number(response.headers.get("X-Export-Unavailable-Documents") ?? "0"),
       );
+    } catch (reason) {
+      setError(getDisplayErrorMessage(reason, "Unable to download export."));
     } finally {
       setCreating(false);
-    }
-  }
-
-  async function download() {
-    if (!exportResult) return;
-    setDownloading(true);
-    setError("");
-    try {
-      const response = await fetch(exportResult.downloadUrl);
-      const result = (await response.json()) as {
-        url?: string;
-        error?: string;
-      };
-      if (!response.ok || !result.url) {
-        throw new Error(result.error ?? "Export expired or could not be downloaded.");
-      }
-      window.open(result.url, "_blank", "noopener,noreferrer");
-    } catch (reason) {
-      setError(
-        getDisplayErrorMessage(reason, "Export expired or could not be downloaded."),
-      );
-    } finally {
-      setDownloading(false);
     }
   }
 
   return (
     <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(17rem,0.85fr)]">
       <form
-        onSubmit={create}
+        onSubmit={download}
         aria-busy={creating}
         className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6"
       >
@@ -174,45 +141,20 @@ export default function ExportManager({
             disabled={creating || clients.length === 0}
             className="w-full sm:flex-1"
           >
-            {creating ? "Creating export…" : "Create export"}
+            <FiDownload aria-hidden="true" />
+            {creating ? "Preparing download…" : "Download export"}
           </Button>
-          {exportResult && (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={downloading}
-              onClick={() => void download()}
-              className="w-full sm:flex-1"
-            >
-              <FiDownload aria-hidden="true" />
-              {downloading ? "Preparing download…" : "Download export"}
-            </Button>
-          )}
         </div>
         {clients.length === 0 && (
           <p className="mt-3 text-sm text-black/55">
             Add a client before creating an export.
           </p>
         )}
-        {exportResult && (
-          <div className="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            <FiCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-            <div>
-              <p className="font-semibold">Export is ready</p>
-              <p className="mt-1 leading-5">
-                The secure download link expires after 10 minutes.
-                {exportResult.expiresAt && (
-                  <> Expires at {new Date(exportResult.expiresAt).toLocaleTimeString()}.</>
-                )}
-              </p>
-            </div>
-          </div>
-        )}
-        {exportResult && exportResult.unavailableDocuments.length > 0 && (
+        {unavailableDocumentCount > 0 && (
           <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
             <p className="font-semibold">
-              Export created, but {exportResult.unavailableDocuments.length} document
-              {exportResult.unavailableDocuments.length === 1 ? " file is" : " files are"} missing from storage.
+              {unavailableDocumentCount} document
+              {unavailableDocumentCount === 1 ? " file is" : " files are"} missing from storage.
             </p>
             <p className="mt-1 leading-5">
               The archive includes a <code>documents-unavailable.json</code> manifest
@@ -236,7 +178,7 @@ export default function ExportManager({
         <div className="mt-6 flex items-start gap-3 border-t border-black/10 pt-5">
           <FiShield aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#602329]" />
           <p className="text-xs leading-5 text-black/60">
-            Download links require an authenticated admin session and are short-lived.
+            Exports require an authenticated admin session and are downloaded directly.
           </p>
         </div>
       </aside>

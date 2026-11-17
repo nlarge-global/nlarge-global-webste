@@ -42,7 +42,3 @@ Planned workflow:
 Before implementation, define how soft-deleted clients and database backups are handled, restrict who can start the migration, and audit start/completion/failure without recording secret material.
 
 This is a planned key rotation, not remediation for a compromised key. If compromise is suspected, re-wrapping does not make old database backups safe; handle it as a separate security incident.
-
-## Expired export object cleanup
-
-Client export ZIPs are stored under private object keys and exposed through short-lived `ExportJob` download tokens. Add an operational cleanup process to remove expired export objects and corresponding job records safely. Define retention, retry behavior, and auditability; never delete source client documents as part of this cleanup.

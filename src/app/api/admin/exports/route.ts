@@ -1,21 +1,22 @@
 import { getDisplayErrorMessage } from "@/lib/error-message";
-import crypto from "node:crypto";
 import * as archiver from "archiver";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
+import {
+  requireAdminSession,
+  validateCsrfToken,
+} from "@/features/admin/auth/session";
 import { AuditEvent } from "@/features/admin/models/audit-event";
 import { Client } from "@/features/admin/models/client";
 import { ConversationEntry } from "@/features/admin/models/conversation-entry";
 import { ClientDocument } from "@/features/admin/models/document";
-import { ExportJob } from "@/features/admin/models/export-job";
 import { Inquiry } from "@/features/admin/models/inquiry";
 import { PaymentRecord } from "@/features/admin/models/payment";
 import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { connectToDatabase } from "@/lib/mongodb";
-import { downloadPrivateObject, uploadPrivateObject } from "@/lib/r2";
+import { downloadPrivateObject } from "@/lib/r2";
 
 const exportSchema = z.object({
   clientId: z.string().regex(/^[a-f\d]{24}$/i),
@@ -37,7 +38,11 @@ function createZip(files: Array<{ name: string; content: string | Buffer }>) {
 function isMissingPrivateObject(error: unknown) {
   if (!error || typeof error !== "object") return false;
   const storageError = error as { name?: string; Code?: string; code?: string };
-  return storageError.name === "NoSuchKey" || storageError.Code === "NoSuchKey" || storageError.code === "NoSuchKey";
+  return (
+    storageError.name === "NoSuchKey" ||
+    storageError.Code === "NoSuchKey" ||
+    storageError.code === "NoSuchKey"
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -47,24 +52,41 @@ export async function POST(request: NextRequest) {
     const data = exportSchema.parse(await request.json());
     await connectToDatabase();
     const client = await Client.findById(data.clientId).lean();
-    if (!client) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    const [inquiries, projects, tasks, payments, documents] = await Promise.all([
-      Inquiry.find({ clientId: client._id }).lean(),
-      Project.find({ clientId: client._id }).lean(),
-      Task.find({ clientId: client._id }).lean(),
-      PaymentRecord.find({ clientId: client._id }).lean(),
-      ClientDocument.find({ clientId: client._id }).select("filename contentType size createdAt objectKey").lean(),
-    ]);
+    if (!client)
+      return NextResponse.json({ error: "Client not found." }, { status: 404 });
+    const [inquiries, projects, tasks, payments, documents] = await Promise.all(
+      [
+        Inquiry.find({ clientId: client._id }).lean(),
+        Project.find({ clientId: client._id }).lean(),
+        Task.find({ clientId: client._id }).lean(),
+        PaymentRecord.find({ clientId: client._id }).lean(),
+        ClientDocument.find({ clientId: client._id })
+          .select("filename contentType size createdAt objectKey")
+          .lean(),
+      ],
+    );
     const inquiryIds = inquiries.map((inquiry) => inquiry._id);
-    const conversations = await ConversationEntry.find({ inquiryId: { $in: inquiryIds } }).lean();
+    const conversations = await ConversationEntry.find({
+      inquiryId: { $in: inquiryIds },
+    }).lean();
     const files: Array<{ name: string; content: string | Buffer }> = [
       { name: "client.json", content: JSON.stringify(client, null, 2) },
       { name: "inquiries.json", content: JSON.stringify(inquiries, null, 2) },
       { name: "projects.json", content: JSON.stringify(projects, null, 2) },
       { name: "tasks.json", content: JSON.stringify(tasks, null, 2) },
       { name: "payments.json", content: JSON.stringify(payments, null, 2) },
-      { name: "conversations.json", content: JSON.stringify(conversations, null, 2) },
-      { name: "documents.json", content: JSON.stringify(documents.map(({ objectKey: _objectKey, ...metadata }) => metadata), null, 2) },
+      {
+        name: "conversations.json",
+        content: JSON.stringify(conversations, null, 2),
+      },
+      {
+        name: "documents.json",
+        content: JSON.stringify(
+          documents.map(({ objectKey: _objectKey, ...metadata }) => metadata),
+          null,
+          2,
+        ),
+      },
     ];
     const unavailableDocuments: string[] = [];
     if (data.includeDocuments) {
@@ -84,7 +106,8 @@ export async function POST(request: NextRequest) {
           name: "documents-unavailable.json",
           content: JSON.stringify(
             {
-              message: "These document records had no matching file in private storage and were not included.",
+              message:
+                "These document records had no matching file in private storage and were not included.",
               filenames: unavailableDocuments,
             },
             null,
@@ -94,23 +117,48 @@ export async function POST(request: NextRequest) {
       }
     }
     const zip = await createZip(files);
-    const token = crypto.randomBytes(32).toString("base64url");
-    const exportId = crypto.randomUUID();
-    const objectKey = `exports/${exportId}.zip`;
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await uploadPrivateObject(objectKey, zip, "application/zip");
-    await ExportJob.create({ clientId: client._id, tokenHash: crypto.createHash("sha256").update(token).digest("hex"), objectKey, expiresAt });
-    await writeAuditEvent({ actor: "admin", action: "client.export.created", resourceType: "client", resourceId: data.clientId, resourceLabel: client.name, requestId: getRequestId(request), metadata: { includeDocuments: data.includeDocuments } });
-    return NextResponse.json({
-      downloadUrl: `/api/admin/exports/${token}`,
-      expiresAt: expiresAt.toISOString(),
-      unavailableDocuments,
+    await writeAuditEvent({
+      actor: "admin",
+      action: "client.export.created",
+      resourceType: "client",
+      resourceId: data.clientId,
+      resourceLabel: client.name,
+      requestId: getRequestId(request),
+      metadata: { includeDocuments: data.includeDocuments },
+    });
+    await writeAuditEvent({
+      actor: "admin",
+      action: "client.export.downloaded",
+      resourceType: "client",
+      resourceId: data.clientId,
+      resourceLabel: client.name,
+      requestId: getRequestId(request),
+    });
+    return new NextResponse(new Uint8Array(zip), {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Disposition": 'attachment; filename="client-export.zip"',
+        "Content-Type": "application/zip",
+        "X-Export-Unavailable-Documents": String(unavailableDocuments.length),
+      },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
-    if (error instanceof z.ZodError) return NextResponse.json({ error: "Invalid export options." }, { status: 400 });
+    if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (error instanceof Error && error.message.startsWith("CSRF_"))
+      return NextResponse.json(
+        { error: "Security check failed. Refresh and try again." },
+        { status: 403 },
+      );
+    if (error instanceof z.ZodError)
+      return NextResponse.json(
+        { error: "Invalid export options." },
+        { status: 400 },
+      );
     console.error("Client export failed:", error);
-    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to create export.") }, { status: 500 });
+    return NextResponse.json(
+      { error: getDisplayErrorMessage(error, "Unable to create export.") },
+      { status: 500 },
+    );
   }
 }
