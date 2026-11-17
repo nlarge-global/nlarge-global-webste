@@ -106,11 +106,20 @@ export async function getCurrentAdminSession() {
 }
 
 export async function getCurrentAdminShareSession() {
+  const { session } = await getAdminShareSessionDiagnostics();
+  return session;
+}
+
+export async function getAdminShareSessionDiagnostics() {
   const cookieStore = await cookies();
-  const token =
-    cookieStore.get(SHARE_COOKIE)?.value ??
-    cookieStore.get(SESSION_COOKIE)?.value;
-  return getSessionForToken(token);
+  const shareToken = cookieStore.get(SHARE_COOKIE)?.value;
+  const adminToken = cookieStore.get(SESSION_COOKIE)?.value;
+  const session = await getSessionForToken(shareToken ?? adminToken);
+  return {
+    session,
+    shareCookiePresent: Boolean(shareToken),
+    adminCookiePresent: Boolean(adminToken),
+  };
 }
 
 export async function stageAdminShare(sessionId: string, pendingShare: PendingAdminShare) {

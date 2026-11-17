@@ -144,10 +144,12 @@ function AdminSidebar({
   mobile = false,
   onClose,
   onLogout,
+  loggingOut,
 }: {
   mobile?: boolean;
   onClose?: () => void;
   onLogout: () => void;
+  loggingOut: boolean;
 }) {
   const { collapsed } = useSidebar();
 
@@ -197,10 +199,13 @@ function AdminSidebar({
         <Button
           type="button"
           onClick={onLogout}
+          disabled={loggingOut}
           className={`w-full ${collapsed ? "justify-center" : "justify-start"}  gap-3 `}
         >
           <FiLogOut aria-hidden="true" />
-          <span className={collapsed ? "sr-only" : undefined}>Sign out</span>
+          <span className={collapsed ? "sr-only" : undefined}>
+            {loggingOut ? "Signing out..." : "Sign out"}
+          </span>
         </Button>
       </SidebarFooter>
     </ShadcnSidebar>
@@ -213,6 +218,8 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -233,25 +240,43 @@ export default function AdminShell({
   }
 
   async function logout() {
-    const csrfToken = document.cookie
-      .split("; ")
-      .find((cookie) => cookie.startsWith("nlarge_admin_csrf="))
-      ?.split("=")[1];
-    const response = await fetch("/api/admin/auth/logout", {
-      method: "POST",
-      headers: csrfToken
-        ? { "x-csrf-token": decodeURIComponent(csrfToken) }
-        : undefined,
-    });
-    if (response.ok) router.replace("/admin/login");
+    if (loggingOut) return;
+    setLoggingOut(true);
+    setLogoutError("");
+    try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("nlarge_admin_csrf="))
+        ?.split("=")[1];
+      const response = await fetch("/api/admin/auth/logout", {
+        method: "POST",
+        headers: csrfToken
+          ? { "x-csrf-token": decodeURIComponent(csrfToken) }
+          : undefined,
+      });
+      if (!response.ok) {
+        const result = await response.json() as { error?: string };
+        throw new Error(result.error ?? "Unable to sign out.");
+      }
+      router.replace("/admin/login");
+    } catch (error) {
+      setLogoutError(
+        error instanceof Error ? error.message : "Unable to sign out. Please try again.",
+      );
+      setLoggingOut(false);
+    }
   }
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-white text-[#352c29]">
+      <div
+        inert={loggingOut}
+        aria-busy={loggingOut}
+        className="min-h-screen bg-white text-[#352c29]"
+      >
         <div className="flex">
           <div className="hidden lg:block">
-            <AdminSidebar onLogout={logout} />
+            <AdminSidebar onLogout={logout} loggingOut={loggingOut} />
           </div>
           <div
             aria-hidden={!mobileOpen}
@@ -279,11 +304,17 @@ export default function AdminShell({
                 mobile
                 onClose={() => setMobileOpen(false)}
                 onLogout={logout}
+                loggingOut={loggingOut}
               />
             </div>
           </div>
           <div className="min-w-0 flex-1">
             <header className="sticky top-0 z-30 border-b border-[#ece5df] bg-[#fffdfb]/95 backdrop-blur">
+              {logoutError && (
+                <p role="alert" className="bg-red-50 px-4 py-2 text-sm text-red-800">
+                  {logoutError}
+                </p>
+              )}
               <div className="flex min-h-16 items-center justify-between gap-4 px-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <Button
@@ -315,6 +346,18 @@ export default function AdminShell({
           </div>
         </div>
       </div>
+      {loggingOut && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-[100] grid cursor-wait place-items-center bg-white/70 backdrop-blur-sm"
+        >
+          <div className="flex items-center gap-3 rounded-xl bg-white px-5 py-4 shadow-lg">
+            <span className="size-5 animate-spin rounded-full border-2 border-[#602329]/25 border-t-[#602329] motion-reduce:animate-none" />
+            <span className="font-medium">Signing out...</span>
+          </div>
+        </div>
+      )}
     </SidebarProvider>
   );
 }
