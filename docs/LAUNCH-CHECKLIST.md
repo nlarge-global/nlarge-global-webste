@@ -4,8 +4,8 @@ This checklist covers the remaining owner/provider steps for publishing the site
 
 ## Completed in the repository
 
-- The canonical URL defaults to `https://nlargecorp.com` in `src/lib/site.ts`. Set the same value in Vercel's Production environment and redeploy.
-- Public pages use canonical metadata and the sitemap uses the non-`www` host.
+- The canonical URL defaults to `https://www.nlargecorp.com` in `src/lib/site.ts`. Set the same value in Vercel's Production environment and redeploy.
+- Public pages use canonical metadata and the sitemap uses the `www` host, matching the primary host that the apex redirects to.
 - One branded 1200 x 630 social preview image is used by public pages.
 - The site says it is based in Rajasthan, India, and serves clients worldwide. No city or street address is published.
 - Four public guides are linked from navigation and the footer: website maintenance, codebase handover, slow websites, and redesign/new feature planning.
@@ -21,16 +21,18 @@ This checklist covers the remaining owner/provider steps for publishing the site
 3. In **Project Settings → Environment Variables**, set the Production value:
 
    ```env
-   NEXT_PUBLIC_SITE_URL=https://nlargecorp.com
+   NEXT_PUBLIC_SITE_URL=https://www.nlargecorp.com
    ```
 
    This is a public URL, not a secret. The site uses it when creating canonical URLs, structured data, and the sitemap, so redeploy after changing it.
 4. Confirm the production environment has the required server-side values from `example.env` (database, admin security, and SMTP). Add R2 settings only if the feature is used. Never put secret values in GitHub or public build variables. Protect Preview deployments and do not expose production secrets to untrusted previews. Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` if contact rate limiting must be shared across serverless instances.
-5. In Vercel's domain settings, make `nlargecorp.com` the primary domain and verify the configured DNS records with the values Vercel shows. Do not guess or copy DNS targets from old instructions.
-6. In Cloudflare, make permanent redirects preserve the path and query:
-   - `https://www.nlargecorp.com/<path>` → `https://nlargecorp.com/<path>`
-   - `http://nlargecorp.com/<path>` → `https://nlargecorp.com/<path>`
-   - `http://www.nlargecorp.com/<path>` → `https://nlargecorp.com/<path>`
+5. In Vercel's domain settings, make `www.nlargecorp.com` the primary domain and verify the configured DNS records with the values Vercel shows. Do not guess or copy DNS targets from old instructions.
+6. Make the apex host permanently redirect to `www`, preserving the path and query:
+   - `https://nlargecorp.com/<path>` → `https://www.nlargecorp.com/<path>`
+   - `http://nlargecorp.com/<path>` → `https://www.nlargecorp.com/<path>`
+   - `http://www.nlargecorp.com/<path>` → `https://www.nlargecorp.com/<path>`
+
+   The live edge currently answers the apex with a temporary `307`. Use a permanent `301`/`308` instead, so search engines consolidate signals on `www` and stop reporting redirect issues.
 
    Configure each redirect in one place (Cloudflare Redirect Rules or Vercel), not as conflicting rules in both. Use a permanent 301/308 redirect and verify that no rule loops.
 7. In **Cloudflare → SSL/TLS → Overview**, use **Full (strict)** only after confirming the Vercel origin presents a valid HTTPS certificate for the configured hostname. Cloudflare's [Full (strict) guidance](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/) explains the certificate requirements.
@@ -48,7 +50,7 @@ In the Cloudflare dashboard for `nlargecorp.com`:
 4. Set **Agents** to **Allow (do not block)**.
 5. Set **Training** to **Disallow**.
 6. Enable **Bot Preference Sync** if shown, then save.
-7. After deployment, open `https://nlargecorp.com/robots.txt` and verify the sitemap line and the intended Search/Agent/Training directives. Also confirm Cloudflare's edge policy is not challenging or blocking verified search crawlers.
+7. After deployment, open `https://www.nlargecorp.com/robots.txt` and verify the sitemap line and the intended Search/Agent/Training directives. Also confirm Cloudflare's edge policy is not challenging or blocking verified search crawlers.
 
 Cloudflare documents these controls in [AI Crawler and Agent access policies](https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/) and [robots.txt setting](https://developers.cloudflare.com/bots/additional-configurations/managed-robots-txt/). Robots directives express a preference; Cloudflare edge policy is what can enforce its crawler controls.
 
@@ -58,19 +60,19 @@ Run these checks from a terminal or browser after DNS and deployment have settle
 
 ```bash
 curl -sSIL https://www.nlargecorp.com/softwares
-curl -sSIL https://nlargecorp.com/products
+curl -sSIL https://www.nlargecorp.com/products
 curl -sSIL http://nlargecorp.com/services
 curl -sSIL http://www.nlargecorp.com/guides
-curl -sSI https://nlargecorp.com/og-image.png
-curl -sS https://nlargecorp.com/robots.txt
-curl -sS https://nlargecorp.com/sitemap.xml
+curl -sSI https://www.nlargecorp.com/og-image.png
+curl -sS https://www.nlargecorp.com/robots.txt
+curl -sS https://www.nlargecorp.com/sitemap.xml
 ```
 
-Confirm the first URL redirects to `/softwares` and the old `/products` URL redirects there permanently; the next two URLs finish at the corresponding `https://nlargecorp.com/...` URL. The image should return `200` with `image/png`, robots should name the canonical sitemap, and the sitemap should contain the four guide URLs and `/softwares`. Open the homepage, services, softwares page, all guides, contact, support, and legal pages on desktop and a phone. Submit a real contact enquiry and confirm staff notification and visitor confirmation arrive. Do not use a real customer's sensitive data for this test.
+Confirm the first URL redirects to `/softwares` and the old `/products` URL redirects there permanently; the next two URLs finish at the corresponding `https://www.nlargecorp.com/...` URL with no interim hop through the apex. The image should return `200` with `image/png`, robots should name the canonical sitemap, and the sitemap should contain the four guide URLs and `/softwares`. Open the homepage, services, softwares page, all guides, contact, support, and legal pages on desktop and a phone. Submit a real contact enquiry and confirm staff notification and visitor confirmation arrive. Do not use a real customer's sensitive data for this test.
 
 Check HTTPS/TLS and response security headers on the deployed pages, including HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and Content Security Policy. The app sets these in `next.config.ts`; verify they survive the Cloudflare/Vercel path and that the CSP does not break the form or page. Confirm the admin login and protected admin routes require authentication; `robots.txt` and `noindex` are not access controls.
 
-For social previews, verify `https://nlargecorp.com/og-image.png` loads and inspect a shared link in the relevant social platform preview/debug tool. A preview may be cached by the social platform.
+For social previews, verify `https://www.nlargecorp.com/og-image.png` loads and inspect a shared link in the relevant social platform preview/debug tool. A preview may be cached by the social platform.
 
 ## Search Console: keep the existing data
 
@@ -79,7 +81,7 @@ Do **not** delete or reset existing Search Console properties.
 1. Add a **Domain property** for `nlargecorp.com` in [Google Search Console](https://search.google.com/search-console).
 2. Verify it by adding Google's DNS TXT record at the domain's DNS provider. Preserve existing DNS records.
 3. Keep the existing URL-prefix properties; the Domain property also covers `www`, HTTP, and HTTPS.
-4. Submit `https://nlargecorp.com/sitemap.xml` under the Domain property after the canonical redirects work.
+4. Submit `https://www.nlargecorp.com/sitemap.xml` under the Domain property after the canonical redirects work.
 5. Use URL Inspection on `/`, `/services`, `/softwares`, `/guides`, and each new guide. Check Google's selected canonical, crawl/index status, and request indexing for the new guides if appropriate.
 6. Review Page indexing, Manual actions, Security issues, and Performance reports periodically. Allow for reporting/indexing delays; submission does not guarantee indexing or rankings.
 
@@ -91,7 +93,7 @@ Google says its normal SEO fundamentals apply to AI Overviews and AI Mode; no sp
 
 Analytics is not installed. If you want visitor behavior and enquiry tracking:
 
-1. Create a GA4 property and web data stream for `https://nlargecorp.com`.
+1. Create a GA4 property and web data stream for `https://www.nlargecorp.com`.
 2. Choose one installation method (Google tag or Google Tag Manager); don't install both.
 3. Track successful contact submissions only after the server confirms success, and test in GA4 Realtime/DebugView.
 4. Decide whether you need a consent banner before enabling Analytics or advertising tags. Review the privacy policy and requirements for visitors' locations. No advertising cookies/tags are installed by this implementation.
@@ -104,7 +106,7 @@ The school does not need to publish proof of permission. Keep the school's writt
 
 You can ask the school by email:
 
-> Would NRI Public School be comfortable adding “Website by NLarge Global” with a link to https://nlargecorp.com in the website footer? Please let me know whether we may also show selected screenshots and describe our work on our portfolio. We will publish only the wording and materials you approve.
+> Would NRI Public School be comfortable adding “Website by NLarge Global” with a link to https://www.nlargecorp.com in the website footer? Please let me know whether we may also show selected screenshots and describe our work on our portfolio. We will publish only the wording and materials you approve.
 
 If approved, retain the reply, confirm the final wording and destination URL, then add the credit only in the placement approved. The link can provide attribution and a useful public reference, but no backlink or directory listing guarantees improved rankings. GoodFirms, Clutch, and DesignRush listings are optional; use consistent, accurate details and genuine reviews only.
 

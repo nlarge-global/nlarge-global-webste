@@ -1,4 +1,4 @@
-export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://nlargecorp.com").origin;
+export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.nlargecorp.com").origin;
 export const organizationId = `${siteUrl}/#organization`;
 export const socialPreviewImage = {
   url: `${siteUrl}/og-image.png`,

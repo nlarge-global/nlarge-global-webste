@@ -3,7 +3,7 @@ import { z } from "zod";
 const emptyToUndefined = (value: unknown) => value === "" ? undefined : value;
 
 const serverEnvSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.string().url().optional().default("https://nlargecorp.com"),
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional().default("https://www.nlargecorp.com"),
   MONGODB_URI: z.string().min(1).optional(),
   SMTP_HOST: z.string().min(1).optional().default("smtp.gmail.com"),
   SMTP_PORT: z.coerce.number().int().positive().optional().default(587),

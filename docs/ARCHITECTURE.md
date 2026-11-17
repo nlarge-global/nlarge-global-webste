@@ -234,7 +234,7 @@ The admin Settings page can generate a bcrypt password hash and new 256-bit envi
 
 | Variable | Required | Default | Purpose |
 |---|---:|---|---|
-| `NEXT_PUBLIC_SITE_URL` | No | `https://nlargecorp.com` | Canonical site URL |
+| `NEXT_PUBLIC_SITE_URL` | No | `https://www.nlargecorp.com` | Canonical site URL (must match the primary host; the apex redirects here) |
 | `MONGODB_URI` | Yes for persisted data | — | MongoDB connection for inquiry and subscriber records |
 | `ADMIN_SESSION_SECRET` | Yes for admin | — | HMAC key for admin session tokens |
 | `UNSUBSCRIBE_TOKEN_SECRET` | Yes for subscriber export and unsubscribe | — | HMAC key for unsubscribe links; generate an independent secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"` |
