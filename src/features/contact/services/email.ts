@@ -122,6 +122,24 @@ export async function sendContactEmails(data: ContactEmailData) {
   }
 }
 
+export async function sendUnsubscribeLinkEmail(email: string, unsubscribeUrl: string) {
+  const env = getServerEnv();
+  const transporter = createTransporter();
+  const safeUrl = escapeHtml(unsubscribeUrl);
+
+  try {
+    await transporter.sendMail({
+      from: `NLarge Global <${env.SMTP_USER}>`,
+      to: email,
+      subject: "Confirm your NLarge Global unsubscribe request",
+      text: `We received a request to stop marketing emails from NLarge Global. Confirm your choice here:\n\n${unsubscribeUrl}\n\nIf you did not make this request, you can ignore this email.`,
+      html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#111"><h1 style="color:#602329">Confirm your email preferences</h1><p>We received a request to stop marketing emails from NLarge Global.</p><p><a href="${safeUrl}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#602329;color:#fff;text-decoration:none">Review email preferences</a></p><p>If you did not make this request, you can ignore this email.</p></body></html>`,
+    });
+  } finally {
+    transporter.close();
+  }
+}
+
 export type DashboardReplyData = {
     recipient: string;
     subject: string;

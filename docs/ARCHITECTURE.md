@@ -29,9 +29,11 @@ src/
 │   │   └── guides/               # Practical editorial guides
 │   │       ├── page.tsx          # /guides
 │   │       └── [slug]/page.tsx   # Statically generated guide articles
-│   ├── api/contact/route.ts      # Contact HTTP boundary
-├── api/unsubscribe/route.ts  # Public unsubscribe action
-├── unsubscribe/page.tsx      # Public email preferences page
+│   ├── api/contact/route.ts          # Contact HTTP boundary
+│   ├── api/unsubscribe/
+│   │   ├── route.ts                  # Public unsubscribe action
+│   │   └── request/route.ts          # Email-based unsubscribe link request
+│   ├── unsubscribe/page.tsx          # Public email preferences page
 │   ├── contact/page.tsx          # /contact
 │   ├── support/page.tsx          # /support
 │   ├── admin/                    # Private dashboard route surface
@@ -58,6 +60,8 @@ src/
 │   ├── contact/
 │   │   ├── api/rate-limit.ts
 │   │   ├── components/ContactForm.tsx
+│   │   ├── components/UnsubscribeForm.tsx
+│   │   ├── components/UnsubscribeRequestForm.tsx
 │   │   ├── schemas/contact.ts
 │   │   ├── models/subscriber.ts
 │   │   ├── services/subscribers.ts

@@ -2,6 +2,16 @@
 
 This document tracks approved work intentionally deferred from the current implementation. Do not treat these items as implemented.
 
+## Showcase cleanup
+
+- Remove the unused `ProjectShowcase` component and update the architecture documentation to reflect the current device showcase.
+
+## Work portfolio and About page
+
+- Add a Work tab with image-led case studies describing selected projects and their outcomes.
+- Add an About page introducing the company and its team.
+- Integrate both pages with public navigation, metadata, and the sitemap when implemented.
+
 ## Admin-managed legal content and notifications
 
 The current legal documents are local, source-controlled records in `src/content/legal-documents.json`. This file is the single source for published text, effective dates, version summaries, SEO descriptions/keywords, privacy acknowledgement wording, and marketing consent wording.

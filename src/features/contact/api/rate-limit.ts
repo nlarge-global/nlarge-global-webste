@@ -4,11 +4,10 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
 
-export async function isContactRateLimited(ip: string) {
+async function isRateLimited(key: string) {
   const env = getServerEnv();
 
   if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
-    const key = `contact-rate:${ip}`;
     const response = await fetch(`${env.UPSTASH_REDIS_REST_URL.replace(/\/$/, "")}/pipeline`, {
       method: "POST",
       headers: {
@@ -28,12 +27,20 @@ export async function isContactRateLimited(ip: string) {
   }
 
   const now = Date.now();
-  const limit = rateLimitStore.get(ip);
+  const limit = rateLimitStore.get(key);
   if (!limit || now > limit.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return false;
   }
   if (limit.count >= RATE_LIMIT_MAX_REQUESTS) return true;
   limit.count += 1;
   return false;
+}
+
+export function isContactRateLimited(ip: string) {
+  return isRateLimited(`contact-rate:${ip}`);
+}
+
+export function isUnsubscribeRequestRateLimited(ip: string) {
+  return isRateLimited(`unsubscribe-request-rate:${ip}`);
 }

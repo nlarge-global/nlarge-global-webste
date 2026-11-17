@@ -1,35 +1,15 @@
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import TestimonialsSection from "@/features/showcase/components/TestimonialsSection";
-import ProjectShowcase from "@/features/showcase/components/ProjectShowcase";
+import DeviceShowcase from "@/features/showcase/components/DeviceShowcase";
 import ServicesSection from "@/components/sections/ServicesSection";
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowUpRight } from "react-icons/fi";
-import projects from "@/content/projects.json";
-import { safeJsonLd } from "@/lib/structured-data";
-import { organizationId, siteUrl } from "@/lib/site";
 
 export default function HomePage() {
-  const featuredProject = projects[0];
-
   return (
     <div className="w-full bg-white text-black">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: safeJsonLd({
-            "@context": "https://schema.org",
-            "@type": "CreativeWork",
-            "@id": `${siteUrl}/#nri-public-school-project`,
-            name: `${featuredProject.name} website`,
-            description: featuredProject.summary,
-            url: featuredProject.url,
-            image: `${siteUrl}${featuredProject.image}`,
-            creator: { "@id": organizationId },
-          }),
-        }}
-      />
       <Navigation />
       <main id="main-content" tabIndex={-1}>
         <section
@@ -66,7 +46,7 @@ export default function HomePage() {
                 />
               </Link>
             </div>
-            <ProjectShowcase />
+            <DeviceShowcase />
           </div>
         </section>
 

@@ -5,10 +5,16 @@ import { useEffect, useState } from "react";
 import { FiPause, FiPlay } from "react-icons/fi";
 import testimonials from "@/content/testimonials.json";
 
-const sidePortraits = [
+const leftsidePortraits = [
   testimonials[0].image,
   testimonials[1].image,
   testimonials[2].image,
+];
+
+const rightsidePortraits = [
+  testimonials[2].image,
+  testimonials[3].image,
+  testimonials[4].image,
 ];
 
 export default function TestimonialsSection() {
@@ -38,7 +44,7 @@ export default function TestimonialsSection() {
     <section aria-labelledby="testimonials-title" className="flex min-h-fit sm:min-h-full  w-full items-center justify-center ">
       <div className="testimonial-layout relative min-h-fit w-full overflow-visible sm:min-h-[46rem]">
         <div className="side-portraits side-portraits-left" aria-hidden="true">
-          {sidePortraits.map((src, index) => (
+          {leftsidePortraits.map((src, index) => (
             <span key={`left-${src}-${index}`} className={`testimonial-side-photo testimonial-side-photo-${index + 1}`}>
               <Image src={src} alt="" fill sizes="220px" className="object-cover" />
             </span>
@@ -87,7 +93,7 @@ export default function TestimonialsSection() {
           </figure>
         </div>
         <div className="side-portraits side-portraits-right" aria-hidden="true">
-          {[sidePortraits[2], sidePortraits[0], sidePortraits[1]].map((src, index) => (
+          {rightsidePortraits.map((src, index) => (
             <span key={`right-${src}-${index}`} className={`testimonial-side-photo testimonial-side-photo-${index + 1}`}>
               <Image src={src} alt="" fill sizes="220px" className="object-cover" />
             </span>

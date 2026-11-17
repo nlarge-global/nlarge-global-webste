@@ -3,6 +3,7 @@ import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import UnsubscribeForm from "@/features/contact/components/UnsubscribeForm";
+import UnsubscribeRequestForm from "@/features/contact/components/UnsubscribeRequestForm";
 import { getVerifiedSubscriberAddressKey } from "@/features/contact/services/unsubscribe-token";
 
 export const metadata: Metadata = {
@@ -41,17 +42,32 @@ export default async function UnsubscribePage({
           ) : (
             <>
               <p className="mt-5 max-w-xl leading-7 text-black/70">
-                This unsubscribe link is invalid or incomplete. Please use the
-                link in a recent NLarge Global email or contact us for help.
+                {token
+                  ? "That email preferences link could not be verified. Enter your email below and we’ll send a fresh link if it’s subscribed."
+                  : "Enter the email address you used to subscribe. We’ll send you a secure link to manage your email preferences."}
               </p>
-              <Link
-                href="/contact"
-                className="mt-6 inline-block font-semibold text-[#602329] underline underline-offset-4"
-              >
-                Contact NLarge Global
-              </Link>
+              <UnsubscribeRequestForm />
             </>
           )}
+          <div className="mt-8 border-t border-black/10 pt-5 text-sm leading-6 text-black/70">
+            <p>
+              You can also email{" "}
+              <a
+                href="mailto:support@nlargecorp.com"
+                className="font-semibold text-[#602329] underline underline-offset-4"
+              >
+                support@nlargecorp.com
+              </a>{" "}
+              or use our{" "}
+              <Link
+                href="/contact"
+                className="font-semibold text-[#602329] underline underline-offset-4"
+              >
+                contact form
+              </Link>
+              .
+            </p>
+          </div>
         </section>
       </main>
       <Footer />
