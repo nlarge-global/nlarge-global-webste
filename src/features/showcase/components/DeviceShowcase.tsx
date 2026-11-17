@@ -105,7 +105,7 @@ export default function DeviceShowcase() {
           <span>View {projectNames[activeScreen ?? "website"]}</span>
           <FiArrowUpRight className="shrink-0 text-base sm:text-lg" aria-hidden="true" />
         </a>
-        <span className="absolute left-1/2 top-[15%] z-30 hidden -translate-x-1/2 whitespace-nowrap text-[clamp(1rem,2.2vw,1.875rem)] font-semibold leading-none tracking-[-0.04em] text-[#602329] lg:block">
+        <span className="absolute left-1/2 rotate-3 top-[15%] z-30 hidden -translate-x-1/2 whitespace-nowrap text-[clamp(1rem,2.2vw,1.875rem)] font-semibold leading-none tracking-[-0.04em] text-[#602329] lg:block">
           Websites
         </span>
         <span className="absolute left-[9%] top-[30%] z-30 hidden -rotate-12 whitespace-nowrap text-[clamp(1rem,2.2vw,1.875rem)] font-semibold leading-none tracking-[-0.04em] text-[#602329] lg:block">

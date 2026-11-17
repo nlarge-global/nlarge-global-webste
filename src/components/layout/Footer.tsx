@@ -101,7 +101,7 @@ export default function Footer() {
               </p>
               <div className="grid gap-[1rem]">
                 {[
-                  ["Sitemap", "/sitemap"],
+                  ["Sitemap", "/sitemap.xml"],
                   ["Support", "/support"],
                   ["Unsubscribe", "/unsubscribe"],
                   ["Privacy Policy", "/privacy-policy"],

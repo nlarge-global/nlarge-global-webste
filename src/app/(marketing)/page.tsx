@@ -50,21 +50,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-y border-black/10 bg-[#f7f5f1] px-5 py-14 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
-          <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
-            <p className="text-xl leading-8 text-black sm:text-2xl sm:leading-9">
-              Based in Rajasthan, India, NLarge Global helps small businesses,
-              founders and individuals across India and worldwide build custom
-              software, business websites and mobile apps.
-            </p>
-            <p className="max-w-2xl text-base leading-7 text-black/70">
-              We also improve existing products with bug fixes, speed
-              improvements, redesigns, new features and integrations, and
-              provide ongoing website maintenance and support after launch.
-            </p>
-          </div>
-        </section>
-
         <TestimonialsSection />
 
         <ServicesSection />
