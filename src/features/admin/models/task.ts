@@ -8,7 +8,7 @@ export type TaskDocument = Document & {
   inquiryId?: Types.ObjectId;
   title: string;
   status: "todo" | "in-progress" | "done";
-  dueDate?: Date;
+  dueDate?: Date | null;
   priority: "low" | "normal" | "high";
   notes?: string;
   completedAt?: Date;
@@ -22,7 +22,7 @@ const taskSchema = new Schema<TaskDocument>({
   inquiryId: { type: Schema.Types.ObjectId, ref: "Inquiry", index: true },
   title: { type: String, required: true, trim: true, maxlength: 200 },
   status: { type: String, enum: ["todo", "in-progress", "done"], default: "todo", required: true },
-  dueDate: { type: Date },
+  dueDate: { type: Date, default: null },
   priority: { type: String, enum: ["low", "normal", "high"], default: "normal", required: true },
   notes: { type: String, trim: true, maxlength: 3000 },
   completedAt: { type: Date },

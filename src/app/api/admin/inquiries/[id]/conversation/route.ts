@@ -29,6 +29,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const channel = searchParams.get("channel");
     const direction = searchParams.get("direction");
     const search = searchParams.get("q")?.trim().slice(0, 100);
+    const archive = searchParams.get("archive");
+    const includeDeleted = archive === "archived" || archive === "all";
     const beforeAt = searchParams.get("beforeAt");
     const beforeId = searchParams.get("beforeId");
     if (Boolean(beforeAt) !== Boolean(beforeId)) {
@@ -45,6 +47,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       ...(channel ? { channel } : {}),
       ...(direction ? { direction } : {}),
       ...(search ? { content: new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") } : {}),
+      ...(archive === "active" || !archive ? { deletedAt: { $exists: false } } : {}),
+      ...(archive === "archived" ? { deletedAt: { $exists: true } } : {}),
     };
     if (beforeAt && beforeId) {
       const cursorDate = new Date(beforeAt);
@@ -57,8 +61,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       ];
     }
     const page = await ConversationEntry.find(filter)
+      .setOptions({ includeDeleted })
       .sort({ occurredAt: -1, _id: -1 })
       .limit(PAGE_SIZE + 1)
+      .select("_id channel direction content occurredAt")
       .lean();
     const hasMore = page.length > PAGE_SIZE;
     const entries = page.slice(0, PAGE_SIZE);

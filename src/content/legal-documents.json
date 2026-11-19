@@ -256,11 +256,11 @@
   ],
   "marketingConsent": [
     {
-      "version": "email-updates-1",
+      "version": "1.0",
       "effectiveAt": "2026-11-17T00:00:00+05:30",
       "changeSummary": "Initial email marketing opt-in wording.",
       "text": "Yes, email me occasional news and updates from NLarge Global. This is optional, and I can unsubscribe at any time.",
-      "withdrawalVersion": "email-updates-withdrawal-1",
+      "withdrawalVersion": "1.0",
       "withdrawalText": "Unsubscribe"
     }
   ]

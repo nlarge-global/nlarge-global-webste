@@ -85,10 +85,11 @@ export default function LegalDocumentPage({
                       {version.version === document.version ? (
                         <span aria-current="page">
                           Version {version.version} ·{" "}
-                          {new Date(version.effectiveAt).toLocaleDateString(
+                          {new Date(version.effectiveAt).toLocaleString(
                             "en-IN",
                             {
                               dateStyle: "long",
+                              timeStyle: "short",
                               timeZone: "Asia/Kolkata",
                             },
                           )}
@@ -104,10 +105,11 @@ export default function LegalDocumentPage({
                           href={documentPath(kind, version.version)}
                         >
                           Version {version.version} ·{" "}
-                          {new Date(version.effectiveAt).toLocaleDateString(
+                          {new Date(version.effectiveAt).toLocaleString(
                             "en-IN",
                             {
                               dateStyle: "long",
+                              timeStyle: "short",
                               timeZone: "Asia/Kolkata",
                             },
                           )}

@@ -18,6 +18,7 @@ import {
   FiMessageSquare,
   FiMail,
   FiX,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { VscLayoutSidebarRight } from "react-icons/vsc";
 import type { IconType } from "react-icons";
@@ -46,6 +47,7 @@ const navigation: AdminNavItem[] = [
   { label: "Subscribers", href: "/admin/subscribers", icon: FiMail },
   { label: "Tasks", href: "/admin/overview/tasks", icon: FiCheckSquare },
   { label: "Audit log", href: "/admin/audit", icon: FiArchive },
+  { label: "Operations", href: "/admin/operations", icon: FiAlertTriangle },
   { label: "Health", href: "/admin/health", icon: FiActivity },
   { label: "Settings", href: "/admin/settings", icon: FiSettings },
   { label: "Exports", href: "/admin/exports", icon: FiFileText },
@@ -86,6 +88,8 @@ function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 function HeaderBreadcrumbs() {
   const pathname = usePathname();
+  const [expandedPathname, setExpandedPathname] = useState<string | null>(null);
+  const expanded = expandedPathname === pathname;
   const parts = pathname.split("/").filter(Boolean);
   const shortId = (value: string) =>
     /^[a-f\d]{24}$/i.test(value) ? `${value.slice(0, 4)}…` : value;
@@ -100,6 +104,7 @@ function HeaderBreadcrumbs() {
     inquiries: "Inquiries",
     subscribers: "Subscribers",
     audit: "Audit log",
+    operations: "Operations",
     health: "Health",
     settings: "Settings",
     exports: "Exports",
@@ -113,21 +118,48 @@ function HeaderBreadcrumbs() {
   ].filter(
     (crumb, index, all) => index === 0 || crumb.href !== all[index - 1].href,
   );
+  const hasHiddenCrumbs = crumbs.length > 4;
+  const visibleCrumbs =
+    hasHiddenCrumbs && !expanded
+      ? [crumbs[0], crumbs[crumbs.length - 1]]
+      : crumbs;
+
   return (
     <nav
       aria-label="Workspace breadcrumbs"
-      className="flex max-w-full flex-wrap items-center gap-1.5 text-sm text-black/45"
+      className={`flex min-w-0 max-w-full items-center gap-1.5 text-xs text-black/45 sm:text-sm ${
+        expanded
+          ? "flex-wrap whitespace-normal"
+          : "flex-nowrap overflow-x-auto whitespace-nowrap"
+      }`}
     >
-      {crumbs.map((crumb, index) => (
-        <span key={crumb.href} className="flex max-w-full items-center gap-1.5">
+      {visibleCrumbs.map((crumb, index) => (
+        <span
+          key={crumb.href}
+          className="flex shrink-0 items-center gap-1.5"
+        >
           {index > 0 && (
             <FiChevronRight aria-hidden="true" className="size-3" />
+          )}
+          {hasHiddenCrumbs && index === 1 && !expanded && (
+            <>
+              <button
+                type="button"
+                onClick={() => setExpandedPathname(pathname)}
+                aria-label={`Show ${crumbs.length - 2} hidden breadcrumb links`}
+                title="Show all breadcrumbs"
+                className="inline-flex px-2 shrink-0 items-center rounded font-medium text-black/60 hover:bg-black/5 hover:text-[#602329] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] cursor-pointer"
+              >
+                ...
+              </button>
+              <FiChevronRight aria-hidden="true" className="size-3" />
+            </>
           )}
           <Link
             href={crumb.href}
             title={crumb.label}
-            className={`max-w-[12rem] truncate ${
-              index === crumbs.length - 1
+            className={`max-w-[8rem] truncate sm:max-w-[12rem] ${
+              crumb.href === crumbs[crumbs.length - 1].href
                 ? "font-medium text-black/70"
                 : "hover:text-[#602329]"
             }`}
@@ -136,6 +168,17 @@ function HeaderBreadcrumbs() {
           </Link>
         </span>
       ))}
+      {hasHiddenCrumbs && expanded && (
+        <button
+          type="button"
+          onClick={() => setExpandedPathname(null)}
+          aria-label="Collapse breadcrumbs"
+          title="Collapse breadcrumbs"
+          className="inline-flex  shrink-0 items-center rounded px-1 font-medium text-black/60 hover:bg-black/5 hover:text-[#602329] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] cursor-pointer"
+        >
+         Show less
+        </button>
+      )}
     </nav>
   );
 }
@@ -315,7 +358,7 @@ export default function AdminShell({
                   {logoutError}
                 </p>
               )}
-              <div className="flex min-h-16 items-center justify-between gap-4 px-4">
+              <div className="flex min-h-14 items-center justify-between gap-2 px-2 sm:min-h-16 sm:gap-4 sm:px-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <Button
                     type="button"
@@ -327,7 +370,7 @@ export default function AdminShell({
                     <VscLayoutSidebarRight aria-hidden="true" />
                   </Button>
                   <SidebarTrigger className="hidden lg:inline-flex" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <HeaderBreadcrumbs />
                   </div>
                 </div>
@@ -340,7 +383,7 @@ export default function AdminShell({
                 </div>
               </div>
             </header>
-            <main id="main-content" className="p-4">
+            <main id="main-content" className="p-2 sm:p-4">
               <div className="mx-auto">{children}</div>
             </main>
           </div>

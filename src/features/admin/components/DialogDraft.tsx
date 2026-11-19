@@ -16,10 +16,24 @@ export default function DialogDraft({
     if (!draft) return;
     const values = JSON.parse(draft) as Record<string, string>;
     Object.entries(values).forEach(([name, value]) => {
-      const field = ref.current?.querySelector<HTMLElement>(
+      const field = ref.current?.querySelector<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >(
         `[name="${name}"]`,
-      ) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
-      if (field) field.value = value;
+      );
+      if (!field) return;
+      const prototype =
+        field instanceof HTMLSelectElement
+          ? HTMLSelectElement.prototype
+          : field instanceof HTMLTextAreaElement
+            ? HTMLTextAreaElement.prototype
+            : HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(prototype, "value")?.set?.call(field, value);
+      field.dispatchEvent(
+        new Event(field instanceof HTMLSelectElement ? "change" : "input", {
+          bubbles: true,
+        }),
+      );
     });
   }, [storageKey]);
   function save() {

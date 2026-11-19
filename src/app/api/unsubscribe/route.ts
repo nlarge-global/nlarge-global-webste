@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).select("_id");
 
     if (subscriber) {

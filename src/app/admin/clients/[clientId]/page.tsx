@@ -10,6 +10,15 @@ import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
 import ProjectDialog from "@/features/admin/components/ProjectDialog";
 import Pagination from "@/features/admin/components/Pagination";
+import { formatDateTime } from "@/features/admin/services/date-time";
+import { getDueDateState } from "@/features/admin/services/due-date-state";
+import RecordBadge from "@/features/admin/components/RecordBadge";
+import AdminListFilters from "@/features/admin/components/AdminListFilters";
+import {
+  getArchiveQuery,
+  includesArchived,
+  parseArchiveFilter,
+} from "@/features/admin/services/archive-filter";
 
 const TASK_PAGE_SIZE = 10;
 
@@ -18,24 +27,37 @@ export default async function ClientDetailPage({
   searchParams,
 }: {
   params: Promise<{ clientId: string }>;
-  searchParams: Promise<{ taskPage?: string }>;
+  searchParams: Promise<{ taskPage?: string; archive?: string }>;
 }) {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
   const { clientId: id } = await params;
-  const taskPage = Math.max(1, Number((await searchParams).taskPage || 1));
+  const query = await searchParams;
+  const taskPage = Math.max(1, Number(query.taskPage || 1));
+  const archive = parseArchiveFilter(query.archive);
+  const archiveQuery = getArchiveQuery(archive);
+  const archiveOptions = { includeDeleted: includesArchived(archive) };
   await connectToDatabase();
   const client = await Client.findById(id).lean();
   if (!client) notFound();
   const [inquiries, projects, tasks] = await Promise.all([
-    Inquiry.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
-    Project.find({ clientId: client._id }).sort({ createdAt: -1 }).lean(),
+    Inquiry.find({ clientId: client._id, ...archiveQuery })
+      .setOptions(archiveOptions)
+      .sort({ createdAt: -1 })
+      .lean(),
+    Project.find({ clientId: client._id, ...archiveQuery })
+      .setOptions(archiveOptions)
+      .sort({ createdAt: -1 })
+      .lean(),
     Promise.all([
-      Task.find({ clientId: client._id })
+      Task.find({ clientId: client._id, ...archiveQuery })
+        .setOptions(archiveOptions)
         .sort({ dueDate: 1, createdAt: -1 })
         .skip((taskPage - 1) * TASK_PAGE_SIZE)
         .limit(TASK_PAGE_SIZE)
         .lean(),
-      Task.countDocuments({ clientId: client._id }),
+      Task.countDocuments({ clientId: client._id, ...archiveQuery }).setOptions(
+        archiveOptions,
+      ),
     ]),
   ]);
   const [clientTasks, taskTotal] = tasks;
@@ -56,7 +78,10 @@ export default async function ClientDetailPage({
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-black/65">
               {client.company && (
                 <span className="inline-flex items-center gap-2">
-                  <FiBriefcase aria-hidden="true" className="size-4 text-[#602329]" />
+                  <FiBriefcase
+                    aria-hidden="true"
+                    className="size-4 text-[#602329]"
+                  />
                   {client.company}
                 </span>
               )}
@@ -65,7 +90,10 @@ export default async function ClientDetailPage({
                   href={`mailto:${client.email}`}
                   className="inline-flex items-center gap-2 underline-offset-4 hover:text-[#602329] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#602329]"
                 >
-                  <FiMail aria-hidden="true" className="size-4 text-[#602329]" />
+                  <FiMail
+                    aria-hidden="true"
+                    className="size-4 text-[#602329]"
+                  />
                   {client.email}
                   <FiArrowUpRight aria-hidden="true" className="size-3.5" />
                 </a>
@@ -73,19 +101,36 @@ export default async function ClientDetailPage({
             </div>
           )}
         </div>
-        <ClientDialog
-          client={{
-            ...client,
-            _id: String(client._id),
-            email: client.email ?? undefined,
-            company: client.company ?? undefined,
-            phone: client.phone ?? undefined,
-            notes: client.notes ?? undefined,
-          }}
-          redirectTo="/admin/clients"
-        />
+        <div className="flex flex-col items-end gap-3">
+          <AdminListFilters
+            fields={[
+              {
+                name: "archive",
+                label: "Records",
+                value: archive,
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "archived", label: "Archived" },
+                  { value: "all", label: "All records" },
+                ],
+              },
+            ]}
+          />
+          <ClientDialog
+            client={{
+              ...client,
+              _id: String(client._id),
+              email: client.email ?? undefined,
+              company: client.company ?? undefined,
+              phone: client.phone ?? undefined,
+              notes: client.notes ?? undefined,
+            }}
+            redirectTo="/admin/clients"
+          />
+        </div>
       </header>
-      <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
+
+      <section className="mt-6 rounded-2xl border border-black/10 bg-white sm:p-5 p-2">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold">Projects</h2>
           <ProjectDialog
@@ -96,24 +141,46 @@ export default async function ClientDetailPage({
           {projects.length === 0 && (
             <p className="py-5 text-sm text-black/50">No projects yet.</p>
           )}
-          {projects.map((project) => (
-            <Link
-              key={String(project._id)}
-              href={`/admin/clients/${client._id}/projects/${project._id}`}
-              className="flex items-center justify-between gap-3 py-4 hover:text-[#602329]"
-            >
-              <span>
-                <span className="block font-medium">{project.name}</span>
-                <span className="mt-1 block text-sm text-black/50">
-                  {project.environment || "No environment"}
-                  {project.deadline
-                    ? ` · due ${project.deadline.toLocaleDateString()}`
-                    : ""}
+          {projects.map((project) => {
+            const projectStatus = project.status ?? "todo";
+            const dueState = getDueDateState(project.deadline);
+            return (
+              <Link
+                key={String(project._id)}
+                href={`/admin/clients/${client._id}/projects/${project._id}`}
+                className="flex items-center justify-between gap-3 py-4 hover:text-[#602329]"
+              >
+                <span>
+                  <span className="block font-medium">{project.name}</span>
+                  <span className="mt-2 flex flex-wrap items-center gap-2">
+                    <RecordBadge status={projectStatus} />
+                    <span className="text-sm text-black/50">
+                      {project.environment || "No environment"}
+                    </span>
+                    {projectStatus === "done" && project.deliveredAt && (
+                      <RecordBadge
+                        status="due-done"
+                        label={`Delivered ${formatDateTime(project.deliveredAt)}`}
+                      />
+                    )}
+                    {projectStatus !== "done" && project.deadline && (
+                      <RecordBadge
+                        status={
+                          dueState === "overdue"
+                            ? "due-overdue"
+                            : dueState === "today" || dueState === "soon"
+                              ? "due-soon"
+                              : "due-later"
+                        }
+                        label={`Due ${formatDateTime(project.deadline)}`}
+                      />
+                    )}
+                  </span>
                 </span>
-              </span>
-              <FiBriefcase aria-hidden="true" />
-            </Link>
-          ))}
+                <FiBriefcase aria-hidden="true" />
+              </Link>
+            );
+          })}
         </div>
       </section>
       <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
@@ -130,7 +197,8 @@ export default async function ClientDetailPage({
             >
               <p className="font-medium">{inquiry.subject}</p>
               <p className="mt-1 text-sm text-black/50">
-                {inquiry.status} · {inquiry.email}
+                <RecordBadge status={inquiry.status} />{" "}
+                <span>{inquiry.email}</span>
               </p>
             </Link>
           ))}
@@ -151,9 +219,12 @@ export default async function ClientDetailPage({
               className="block py-4 hover:text-[#602329]"
             >
               <p className="font-medium">{task.title}</p>
-              <p className="mt-1 text-sm capitalize text-black/50">
-                {projectMap.get(String(task.projectId)) ?? "Unassigned project"}{" "}
-                · {task.status}
+              <p className="mt-2 flex flex-wrap items-center gap-2 text-sm capitalize text-black/50">
+                <span>
+                  {projectMap.get(String(task.projectId)) ??
+                    "Unassigned project"}
+                </span>
+                <RecordBadge status={task.status} />
               </p>
             </Link>
           ))}
@@ -164,6 +235,7 @@ export default async function ClientDetailPage({
           pageSize={TASK_PAGE_SIZE}
           basePath={`/admin/clients/${client._id}`}
           param="taskPage"
+          queryParams={{ archive }}
         />
       </section>
       <p className="mt-6 text-sm text-black/50">

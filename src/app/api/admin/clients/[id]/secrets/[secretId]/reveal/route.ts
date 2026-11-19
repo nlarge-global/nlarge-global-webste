@@ -9,6 +9,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { getClientWithKey } from "@/features/admin/auth/secret-keys";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { BCRYPT_PASSWORD_TOO_LONG, isWithinBcryptPasswordLimit } from "@/features/admin/auth/bcrypt-password";
+import { writeOperationsEvent } from "@/features/admin/services/operations";
 
 const revealSchema = z.object({
   password: z.string().min(1).max(200).refine(isWithinBcryptPasswordLimit, BCRYPT_PASSWORD_TOO_LONG),
@@ -37,6 +38,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       keyVersion: secret.keyVersion,
     }, result.key);
     await writeAuditEvent({ actor: "admin", action: "secret.revealed", resourceType: "secret", resourceId: secretId, resourceLabel: secret.label, requestId: getRequestId(request), metadata: { clientId: id, type: secret.type } });
+    await writeOperationsEvent(request, {
+      category: "data-access",
+      severity: "high",
+      event: "data.secret_revealed",
+      status: 200,
+      resourceType: "secret",
+      resourceId: secretId,
+      message: "Admin revealed an encrypted project secret.",
+    });
     return NextResponse.json({ value });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

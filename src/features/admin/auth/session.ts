@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getServerEnv } from "@/lib/env";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getOrCreateModel } from "@/lib/mongoose-model";
 import { Schema, type Document } from "mongoose";
+import { writeSecurityEvent } from "@/features/admin/services/operations";
 
 const SESSION_COOKIE = "nlarge_admin_session";
 const CSRF_COOKIE = "nlarge_admin_csrf";
@@ -131,7 +132,29 @@ export async function consumePendingAdminShare(sessionId: string, shareId: strin
 
 export async function requireAdminSession() {
   const session = await getCurrentAdminSession();
-  if (!session) throw new Error("ADMIN_UNAUTHORIZED");
+  if (!session) {
+    const requestHeaders = await headers();
+    const invokePath = requestHeaders.get("x-invoke-path");
+    const path = invokePath?.startsWith("/api/admin/")
+      ? new URL(invokePath, "https://operations.invalid").pathname
+      : "/api/admin/protected";
+    const eventHeaders = new Headers();
+    for (const name of ["cf-connecting-ip", "x-real-ip", "x-forwarded-for", "user-agent", "x-request-id"]) {
+      const value = requestHeaders.get(name);
+      if (value) eventHeaders.set(name, value);
+    }
+    const request = new Request(`https://operations.invalid${path}`, {
+      method: "GET",
+      headers: eventHeaders,
+    });
+    await writeSecurityEvent(request, {
+      event: "auth.unauthorized_admin_request",
+      severity: "medium",
+      status: 401,
+      message: "An admin API request did not have a valid admin session.",
+    });
+    throw new Error("ADMIN_UNAUTHORIZED");
+  }
   return session;
 }
 
@@ -156,13 +179,41 @@ export async function revokeCurrentAdminSession() {
 export async function validateCsrfToken(request: Request, session: AdminSessionDocument) {
   const requestOrigin = new URL(request.url).origin;
   const origin = request.headers.get("origin") ?? request.headers.get("referer");
-  if (!origin || new URL(origin).origin !== requestOrigin) throw new Error("CSRF_ORIGIN_INVALID");
+  let validOrigin = false;
+  try {
+    validOrigin = Boolean(origin && new URL(origin).origin === requestOrigin);
+  } catch {
+    validOrigin = false;
+  }
+  if (!validOrigin) {
+    await writeSecurityEvent(request, {
+      event: "auth.csrf_rejected",
+      severity: "medium",
+      status: 403,
+      message: "An admin write request failed the origin security check.",
+    });
+    throw new Error("CSRF_ORIGIN_INVALID");
+  }
 
   const token = request.headers.get("x-csrf-token");
-  if (!token) throw new Error("CSRF_TOKEN_INVALID");
+  if (!token) {
+    await writeSecurityEvent(request, {
+      event: "auth.csrf_rejected",
+      severity: "medium",
+      status: 403,
+      message: "An admin write request did not include a CSRF token.",
+    });
+    throw new Error("CSRF_TOKEN_INVALID");
+  }
   const tokenBuffer = Buffer.from(token);
   const sessionTokenBuffer = Buffer.from(session.csrfToken);
   if (tokenBuffer.length !== sessionTokenBuffer.length || !crypto.timingSafeEqual(tokenBuffer, sessionTokenBuffer)) {
+    await writeSecurityEvent(request, {
+      event: "auth.csrf_rejected",
+      severity: "medium",
+      status: 403,
+      message: "An admin write request had an invalid CSRF token.",
+    });
     throw new Error("CSRF_TOKEN_INVALID");
   }
 }

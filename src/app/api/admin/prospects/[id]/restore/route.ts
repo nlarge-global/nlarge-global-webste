@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const prospect = await Prospect.findOneAndUpdate(
       { _id: id, deletedAt: { $exists: true } },
       { $unset: { deletedAt: 1 } },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
     if (!prospect) return NextResponse.json({ error: "Prospect not found." }, { status: 404 });
     await writeAuditEvent({

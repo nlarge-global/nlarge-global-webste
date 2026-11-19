@@ -8,6 +8,7 @@ import ProspectActivityTimeline from "@/features/admin/components/ProspectActivi
 import { Prospect } from "@/features/admin/models/prospect";
 import { ProspectActivity } from "@/features/admin/models/prospect-activity";
 import { connectToDatabase } from "@/lib/mongodb";
+import { formatDateTime } from "@/features/admin/services/date-time";
 
 export default async function ProspectDetailPage({
   params,
@@ -47,11 +48,7 @@ export default async function ProspectDetailPage({
             {displayName}
           </h1>
           <p className="mt-2 text-sm text-black/55">
-            Added{" "}
-            {new Intl.DateTimeFormat("en", {
-              dateStyle: "medium",
-              timeZone: "UTC",
-            }).format(prospect.createdAt)}
+            Added {formatDateTime(prospect.createdAt)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -78,7 +75,7 @@ export default async function ProspectDetailPage({
             status: prospect.status,
             notes: prospect.notes ?? "",
             nextAction: prospect.nextAction ?? "",
-            followUpAt: prospect.followUpAt?.toISOString().slice(0, 10) ?? "",
+            followUpAt: prospect.followUpAt?.toISOString() ?? "",
           }}
         />
         <ProspectActivityTimeline

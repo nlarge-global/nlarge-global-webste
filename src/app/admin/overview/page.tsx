@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
+import { formatDateTime } from "@/features/admin/services/date-time";
 import { Inquiry } from "@/features/admin/models/inquiry";
 import { Client } from "@/features/admin/models/client";
 import { Secret } from "@/features/admin/models/secret";
@@ -9,6 +10,7 @@ import { PaymentRecord } from "@/features/admin/models/payment";
 import { Task } from "@/features/admin/models/task";
 import { Project } from "@/features/admin/models/project";
 import { AuditEvent } from "@/features/admin/models/audit-event";
+import RecordBadge from "@/features/admin/components/RecordBadge";
 
 export default async function OverviewPage() {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
@@ -116,16 +118,18 @@ export default async function OverviewPage() {
               >
                 <div className="flex flex-wrap justify-between gap-2">
                   <p className="font-medium">{task.title}</p>
-                  <span className="text-xs capitalize text-black/45">
-                    {task.priority}
-                  </span>
+                  <RecordBadge status={task.priority} />
                 </div>
                 <p className="mt-1 text-sm text-black/50">
                   {project?.name ?? "Unassigned project"}
-                  {task.dueDate
-                    ? ` · due ${task.dueDate.toLocaleDateString()}`
-                    : ""}
                 </p>
+                {task.dueDate && (
+                  <RecordBadge
+                    className="mt-2"
+                    status="due-later"
+                    label={`Due ${formatDateTime(task.dueDate)}`}
+                  />
+                )}
               </Link>
             );
           })}
@@ -159,13 +163,11 @@ export default async function OverviewPage() {
               >
                 <div className="flex flex-wrap justify-between gap-2">
                   <p className="font-medium">{inquiry.subject}</p>
-                  <span className="text-xs capitalize text-black/45">
-                    {inquiry.status}
-                  </span>
+                  <RecordBadge status={inquiry.status} />
                 </div>
                 <p className="mt-1 text-sm text-black/50">
                   {inquiry.name} ·{" "}
-                  {new Date(inquiry.createdAt).toLocaleDateString()}
+                  {formatDateTime(inquiry.createdAt)}
                 </p>
               </Link>
             ))}

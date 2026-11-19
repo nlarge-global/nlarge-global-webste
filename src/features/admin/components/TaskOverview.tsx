@@ -8,7 +8,12 @@ import {
 } from "react-icons/fi";
 import { AdminPagination } from "@/components/ui/pagination";
 import type { TaskOverviewRecord } from "@/features/admin/services/task-overview";
+import { getDueDateState } from "@/features/admin/services/due-date-state";
+import { formatDateTime } from "@/features/admin/services/date-time";
 import TaskStatusSelect from "./TaskStatusSelect";
+import RecordBadge from "./RecordBadge";
+import AdminListFilters from "./AdminListFilters";
+import type { ArchiveFilter } from "@/features/admin/services/archive-filter";
 
 const groups = [
   { status: "in-progress", title: "Processing", icon: FiClock },
@@ -16,20 +21,16 @@ const groups = [
   { status: "done", title: "Done", icon: FiCheckCircle },
 ] as const;
 
-const priorityStyles = {
-  high: "border-rose-200 bg-rose-50 text-rose-800",
-  normal: "border-amber-200 bg-amber-50 text-amber-900",
-  low: "border-black/10 bg-[#f7f5f2] text-black/60",
-} as const;
-
 export default function TaskOverview({
   tasks,
   total,
   page,
+  archive,
 }: {
   tasks: TaskOverviewRecord[];
   total: number;
   page: number;
+  archive: ArchiveFilter;
 }) {
   const pageSize = 20;
   const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -46,9 +47,26 @@ export default function TaskOverview({
             Work in progress first, followed by upcoming and completed tasks.
           </p>
         </div>
-        <p className="shrink-0 text-sm tabular-nums text-black/55">
-          {firstItem}–{lastItem} <span aria-hidden="true">/</span> {total} tasks
-        </p>
+        <div className="flex flex-col items-end justify-between gap-3">
+          <AdminListFilters
+            fields={[
+              {
+                name: "archive",
+                label: "Records",
+                value: archive,
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "archived", label: "Archived" },
+                  { value: "all", label: "All records" },
+                ],
+              },
+            ]}
+          />
+          <p className="shrink-0 text-sm tabular-nums text-black/55">
+            {firstItem}–{lastItem} <span aria-hidden="true">/</span> {total}{" "}
+            tasks
+          </p>
+        </div>
       </header>
 
       <section className="mt-3 flex h-[calc(100dvh-20rem)] min-h-56 flex-col overflow-hidden   bg-white sm:h-[calc(100dvh-12rem)]">
@@ -87,7 +105,7 @@ export default function TaskOverview({
                         id={`tasks-${status}`}
                         className="text-sm font-semibold"
                       >
-                        {title}
+                        <RecordBadge status={status} label={title} />
                       </h2>
                       <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs tabular-nums text-black/60">
                         {groupTasks.length}
@@ -96,10 +114,10 @@ export default function TaskOverview({
                     <div className="grid gap-3 lg:grid-cols-2">
                       {groupTasks.map((task) => {
                         const isDone = task.status === "done";
-                        const isOverdue =
-                          !isDone &&
-                          task.dueDate !== undefined &&
-                          new Date(task.dueDate).getTime() < Date.now();
+                        const dueState = isDone
+                          ? null
+                          : getDueDateState(task.dueDate);
+                        const isOverdue = dueState === "overdue";
                         return (
                           <article
                             key={task._id}
@@ -140,39 +158,62 @@ export default function TaskOverview({
 
                             <div className="mt-1 flex items-center justify-between gap-3">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-xs font-medium ${
-                                    isDone
-                                      ? "border-black/5 bg-white/70 text-black/45 line-through decoration-black/30"
-                                      : isOverdue
-                                        ? "border-red-200 bg-red-50 text-red-800"
-                                        : "border-black/10 bg-[#faf9f7] text-black/65"
-                                  }`}
-                                >
-                                  <FiCalendar
-                                    aria-hidden="true"
-                                    className="size-3.5"
+                                {isDone ? (
+                                  <RecordBadge
+                                    status="due-done"
+                                    label={
+                                      <>
+                                        <FiCalendar
+                                          aria-hidden="true"
+                                          className="size-3.5"
+                                        />
+                                        Done at{" "}
+                                        {task.completedAt ? (
+                                          <time dateTime={task.completedAt}>
+                                            {formatDateTime(task.completedAt)}
+                                          </time>
+                                        ) : (
+                                          "date not recorded"
+                                        )}
+                                      </>
+                                    }
                                   />
-                                  {task.dueDate ? (
-                                    <time dateTime={task.dueDate}>
-                                      {isOverdue ? "Overdue · " : "Due "}
-                                      {new Date(
-                                        task.dueDate,
-                                      ).toLocaleDateString()}
-                                    </time>
-                                  ) : (
-                                    "No due date"
-                                  )}
-                                </span>
-                                <span
-                                  className={`rounded-sm border px-2.5 py-1 text-xs font-medium capitalize ${
-                                    isDone
-                                      ? "border-black/5 bg-white/70 text-black/45 line-through decoration-black/30"
-                                      : priorityStyles[task.priority]
-                                  }`}
-                                >
-                                  {task.priority} priority
-                                </span>
+                                ) : task.dueDate ? (
+                                  <RecordBadge
+                                    status={
+                                      isOverdue
+                                        ? "due-overdue"
+                                        : dueState === "today" ||
+                                            dueState === "soon"
+                                          ? "due-soon"
+                                          : "due-later"
+                                    }
+                                    label={
+                                      <>
+                                        <FiCalendar
+                                          aria-hidden="true"
+                                          className="size-3.5"
+                                        />
+                                        <time dateTime={task.dueDate}>
+                                          Due {formatDateTime(task.dueDate)}
+                                        </time>
+                                      </>
+                                    }
+                                  />
+                                ) : (
+                                  <span className="text-xs text-black/55">
+                                    No due date
+                                  </span>
+                                )}
+                                {isOverdue && (
+                                  <span className="text-xs font-medium text-[#a12f26]">
+                                    Invalid date - fix it
+                                  </span>
+                                )}
+                                <RecordBadge
+                                  status={task.priority}
+                                  label={`${task.priority} priority`}
+                                />
                               </div>
                               <div
                                 className={`flex min-w-0 items-center gap-2 text-xs ${
@@ -213,6 +254,7 @@ export default function TaskOverview({
             total={total}
             pageSize={pageSize}
             basePath="/admin/overview/tasks"
+            queryParams={{ archive }}
           />
         </div>
       </section>

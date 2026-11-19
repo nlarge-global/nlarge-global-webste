@@ -5,6 +5,7 @@ import { addSoftDelete } from "./soft-delete";
 export type ProjectDocument = Document & {
   clientId: Types.ObjectId;
   name: string;
+  status: "todo" | "in-progress" | "done";
   technicalDetails?: string;
   deliveryDetails?: string;
   repositoryUrl?: string;
@@ -12,6 +13,7 @@ export type ProjectDocument = Document & {
   productionUrl?: string;
   stagingUrl?: string;
   deadline?: Date;
+  deliveredAt?: Date;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +22,7 @@ export type ProjectDocument = Document & {
 const projectSchema = new Schema<ProjectDocument>({
   clientId: { type: Schema.Types.ObjectId, ref: "Client", required: true, index: true },
   name: { type: String, required: true, trim: true, maxlength: 150 },
+  status: { type: String, enum: ["todo", "in-progress", "done"], default: "todo", required: true },
   technicalDetails: { type: String, trim: true, maxlength: 5000 },
   deliveryDetails: { type: String, trim: true, maxlength: 5000 },
   repositoryUrl: { type: String, trim: true, maxlength: 500 },
@@ -27,6 +30,7 @@ const projectSchema = new Schema<ProjectDocument>({
   productionUrl: { type: String, trim: true, maxlength: 500 },
   stagingUrl: { type: String, trim: true, maxlength: 500 },
   deadline: { type: Date },
+  deliveredAt: { type: Date },
   notes: { type: String, trim: true, maxlength: 5000 },
 }, { timestamps: true, strict: true });
 addSoftDelete(projectSchema);

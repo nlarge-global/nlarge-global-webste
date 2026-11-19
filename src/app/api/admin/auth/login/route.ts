@@ -12,6 +12,11 @@ import {
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { RATE_LIMITS } from "@/lib/rate-limit-config";
 import { isRateLimited } from "@/lib/rate-limit";
+import {
+  getOperationsClientIp,
+  writeOperationsEvent,
+  writeSecurityEvent,
+} from "@/features/admin/services/operations";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -24,14 +29,16 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const requestId = getRequestId(request);
-  const ip =
-    request.headers.get("cf-connecting-ip")
-    || request.headers.get("x-real-ip")
-    || request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()
-    || "unknown";
+  const ip = getOperationsClientIp(request);
 
   try {
     if (await isRateLimited("adminLogin", ip)) {
+      await writeSecurityEvent(request, {
+        event: "auth.login_rate_limited",
+        severity: "high",
+        message: "Admin login attempts exceeded the configured rate limit.",
+        ipAddress: ip,
+      });
       return NextResponse.json(
         { error: "Too many login attempts. Try again later." },
         {
@@ -49,6 +56,12 @@ export async function POST(request: NextRequest) {
       data.email.toLowerCase() === credentials.email.toLowerCase() &&
       (await bcrypt.compare(data.password, credentials.passwordHash));
     if (!valid) {
+      await writeSecurityEvent(request, {
+        event: "auth.login_failed",
+        severity: "medium",
+        message: "Admin credentials did not match.",
+        ipAddress: ip,
+      });
       return NextResponse.json(
         { error: "Invalid email or password." },
         { status: 401 },
@@ -62,6 +75,13 @@ export async function POST(request: NextRequest) {
       resourceType: "session",
       resourceLabel: "Admin session",
       requestId,
+    });
+    await writeSecurityEvent(request, {
+      event: "auth.login_success",
+      severity: "low",
+      status: 200,
+      message: "Admin authentication succeeded.",
+      ipAddress: ip,
     });
     return NextResponse.json({
       message: "Signed in",
@@ -81,9 +101,20 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Admin login failed:", error);
+    const referenceId = await writeOperationsEvent(request, {
+      category: "application",
+      severity: "high",
+      event: "auth.login_error",
+      status: 503,
+      message: error instanceof Error ? error.message : "Admin login failed.",
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
-      { error: "Admin authentication is not configured." },
+      {
+        error: `Admin authentication is unavailable. Reference: ${referenceId}`,
+        referenceId,
+      },
       { status: 503 },
     );
   }

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import DeleteRowAction from "./DeleteRowAction";
 import { AdminPagination } from "@/components/ui/pagination";
-import { Badge } from "@/components/ui/badge";
+import RecordBadge from "./RecordBadge";
 import type { ReactNode } from "react";
+import { formatDateTime } from "@/features/admin/services/date-time";
 
 type RecordRow = {
   id: string;
@@ -27,16 +28,19 @@ export default function AdminRecordsPage({
   rows,
   pagination,
   action,
+  filters,
 }: {
   title: string;
   description: string;
   rows: RecordRow[];
   action?: ReactNode;
+  filters?: ReactNode;
   pagination?: {
     page: number;
     total: number;
     pageSize?: number;
     basePath: string;
+    queryParams?: Record<string, string>;
   };
 }) {
   return (
@@ -53,6 +57,10 @@ export default function AdminRecordsPage({
         {action}
       </header>
       <Card className="mt-6 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b">
+          <div className="font-semibold text-xl">{title}</div>
+          <div>{filters}</div>
+        </div>
         {rows.length === 0 ? (
           <CardContent>
             <p className="text-sm text-black/60">No {title.toLowerCase()} yet.</p>
@@ -80,18 +88,13 @@ export default function AdminRecordsPage({
                       <h2 className="font-semibold">{row.title}</h2>
                     )}
                     {row.status && (
-                      <Badge variant={
-                        row.status === "new" ? "default" :
-                        row.status === "in-progress" ? "warning" :
-                        row.status === "converted" ? "success" : "secondary"
-                      }>
-                        {row.status}
-                      </Badge>
+                      <RecordBadge status={row.status} />
                     )}
                     {row.priority && row.priority !== "normal" && (
-                      <Badge variant={row.priority === "high" ? "destructive" : "outline"}>
-                        {row.priority} priority
-                      </Badge>
+                      <RecordBadge
+                        status={row.priority}
+                        label={`${row.priority} priority`}
+                      />
                     )}
                   </div>
                   <p className="mt-1 truncate text-sm text-black/65">
@@ -116,11 +119,7 @@ export default function AdminRecordsPage({
                       {row.meta && row.createdAt && <span aria-hidden="true">·</span>}
                       {row.createdAt && (
                         <time dateTime={row.createdAt}>
-                          {new Date(row.createdAt).toLocaleDateString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formatDateTime(row.createdAt)}
                         </time>
                       )}
                     </p>

@@ -10,13 +10,21 @@ import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 const projectSchema = z.object({
   clientId: z.string().regex(/^[a-f\d]{24}$/i),
   name: z.string().trim().min(1).max(150),
+  status: z.enum(["todo", "in-progress", "done"]).default("todo"),
   technicalDetails: z.string().trim().max(5000).optional(),
   deliveryDetails: z.string().trim().max(5000).optional(),
   repositoryUrl: z.string().url().optional().or(z.literal("")),
   environment: z.string().trim().max(100).optional(),
   productionUrl: z.string().url().optional().or(z.literal("")),
   stagingUrl: z.string().url().optional().or(z.literal("")),
-  deadline: z.coerce.date().optional(),
+  deadline: z.preprocess(
+    (value) => (value === "" || value == null ? undefined : value),
+    z.coerce.date().optional(),
+  ),
+  deliveredAt: z.preprocess(
+    (value) => (value === "" || value == null ? undefined : value),
+    z.coerce.date().optional(),
+  ),
   notes: z.string().trim().max(5000).optional(),
 });
 
@@ -40,7 +48,12 @@ export async function POST(request: NextRequest) {
     const data = projectSchema.parse(await request.json());
     await connectToDatabase();
     if (!await Client.exists({ _id: data.clientId })) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-    const project = await Project.create({ ...data, repositoryUrl: data.repositoryUrl || undefined, productionUrl: data.productionUrl || undefined, stagingUrl: data.stagingUrl || undefined });
+    const project = await Project.create({
+      ...data,
+      repositoryUrl: data.repositoryUrl || undefined,
+      productionUrl: data.productionUrl || undefined,
+      stagingUrl: data.stagingUrl || undefined,
+    });
     await writeAuditEvent({ actor: "admin", action: "project.created", resourceType: "project", resourceId: String(project._id), resourceLabel: project.name, requestId: getRequestId(request), metadata: { clientId: data.clientId } });
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {

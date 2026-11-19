@@ -32,17 +32,18 @@ export default function TaskDialog({
   onCreateFailed: (temporaryId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const dialogRef = useDialogEscape(open, () => setOpen(false));
   return (
     <>
-      <Button type="button" onClick={() => setOpen(true)} size="sm">
+      <Button type="button" onClick={() => { setMounted(true); setOpen(true); }} size="sm">
         Add task
       </Button>
-      {open && (
+      {mounted && (
         <div
           ref={dialogRef}
-          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-2"
+          className={`fixed inset-0 z-50 place-items-center bg-black/40 p-2 ${open ? "grid" : "hidden"}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby="task-dialog-title"
@@ -72,10 +73,13 @@ export default function TaskDialog({
                 projectId={projectId}
                 onOptimisticCreate={onOptimisticCreate}
                 onCreateFailed={onCreateFailed}
+                onOptimisticClose={() => setOpen(false)}
+                onRecover={() => setOpen(true)}
                 onCreated={(temporaryId, task) => {
                   sessionStorage.removeItem(`admin-task-${projectId}`);
                   onCreated(temporaryId, task);
                   setOpen(false);
+                  setMounted(false);
                   router.refresh();
                 }}
               />

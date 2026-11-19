@@ -1,6 +1,11 @@
 import { Types } from "mongoose";
 import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
+import {
+  getArchiveQuery,
+  includesArchived,
+  type ArchiveFilter,
+} from "@/features/admin/services/archive-filter";
 
 export type TaskOverviewRecord = {
   _id: string;
@@ -8,10 +13,17 @@ export type TaskOverviewRecord = {
   status: "in-progress" | "todo" | "done";
   priority: "low" | "normal" | "high";
   dueDate?: string;
+  completedAt?: string;
   project?: { _id: string; name: string; clientId: string };
 };
 
-export async function getTaskOverviewPage(page: number, pageSize: number) {
+export async function getTaskOverviewPage(
+  page: number,
+  pageSize: number,
+  archive: ArchiveFilter = "active",
+) {
+  const filter = getArchiveQuery(archive);
+  const match = Object.keys(filter).length ? filter : {};
   const [rows, total] = await Promise.all([
     Task.aggregate<{
       _id: Types.ObjectId;
@@ -19,9 +31,10 @@ export async function getTaskOverviewPage(page: number, pageSize: number) {
       status: TaskOverviewRecord["status"];
       priority: TaskOverviewRecord["priority"];
       dueDate?: Date;
+      completedAt?: Date;
       projectId?: Types.ObjectId;
     }>([
-      { $match: { deletedAt: { $exists: false } } },
+      { $match: match },
       {
         $addFields: {
           statusOrder: {
@@ -39,9 +52,11 @@ export async function getTaskOverviewPage(page: number, pageSize: number) {
       { $sort: { statusOrder: 1, dueDate: 1, createdAt: -1 } },
       { $skip: (page - 1) * pageSize },
       { $limit: pageSize },
-      { $project: { title: 1, status: 1, priority: 1, dueDate: 1, projectId: 1 } },
+      { $project: { title: 1, status: 1, priority: 1, dueDate: 1, completedAt: 1, projectId: 1 } },
     ]),
-    Task.countDocuments(),
+    Task.countDocuments(filter).setOptions({
+      includeDeleted: includesArchived(archive),
+    }),
   ]);
   const projectIds = rows.flatMap((task) => task.projectId ? [task.projectId] : []);
   const projects = projectIds.length
@@ -66,6 +81,7 @@ export async function getTaskOverviewPage(page: number, pageSize: number) {
         status: task.status,
         priority: task.priority,
         dueDate: task.dueDate?.toISOString(),
+        completedAt: task.completedAt?.toISOString(),
         ...(project
           ? {
               project: {

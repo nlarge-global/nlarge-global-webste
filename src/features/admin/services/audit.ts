@@ -11,6 +11,7 @@ const safeMetadataKeys = new Set([
   "contentType",
   "currency",
   "direction",
+  "from",
   "includeDocuments",
   "priority",
   "projectId",
@@ -19,6 +20,7 @@ const safeMetadataKeys = new Set([
   "source",
   "status",
   "type",
+  "to",
   "updated",
 ]);
 
@@ -46,11 +48,17 @@ export function sanitizeAuditMetadata(metadata: unknown = {}): AuditMetadata {
 }
 
 export function getRequestId(request: Request) {
+  const existing = requestIds.get(request);
+  if (existing) return existing;
   const requestId = request.headers.get("x-request-id");
-  return requestId && /^[a-zA-Z0-9._:-]{1,100}$/.test(requestId)
+  const validRequestId = requestId && /^[a-zA-Z0-9._:-]{1,100}$/.test(requestId)
     ? requestId
     : crypto.randomUUID();
+  requestIds.set(request, validRequestId);
+  return validRequestId;
 }
+
+const requestIds = new WeakMap<Request, string>();
 
 export async function writeAuditEvent(event: {
   actor: "admin" | "public";

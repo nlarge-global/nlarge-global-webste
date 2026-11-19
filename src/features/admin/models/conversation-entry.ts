@@ -1,5 +1,6 @@
 import { Schema, type Document, type Types } from "mongoose";
 import { getOrCreateModel } from "@/lib/mongoose-model";
+import { addSoftDelete } from "./soft-delete";
 
 export type ConversationEntryDocument = Document & {
   inquiryId: Types.ObjectId;
@@ -9,6 +10,7 @@ export type ConversationEntryDocument = Document & {
   occurredAt: Date;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 };
 
 const conversationEntrySchema = new Schema<ConversationEntryDocument>({
@@ -19,6 +21,7 @@ const conversationEntrySchema = new Schema<ConversationEntryDocument>({
   occurredAt: { type: Date, required: true, index: true },
 }, { timestamps: true, strict: true });
 
+addSoftDelete(conversationEntrySchema);
 conversationEntrySchema.index({ inquiryId: 1, occurredAt: -1 });
 
 export const ConversationEntry = getOrCreateModel<ConversationEntryDocument>("ConversationEntry", conversationEntrySchema);

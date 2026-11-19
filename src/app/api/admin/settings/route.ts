@@ -47,7 +47,7 @@ export async function PATCH(request: NextRequest) {
     await validateCsrfToken(request, session);
     const data = settingsSchema.parse(await request.json());
     await connectToDatabase();
-    const settings = await Settings.findOneAndUpdate({ key: "dashboard" }, { ...data, key: "dashboard" }, { upsert: true, new: true, runValidators: true }).lean();
+    const settings = await Settings.findOneAndUpdate({ key: "dashboard" }, { ...data, key: "dashboard" }, { upsert: true, returnDocument: "after", runValidators: true }).lean();
     await writeAuditEvent({ actor: "admin", action: "settings.updated", resourceType: "settings", resourceId: "dashboard", resourceLabel: "Dashboard settings", requestId: getRequestId(request) });
     return NextResponse.json({ settings });
   } catch (error) {

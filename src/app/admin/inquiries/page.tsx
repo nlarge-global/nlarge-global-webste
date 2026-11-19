@@ -4,30 +4,76 @@ import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import { Inquiry } from "@/features/admin/models/inquiry";
 import { connectToDatabase } from "@/lib/mongodb";
 import InquiryCreateDialog from "@/features/admin/components/InquiryCreateDialog";
+import AdminListFilters from "@/features/admin/components/AdminListFilters";
+import {
+  getArchiveQuery,
+  includesArchived,
+  parseArchiveFilter,
+} from "@/features/admin/services/archive-filter";
 
 const PAGE_SIZE = 10;
+const inquiryTypes = ["general", "support", "business", "careers", "privacy"] as const;
 
 export default async function AdminInquiriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; archive?: string; type?: string }>;
 }) {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
   await connectToDatabase();
-  const page = Math.max(1, Number((await searchParams).page) || 1);
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page) || 1);
+  const archive = parseArchiveFilter(params.archive);
+  const type = inquiryTypes.includes(params.type as (typeof inquiryTypes)[number])
+    ? params.type!
+    : "";
+  const filter: Record<string, unknown> = {
+    ...getArchiveQuery(archive),
+    ...(type ? { queryType: type } : {}),
+  };
+  const options = { includeDeleted: includesArchived(archive) };
   const [inquiries, total] = await Promise.all([
-    Inquiry.find()
+    Inquiry.find(filter)
+      .setOptions(options)
       .sort({ createdAt: -1 })
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
       .lean(),
-    Inquiry.countDocuments(),
+    Inquiry.countDocuments(filter).setOptions(options),
   ]);
   return (
     <AdminRecordsPage
       title="Inquiries"
       description="Review and organize incoming project enquiries and follow-ups."
       action={<InquiryCreateDialog />}
+      filters={
+        <AdminListFilters
+          fields={[
+            {
+              name: "archive",
+              label: "Records",
+              value: archive,
+              options: [
+                { value: "active", label: "Active" },
+                { value: "archived", label: "Archived" },
+                { value: "all", label: "All records" },
+              ],
+            },
+            {
+              name: "type",
+              label: "Inquiry type",
+              value: type,
+              options: [
+                { value: "", label: "All types" },
+                ...inquiryTypes.map((value) => ({
+                  value,
+                  label: value[0].toUpperCase() + value.slice(1),
+                })),
+              ],
+            },
+          ]}
+        />
+      }
       rows={inquiries.map((inquiry) => ({
         id: String(inquiry._id),
         title: inquiry.subject,
@@ -49,6 +95,7 @@ export default async function AdminInquiriesPage({
         total,
         pageSize: PAGE_SIZE,
         basePath: "/admin/inquiries",
+        queryParams: { archive, ...(type ? { type } : {}) },
       }}
     />
   );

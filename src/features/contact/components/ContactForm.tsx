@@ -374,8 +374,8 @@ export default function ContactForm({
                       className="text-sm font-semibold text-[#602329]"
                       role="status"
                     >
-                      Your inquiry has been saved in our Admin dashboard. No
-                      email was sent.
+                      Thanks for your message. We’ve received it and will get
+                      back to you as soon as possible.
                     </p>
                   )}
                   {submitStatus === "error" && (

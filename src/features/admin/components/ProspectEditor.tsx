@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { Button } from "./ui/Button";
 import type { ProspectSource, ProspectStatus } from "@/features/admin/models/prospect";
+import {
+  fromDateTimeLocal,
+  toDateTimeLocal,
+} from "@/features/admin/services/date-time";
 
 type Prospect = {
   id: string;
@@ -49,7 +53,11 @@ export default function ProspectEditor({ prospect }: { prospect: Prospect }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const formData = new FormData(form);
+    const data = {
+      ...Object.fromEntries(formData.entries()),
+      followUpAt: fromDateTimeLocal(formData.get("followUpAt")),
+    };
     const token = csrfToken();
     setPending(true);
     setError("");
@@ -99,8 +107,8 @@ export default function ProspectEditor({ prospect }: { prospect: Prospect }) {
         <label className="block text-sm font-medium">Next action
           <input name="nextAction" defaultValue={prospect.nextAction} maxLength={500} placeholder="For example, send an introduction" className="mt-1.5 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />
         </label>
-        <label className="block text-sm font-medium">Follow-up date
-          <input name="followUpAt" type="date" defaultValue={prospect.followUpAt} className="mt-1.5 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />
+        <label className="block text-sm font-medium">Follow-up date and time
+          <input name="followUpAt" type="datetime-local" step="60" defaultValue={toDateTimeLocal(prospect.followUpAt)} className="mt-1.5 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />
         </label>
         <label className="block text-sm font-medium">Notes
           <textarea name="notes" defaultValue={prospect.notes} maxLength={5000} rows={6} className="mt-1.5 w-full rounded-xl border border-black/15 bg-white p-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />

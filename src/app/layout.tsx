@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { safeJsonLd } from "@/lib/structured-data";
 import { organizationId, siteUrl, socialPreviewImage } from "@/lib/site";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,8 +22,12 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Custom Software Development | NLarge Global", template: "%s | NLarge Global" },
-  description: "Based in Rajasthan, NLarge Global builds custom software, websites and apps for small businesses, and helps improve and maintain existing platforms in India and worldwide.",
+  title: {
+    default: "Custom Software Development | NLarge Global",
+    template: "%s | NLarge Global",
+  },
+  description:
+    "Based in Rajasthan, NLarge Global builds custom software, websites and apps for small businesses, and helps improve and maintain existing platforms in India and worldwide.",
   keywords: [
     "custom software development",
     "custom software for small business",
@@ -41,11 +46,18 @@ export const metadata: Metadata = {
     locale: "en_IN",
     siteName: "NLarge Global",
     title: "Custom Software Development | NLarge Global",
-    description: "Custom software, website and app development, website maintenance, bug fixes, redesigns, speed improvements and new features for clients in India and worldwide.",
+    description:
+      "Custom software, website and app development, website maintenance, bug fixes, redesigns, speed improvements and new features for clients in India and worldwide.",
     url: "/",
     images: [socialPreviewImage],
   },
-  twitter: { card: "summary_large_image", title: "Custom Software Development | NLarge Global", description: "Build, improve and maintain websites, apps and custom software with NLarge Global in India and worldwide.", images: [socialPreviewImage.url] },
+  twitter: {
+    card: "summary_large_image",
+    title: "Custom Software Development | NLarge Global",
+    description:
+      "Build, improve and maintain websites, apps and custom software with NLarge Global in India and worldwide.",
+    images: [socialPreviewImage.url],
+  },
 };
 
 export default function RootLayout({
@@ -122,10 +134,17 @@ export default function RootLayout({
             }),
           }}
         />
-        <a href="#main-content" className="fixed left-4 -top-1 z-[100] -translate-y-full rounded-b-md bg-[#602329] px-4 py-3 text-sm font-semibold text-white focus:translate-y-0">Skip to main content</a>
-        <NextTopLoader
-          color="#000000"
-         />
+        <a
+          href="#main-content"
+          className="fixed left-4 -top-1 z-[100] -translate-y-full rounded-b-md bg-[#602329] px-4 py-3 text-sm font-semibold text-white focus:translate-y-0"
+        >
+          Skip to main content
+        </a>
+        <NextTopLoader color="#000000" />
+        <Toaster
+          position="bottom-right"
+          richColors
+        />
         {children}
       </body>
     </html>

@@ -13,6 +13,7 @@ export type ClientDocument = Document & {
   dataKeyIv?: string;
   dataKeyAuthTag?: string;
   dataKeyVersion?: string;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 };

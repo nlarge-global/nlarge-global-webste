@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { FiDownload } from "react-icons/fi";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import RecordBadge from "@/features/admin/components/RecordBadge";
 import { AdminPagination } from "@/components/ui/pagination";
 import { getCurrentAdminSession } from "@/features/admin/auth/session";
 import SubscriberDeleteAction from "@/features/admin/components/SubscriberDeleteAction";
 import { Subscriber } from "@/features/contact/models/subscriber";
 import { connectToDatabase } from "@/lib/mongodb";
+import Link from "next/link";
 
 const PAGE_SIZE = 10;
 
@@ -34,16 +34,15 @@ export default async function AdminSubscribersPage({
         <div>
           <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Subscribers</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-black/55">
-            Only opted-in addresses are included in the marketing export.
+            Export opted-in addresses from the protected Exports workspace.
           </p>
         </div>
-        <a
-          href="/api/admin/subscribers/export"
-          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-full bg-[#602329] px-5 text-sm font-semibold text-white hover:bg-[#481a1e] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#602329]"
+        <Link
+          href="/admin/exports"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#602329] px-4 text-sm font-medium text-white hover:bg-[#4e1d22] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329]"
         >
-          <FiDownload aria-hidden="true" />
-          Export subscribed CSV
-        </a>
+          Go to exports
+        </Link>
       </header>
 
       <Card className="mt-6 overflow-hidden">
@@ -68,9 +67,7 @@ export default async function AdminSubscribersPage({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="break-all font-semibold">{subscriber.email}</h2>
-                      <Badge variant={subscriber.status === "subscribed" ? "success" : "secondary"}>
-                        {subscriber.status}
-                      </Badge>
+                      <RecordBadge status={subscriber.status} />
                     </div>
                     <p className="mt-2 text-sm text-black/55">
                       {latestGrant

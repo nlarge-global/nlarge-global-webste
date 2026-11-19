@@ -10,10 +10,9 @@ export type PaymentRecordDocument = Document & {
   method: "bank-transfer" | "card" | "cash" | "other";
   status: "pending" | "paid" | "partial" | "overdue" | "cancelled";
   utrReference?: string;
-  milestone?: string;
-  paidAt?: Date;
+  paidAt?: Date | null;
   notes?: string;
-  proofDocumentId?: Types.ObjectId;
+  proofDocumentId?: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -26,10 +25,9 @@ const paymentSchema = new Schema<PaymentRecordDocument>({
   method: { type: String, enum: ["bank-transfer", "card", "cash", "other"], required: true },
   status: { type: String, enum: ["pending", "paid", "partial", "overdue", "cancelled"], required: true },
   utrReference: { type: String, trim: true, maxlength: 150 },
-  milestone: { type: String, trim: true, maxlength: 150 },
   paidAt: { type: Date },
   notes: { type: String, trim: true, maxlength: 3000 },
-  proofDocumentId: { type: Schema.Types.ObjectId, ref: "ClientDocument" },
+  proofDocumentId: { type: String, ref: "ClientDocument" },
 }, { timestamps: true, strict: true });
 addSoftDelete(paymentSchema);
 

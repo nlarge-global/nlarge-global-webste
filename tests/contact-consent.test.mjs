@@ -63,8 +63,8 @@ test("legal content resolves effective versions and fingerprints the complete ar
   const rightsSection = privacyPolicy.sections.find((section) => section.title === "Your rights and how long we keep data");
   assert.ok(rightsSection.paragraphs[1].some((segment) => segment.href === "/contact"));
   assert.match(rightsSection.paragraphs[1].at(-1).text, /do not send an email/);
-  assert.equal(marketingConsent.version, "email-updates-1");
-  assert.equal(marketingConsent.withdrawalVersion, "email-updates-withdrawal-1");
+  assert.equal(marketingConsent.version, "1.0");
+  assert.equal(marketingConsent.withdrawalVersion, "1.0");
   assert.equal(
     getRichTextContent(privacyPolicy.contactAcknowledgement),
     "I understand that NLarge Global will store and use these details to respond to my inquiry, as explained in the Privacy Policy.",
@@ -82,7 +82,7 @@ test("contact submission requires versioned policy metadata and a SHA-256 finger
   const metadata = {
     privacyPolicyVersion: "1.1",
     privacyPolicyHash: "a".repeat(64),
-    marketingConsentVersion: "email-updates-1",
+    marketingConsentVersion: "1.0",
   };
   assert.equal(
     contactSubmissionSchema.parse({ ...inquiry, ...metadata }).privacyPolicyHash,

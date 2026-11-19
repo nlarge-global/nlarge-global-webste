@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { Button } from "./ui/Button";
+import { fromDateTimeLocal } from "@/features/admin/services/date-time";
 
 function csrfToken() {
   return document.cookie.split("; ").find((cookie) => cookie.startsWith("nlarge_admin_csrf="))?.split("=")[1];
@@ -18,7 +19,11 @@ export default function ProspectCreateForm({ onCreated }: { onCreated: () => voi
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const formData = new FormData(form);
+    const data = {
+      ...Object.fromEntries(formData.entries()),
+      followUpAt: fromDateTimeLocal(formData.get("followUpAt")),
+    };
     const token = csrfToken();
     setPending(true);
     setError("");
@@ -65,8 +70,8 @@ export default function ProspectCreateForm({ onCreated }: { onCreated: () => voi
             <option value="call">Call</option>
           </Select>
         </label>
-        <label className="block text-sm font-medium">Follow-up date
-          <input name="followUpAt" type="date" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />
+        <label className="block text-sm font-medium">Follow-up date and time
+          <input name="followUpAt" type="datetime-local" step="60" className="mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-3 outline-none focus-visible:ring-2 focus-visible:ring-[#602329]" />
         </label>
       </div>
       <label className="block text-sm font-medium">Next action

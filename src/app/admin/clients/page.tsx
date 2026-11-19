@@ -5,6 +5,12 @@ import ClientDialog from "@/features/admin/components/ClientDialog";
 import { Client } from "@/features/admin/models/client";
 import { connectToDatabase } from "@/lib/mongodb";
 import Pagination from "@/features/admin/components/Pagination";
+import AdminListFilters from "@/features/admin/components/AdminListFilters";
+import {
+  getArchiveQuery,
+  includesArchived,
+  parseArchiveFilter,
+} from "@/features/admin/services/archive-filter";
 import {
   Table,
   TableBody,
@@ -19,18 +25,23 @@ const PAGE_SIZE = 10;
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; archive?: string }>;
 }) {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
   await connectToDatabase();
-  const page = Math.max(1, Number((await searchParams).page) || 1);
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page) || 1);
+  const archive = parseArchiveFilter(params.archive);
+  const filter = getArchiveQuery(archive);
+  const options = { includeDeleted: includesArchived(archive) };
   const [clients, total] = await Promise.all([
-    Client.find()
+    Client.find(filter)
+      .setOptions(options)
       .sort({ createdAt: -1 })
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
       .lean(),
-    Client.countDocuments(),
+    Client.countDocuments(filter).setOptions(options),
   ]);
   return (
     <div>
@@ -48,9 +59,26 @@ export default async function ClientsPage({
       </div>
       <section className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold">Client records</h2>
-          <span className="text-sm text-black/45">{clients.length} total</span>
+          <div >
+            <h2 className="font-semibold">Client records</h2>
+            <span className="text-sm text-black/45">{total} total</span>
+          </div>
+          <AdminListFilters
+            fields={[
+              {
+                name: "archive",
+                label: "Records",
+                value: archive,
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "archived", label: "Archived" },
+                  { value: "all", label: "All records" },
+                ],
+              },
+            ]}
+          />
         </div>
+
         {clients.length === 0 ? (
           <p className="mt-4 py-5 text-sm text-black/50">No clients yet.</p>
         ) : (
@@ -100,6 +128,7 @@ export default async function ClientsPage({
           total={total}
           pageSize={PAGE_SIZE}
           basePath="/admin/clients"
+          queryParams={{ archive }}
         />
       </section>
     </div>

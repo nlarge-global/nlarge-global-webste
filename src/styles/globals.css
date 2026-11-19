@@ -57,6 +57,23 @@
   }
 }
 
+@keyframes recovery-toast-countdown {
+  to {
+    stroke-dashoffset: 81.7;
+  }
+}
+
+.recovery-toast-countdown circle {
+  stroke-dashoffset: 0;
+  animation: recovery-toast-countdown 5s linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recovery-toast-countdown circle {
+    animation: none;
+  }
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

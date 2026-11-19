@@ -1,8 +1,10 @@
 import { Client } from "@/features/admin/models/client";
 import { createClientDataKey, unwrapClientDataKey } from "@/features/admin/auth/encryption";
 
-export async function getClientWithKey(id: string) {
-  const client = await Client.findById(id).select("+encryptedDataKey +dataKeyIv +dataKeyAuthTag +dataKeyVersion");
+export async function getClientWithKey(id: string, includeDeleted = false) {
+  const query = Client.findById(id);
+  if (includeDeleted) query.setOptions({ includeDeleted: true });
+  const client = await query.select("+encryptedDataKey +dataKeyIv +dataKeyAuthTag +dataKeyVersion");
   if (!client) return null;
   if (!client.encryptedDataKey || !client.dataKeyIv || !client.dataKeyAuthTag || !client.dataKeyVersion) {
     const dataKey = createClientDataKey();

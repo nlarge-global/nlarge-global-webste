@@ -1,13 +1,20 @@
 "use client";
-import { getDisplayErrorMessage } from "@/lib/error-message";
 
+import { getDisplayErrorMessage } from "@/lib/error-message";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { FiChevronDown, FiMail, FiMessageSquare, FiPlus, FiSearch } from "react-icons/fi";
 import { IoCloseSharp } from "react-icons/io5";
 import { Button } from "./ui/Button";
 import { Select } from "@/components/ui/select";
 import { useDialogEscape } from "./useDialogEscape";
+import RecordActionsMenu from "./RecordActionsMenu";
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+import { showOptimisticRecoveryToast } from "./showOptimisticRecoveryToast";
+import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import type { TimelineEntryValues } from "./TimelineEntryForm";
+import type { ConversationEntryDetails } from "./ConversationEntryDetailsDialog";
 
 export type TimelineEntry = {
   _id: string;
@@ -19,9 +26,12 @@ export type TimelineEntry = {
 
 const PAGE_SIZE = 30;
 
-const AddEntryForm = dynamic(() => import("./AddTimelineEntryForm"), {
+const EntryForm = dynamic(() => import("./TimelineEntryForm"), {
   ssr: false,
   loading: () => <FormSkeleton />,
+});
+const EntryDetailsDialog = dynamic(() => import("./ConversationEntryDetailsDialog"), {
+  ssr: false,
 });
 const ReplyComposer = dynamic(() => import("./ReplyComposer"), {
   ssr: false,
@@ -39,6 +49,15 @@ function FormSkeleton() {
   );
 }
 
+function csrfToken() {
+  const cookie = document.cookie.split("; ").find((item) => item.startsWith("nlarge_admin_csrf="));
+  return cookie ? decodeURIComponent(cookie.split("=")[1]) : undefined;
+}
+
+function sortEntries(entries: TimelineEntry[]) {
+  return [...entries].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt) || b._id.localeCompare(a._id));
+}
+
 export default function ConversationTimeline({
   inquiryId,
   initialEntries,
@@ -52,15 +71,30 @@ export default function ConversationTimeline({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [channel, setChannel] = useState("");
   const [direction, setDirection] = useState("");
+  const [archive, setArchive] = useState("active");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [error, setError] = useState("");
-  const [dialog, setDialog] = useState<"entry" | "reply" | null>(null);
+  const [dialog, setDialog] = useState<"entry" | "edit" | "reply" | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editingEntry, setEditingEntry] = useState<ConversationEntryDetails | null>(null);
+  const [entryDraft, setEntryDraft] = useState<TimelineEntryValues | null>(null);
+  const [editingLoading, setEditingLoading] = useState(false);
+  const [detailsEntryId, setDetailsEntryId] = useState<string | null>(null);
+  const [detailsEntry, setDetailsEntry] = useState<ConversationEntryDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
+  const [deleteEntry, setDeleteEntry] = useState<TimelineEntry | null>(null);
   const firstFetch = useRef(true);
-  const dialogRef = useDialogEscape(Boolean(dialog), () => setDialog(null));
+  const dialogRef = useDialogEscape(Boolean(dialog), closeEntryDialog);
+
+  function closeEntryDialog() {
+    setDialog(null);
+    setEditingEntry(null);
+    setEntryDraft(null);
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
@@ -76,6 +110,7 @@ export default function ConversationTimeline({
     const params = new URLSearchParams({
       ...(channel ? { channel } : {}),
       ...(direction ? { direction } : {}),
+      archive,
       ...(debouncedSearch ? { q: debouncedSearch } : {}),
     });
     setLoading(true);
@@ -99,7 +134,7 @@ export default function ConversationTimeline({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [channel, debouncedSearch, direction, inquiryId, refreshKey]);
+  }, [archive, channel, debouncedSearch, direction, inquiryId, refreshKey]);
 
   async function loadOlder() {
     const oldest = entries.at(-1);
@@ -110,6 +145,7 @@ export default function ConversationTimeline({
       ...(channel ? { channel } : {}),
       ...(direction ? { direction } : {}),
       ...(debouncedSearch ? { q: debouncedSearch } : {}),
+      archive,
     });
     setLoadingOlder(true);
     setError("");
@@ -126,12 +162,129 @@ export default function ConversationTimeline({
     }
   }
 
-  function savedEntry() {
+  function matchesFilters(entry: TimelineEntry) {
+    return (!channel || entry.channel === channel)
+      && (!direction || entry.direction === direction)
+      && (!debouncedSearch || entry.content.toLocaleLowerCase().includes(debouncedSearch.toLocaleLowerCase()));
+  }
+
+  async function saveEntry(values: TimelineEntryValues) {
+    const editing = editingEntry;
+    setEntryDraft(values);
+    setDialog(null);
+    const occurredAt = new Date(values.occurredAt).toISOString();
+    const optimistic: TimelineEntry = {
+      _id: editing?._id ?? `optimistic-${crypto.randomUUID()}`,
+      ...values,
+      occurredAt,
+    };
+    const previous = entries;
+    if (editing) {
+      setEntries((current) => sortEntries(current
+        .map((entry) => entry._id === editing._id ? optimistic : entry)
+        .filter(matchesFilters)));
+    } else if (matchesFilters(optimistic)) {
+      setEntries((current) => sortEntries([optimistic, ...current]));
+    }
+
+    try {
+      const token = csrfToken();
+      const response = await fetch(
+        editing
+          ? `/api/admin/inquiries/${inquiryId}/conversation/${editing._id}`
+          : `/api/admin/inquiries/${inquiryId}/conversation`,
+        {
+          method: editing ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "x-csrf-token": token } : {}),
+          },
+          body: JSON.stringify(values),
+        },
+      );
+      const result = await response.json() as { entry?: TimelineEntry; error?: string };
+      if (!response.ok || !result.entry) throw new Error(result.error ?? "Unable to save entry.");
+      const saved = result.entry;
+      setEntries((current) => sortEntries(current
+        .filter((entry) => entry._id !== optimistic._id)
+        .concat(matchesFilters(saved) ? [saved] : [])));
+      toast.success(editing ? "Conversation entry updated." : "Conversation entry added.");
+      setEditingEntry(null);
+      setEntryDraft(null);
+    } catch (cause) {
+      setEntries(previous);
+      const message = getDisplayErrorMessage(cause, "Unable to save entry. Check your connection and try again.");
+      showOptimisticRecoveryToast(message, () => {
+        setEntryDraft(values);
+        setDialog(editing ? "edit" : "entry");
+      });
+    }
+  }
+
+  async function loadEntryDetails(entryId: string) {
+    const response = await fetch(`/api/admin/inquiries/${inquiryId}/conversation/${entryId}`);
+    const result = await response.json() as { entry?: ConversationEntryDetails; error?: string };
+    if (!response.ok || !result.entry) throw new Error(result.error ?? "Unable to load entry details.");
+    return result.entry;
+  }
+
+  async function showDetails(entryId: string) {
+    setDetailsEntryId(entryId);
+    setDetailsEntry(null);
+    setDetailsError("");
+    setDetailsLoading(true);
+    try {
+      setDetailsEntry(await loadEntryDetails(entryId));
+    } catch (cause) {
+      const message = getDisplayErrorMessage(cause, "Unable to load entry details.");
+      setDetailsError(message);
+      toast.error(message);
+    } finally {
+      setDetailsLoading(false);
+    }
+  }
+
+  async function editEntry(entryId: string) {
+    setEditingEntry(null);
+    setEntryDraft(null);
+    setEditingLoading(true);
+    setDialog("edit");
+    try {
+      setEditingEntry(await loadEntryDetails(entryId));
+    } catch (cause) {
+      toast.error(getDisplayErrorMessage(cause, "Unable to load entry for editing."));
+      setDialog(null);
+    } finally {
+      setEditingLoading(false);
+    }
+  }
+
+  async function deleteSelectedEntry(mode: DeleteMode) {
+    if (!deleteEntry) return;
+    const removed = deleteEntry;
+    const previous = entries;
+    setEntries((current) => current.filter((entry) => entry._id !== removed._id));
+    try {
+      await deleteAdminRecord(
+        `/api/admin/inquiries/${inquiryId}/conversation/${removed._id}`,
+        removed._id,
+        mode,
+        "Unable to delete entry.",
+      );
+      toast.success(mode === "permanent" ? "Conversation entry permanently deleted." : "Conversation entry archived.");
+    } catch (cause) {
+      setEntries(previous);
+      const message = getDisplayErrorMessage(cause, "Unable to delete entry.");
+      throw new Error(message);
+    }
+  }
+
+  function savedReply() {
     setDialog(null);
     setRefreshKey((current) => current + 1);
   }
 
-  const hasFilters = Boolean(channel || direction || debouncedSearch);
+  const hasFilters = Boolean(channel || direction || debouncedSearch || archive !== "active");
 
   return (
     <section className="overflow-hidden rounded-2xl border border-black/10 bg-white">
@@ -146,7 +299,7 @@ export default function ConversationTimeline({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => setDialog("entry")}>
+          <Button type="button" variant="outline" onClick={() => { setEntryDraft(null); setDialog("entry"); }}>
             <FiPlus aria-hidden="true" /> Add entry
           </Button>
           <Button type="button" onClick={() => setDialog("reply")}>
@@ -155,7 +308,7 @@ export default function ConversationTimeline({
         </div>
       </header>
 
-      <div className="grid gap-3 border-b border-black/10 bg-[#fbfaf8] p-4 sm:grid-cols-[minmax(12rem,1fr)_10rem_10rem] sm:px-6">
+      <div className="grid gap-3 border-b border-black/10 bg-[#fbfaf8] p-4 sm:grid-cols-[minmax(12rem,1fr)_10rem_10rem_10rem] sm:px-6">
         <label className="relative block text-sm font-medium">
           <span className="sr-only">Search timeline entries</span>
           <FiSearch aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-black/45" />
@@ -187,6 +340,14 @@ export default function ConversationTimeline({
             <option value="internal">Internal</option>
           </Select>
         </label>
+        <label className="text-sm font-medium">
+          <span className="sr-only">Filter records</span>
+          <Select aria-label="Filter records" value={archive} onChange={(event) => setArchive(event.target.value)}>
+            <option value="active">Active entries</option>
+            <option value="archived">Archived entries</option>
+            <option value="all">All entries</option>
+          </Select>
+        </label>
       </div>
 
       {error && <p role="alert" className="border-b border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800">{error}</p>}
@@ -208,7 +369,7 @@ export default function ConversationTimeline({
       ) : (
         <ol aria-live="polite" className="divide-y divide-black/10">
           {entries.map((entry) => (
-            <li key={entry._id} className="grid gap-3 p-4 sm:grid-cols-[9.5rem_minmax(0,1fr)] sm:gap-5 sm:px-6 sm:py-5">
+            <li key={entry._id} className="grid gap-3 p-4 sm:grid-cols-[9.5rem_minmax(0,1fr)_auto] sm:gap-5 sm:px-6 sm:py-5">
               <time dateTime={entry.occurredAt} className="pt-0.5 text-xs leading-5 text-black/55">
                 {new Date(entry.occurredAt).toLocaleString(undefined, {
                   month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
@@ -222,17 +383,20 @@ export default function ConversationTimeline({
                   <span className="text-xs font-medium capitalize text-black/55">{entry.direction.replaceAll("-", " ")}</span>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-black/75">
-                  {entry.content.length > 700 ? `${entry.content.slice(0, 700).trimEnd()}…` : entry.content}
+                  {entry.content.length > 200 ? `${entry.content.slice(0, 200).trimEnd()}…` : entry.content}
                 </p>
-                {entry.content.length > 700 && (
-                  <details className="mt-2 text-sm">
-                    <summary className="w-fit cursor-pointer font-medium text-[#602329] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-[#602329]">
-                      Read full entry
-                    </summary>
-                    <p className="mt-2 whitespace-pre-wrap break-words leading-6 text-black/75">{entry.content}</p>
-                  </details>
+                {entry.content.length > 200 && (
+                  <button type="button" onClick={() => void showDetails(entry._id)} className="mt-1 text-sm font-medium text-[#602329] underline underline-offset-2 cursor-pointer">
+                    Read full entry
+                  </button>
                 )}
               </div>
+              <RecordActionsMenu
+                label="conversation entry"
+                edit={{ onSelect: () => void editEntry(entry._id) }}
+                details={{ onSelect: () => void showDetails(entry._id) }}
+                delete={{ onSelect: () => setDeleteEntry(entry) }}
+              />
             </li>
           ))}
         </ol>
@@ -251,21 +415,50 @@ export default function ConversationTimeline({
             <header className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 id="inquiry-action-title" className="text-xl font-semibold">
-                  {dialog === "entry" ? "Add timeline entry" : "Reply by email"}
+                  {dialog === "reply" ? "Reply by email" : dialog === "edit" ? "Edit timeline entry" : "Add timeline entry"}
                 </h2>
                 <p className="mt-1 text-sm text-black/55">
-                  {dialog === "entry" ? "Record a note or an interaction." : "Review the saved reply defaults before sending."}
+                  {dialog === "reply" ? "Review the saved reply defaults before sending." : "Record a note or an interaction."}
                 </p>
               </div>
-              <Button type="button" variant="outline" size="icon" aria-label="Close dialog" onClick={() => setDialog(null)}>
+              <Button type="button" variant="outline" size="icon" aria-label="Close dialog" onClick={closeEntryDialog}>
                 <IoCloseSharp aria-hidden="true" />
               </Button>
             </header>
-            {dialog === "entry"
-              ? <AddEntryForm inquiryId={inquiryId} onSaved={savedEntry} />
-              : <ReplyComposer inquiryId={inquiryId} onSent={savedEntry} />}
+            {dialog === "reply"
+              ? <ReplyComposer inquiryId={inquiryId} onSent={savedReply} />
+              : editingLoading
+                ? <FormSkeleton />
+                : <EntryForm
+                    entry={dialog === "edit" ? editingEntry ?? undefined : undefined}
+                    initialValues={entryDraft ?? undefined}
+                    onSave={saveEntry}
+                  />}
           </section>
         </div>
+      )}
+      {detailsEntryId && (
+        <EntryDetailsDialog
+          entry={detailsEntry}
+          loading={detailsLoading}
+          error={detailsError}
+          onClose={() => {
+            setDetailsEntryId(null);
+            setDetailsEntry(null);
+            setDetailsError("");
+          }}
+        />
+      )}
+      {deleteEntry && (
+        <DeleteConfirmationDialog
+          label="conversation entry"
+          description="Delete this conversation entry? It will be removed from the timeline but can be retained in the audit history."
+          onConfirm={deleteSelectedEntry}
+          onRecovery={() => setDeleteEntry(deleteEntry)}
+          open
+          onOpenChange={(open) => { if (!open) setDeleteEntry(null); }}
+          trigger={null}
+        />
       )}
     </section>
   );

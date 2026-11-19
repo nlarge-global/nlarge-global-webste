@@ -8,6 +8,7 @@ import { ConversationEntry } from "@/features/admin/models/conversation-entry";
 import { Client } from "@/features/admin/models/client";
 import InquiryClientLink from "@/features/admin/components/InquiryClientLink";
 import InquiryProperties from "@/features/admin/components/InquiryProperties";
+import InquiryConsentEvidence from "@/features/admin/components/InquiryConsentEvidence";
 import { connectToDatabase } from "@/lib/mongodb";
 
 const TIMELINE_PAGE_SIZE = 30;
@@ -18,9 +19,15 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
   await connectToDatabase();
   const inquiry = await Inquiry.findById(id).lean();
   if (!inquiry) notFound();
-  const [entryPage, clients] = await Promise.all([
-    ConversationEntry.find({ inquiryId: inquiry._id }).sort({ occurredAt: -1, _id: -1 }).limit(TIMELINE_PAGE_SIZE + 1).lean(),
-    Client.find().select("_id name").sort({ name: 1 }).lean(),
+  const [entryPage, linkedClient] = await Promise.all([
+    ConversationEntry.find({ inquiryId: inquiry._id })
+      .sort({ occurredAt: -1, _id: -1 })
+      .limit(TIMELINE_PAGE_SIZE + 1)
+      .select("_id channel direction content occurredAt")
+      .lean(),
+    inquiry.clientId
+      ? Client.findById(inquiry.clientId).select("_id name").lean()
+      : Promise.resolve(null),
   ]);
   const hasMoreEntries = entryPage.length > TIMELINE_PAGE_SIZE;
   const entries = entryPage.slice(0, TIMELINE_PAGE_SIZE);
@@ -44,44 +51,16 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
           initialStatus={inquiry.status}
           initialPriority={inquiry.priority}
         />
-        <p className="mt-4 text-xs text-black/50">
-          {inquiry.privacyAcknowledgement
-            ? `Privacy notice ${inquiry.privacyAcknowledgement.version} acknowledged on ${inquiry.privacyAcknowledgement.acknowledgedAt.toLocaleString()}.`
-            : inquiry.consent
-              ? "Legacy public contact-form acknowledgement recorded."
-              : "No public contact-form acknowledgement recorded."}
-          {inquiry.marketingConsent
-            ? ` Marketing consent ${inquiry.marketingConsent.version} recorded on ${inquiry.marketingConsent.grantedAt.toLocaleString()}.`
-            : inquiry.origin !== "manual" && inquiry.privacyAcknowledgement
-              ? " Marketing updates were not selected."
-              : ""}
-          {inquiry.origin === "manual" ? " · Manually entered" : ""}
-        </p>
-        {inquiry.privacyAcknowledgement && (
-          <div className="mt-3 max-w-3xl rounded-xl bg-[#f1efea] p-4 text-sm leading-6 text-black/70">
-            <blockquote>{inquiry.privacyAcknowledgement.text}</blockquote>
-            <p className="mt-2">
-              <Link
-                href={`/privacy-policy/${encodeURIComponent(inquiry.privacyAcknowledgement.version)}`}
-                className="font-semibold text-[#602329] underline underline-offset-4"
-              >
-                View acknowledged policy version
-              </Link>
-              {inquiry.privacyAcknowledgement.hash
-                ? ` · SHA-256 ${inquiry.privacyAcknowledgement.hash}`
-                : " · Legacy record without a document fingerprint"}
-            </p>
-          </div>
-        )}
-        {inquiry.marketingConsent && (
-          <blockquote className="mt-3 max-w-3xl rounded-xl bg-[#f1efea] p-4 text-sm leading-6 text-black/70">
-            {inquiry.marketingConsent.text}
-          </blockquote>
-        )}
+        <InquiryConsentEvidence
+          privacyAcknowledgement={inquiry.privacyAcknowledgement}
+          marketingConsent={inquiry.marketingConsent}
+          legacyConsent={Boolean(inquiry.consent)}
+          manuallyEntered={inquiry.origin === "manual"}
+        />
         <InquiryClientLink
           inquiryId={String(inquiry._id)}
           currentClientId={inquiry.clientId ? String(inquiry.clientId) : undefined}
-          clients={clients.map((client) => ({ _id: String(client._id), name: client.name }))}
+          currentClientName={linkedClient?.name}
         />
       </div>
       <div className="mt-6">

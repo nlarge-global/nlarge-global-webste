@@ -7,6 +7,7 @@ import { ProspectActivity } from "@/features/admin/models/prospect-activity";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { normalizeProspectUrl, prospectAuditLabel } from "@/features/admin/services/prospect-url";
+import { getDeleteMode } from "@/features/admin/services/delete-mode";
 
 const updateSchema = z.object({
   name: z.string().trim().max(150).optional(),
@@ -15,7 +16,7 @@ const updateSchema = z.object({
   notes: z.string().trim().max(5000).optional(),
   status: z.enum(["to-review", "ready-to-contact", "contacted", "responded", "converted", "not-a-fit"]).optional(),
   nextAction: z.string().trim().max(500).optional(),
-  followUpAt: z.union([z.iso.date(), z.literal("")]).nullable().optional(),
+  followUpAt: z.coerce.date().nullable().optional(),
 }).refine((value) => Object.keys(value).length > 0)
   .refine((value) => !value.url || Boolean(normalizeProspectUrl(value.url)), { message: "Enter a valid website URL." });
 
@@ -36,7 +37,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         status: prospect.status,
         notes: prospect.notes ?? "",
         nextAction: prospect.nextAction ?? "",
-        followUpAt: prospect.followUpAt?.toISOString().slice(0, 10) ?? "",
+        followUpAt: prospect.followUpAt?.toISOString() ?? "",
       },
     });
   } catch (error) {
@@ -68,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       notes: fields.notes || undefined,
       nextAction: fields.nextAction || undefined,
     };
-    if (followUpAt !== undefined) update.followUpAt = followUpAt ? new Date(`${followUpAt}T00:00:00.000Z`) : undefined;
+    if (followUpAt !== undefined) update.followUpAt = followUpAt ?? undefined;
     Object.assign(prospect, update);
     await prospect.save();
     if (data.status && data.status !== oldStatus) {
@@ -105,11 +106,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const { id } = await params;
     if (!/^[a-f\d]{24}$/i.test(id)) return NextResponse.json({ error: "Prospect not found." }, { status: 404 });
     if (request.headers.get("x-confirm-delete") !== id) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
+    const mode = getDeleteMode(request);
+    if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
     const prospect = await Prospect.findById(id);
     if (!prospect) return NextResponse.json({ error: "Prospect not found." }, { status: 404 });
-    prospect.deletedAt = new Date();
-    await prospect.save();
+    if (mode === "permanent") {
+      await ProspectActivity.deleteMany({ prospectId: id });
+      await prospect.deleteOne();
+    } else {
+      prospect.deletedAt = new Date();
+      await prospect.save();
+    }
     await writeAuditEvent({
       actor: "admin",
       action: "prospect.deleted",
@@ -117,13 +125,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       resourceId: id,
       resourceLabel: prospectAuditLabel(prospect.name, prospect.url),
       requestId: getRequestId(request),
-      metadata: { softDelete: true },
+      metadata: { [mode === "permanent" ? "permanentDelete" : "softDelete"]: true },
     });
-    return NextResponse.json({ message: "Prospect archived." });
+    return NextResponse.json({ message: mode === "permanent" ? "Prospect and activity history permanently deleted." : "Prospect archived." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });
-    console.error("Prospect archive failed:", error);
-    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to archive prospect.") }, { status: 500 });
+    console.error("Prospect deletion failed:", error);
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to delete prospect.") }, { status: 500 });
   }
 }

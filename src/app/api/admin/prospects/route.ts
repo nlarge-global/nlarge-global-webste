@@ -7,6 +7,7 @@ import { ProspectActivity } from "@/features/admin/models/prospect-activity";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 import { normalizeProspectUrl, prospectAuditLabel } from "@/features/admin/services/prospect-url";
+import { parseArchiveFilter } from "@/features/admin/services/archive-filter";
 
 const prospectSchema = z.object({
   name: z.string().trim().max(150).optional(),
@@ -14,7 +15,7 @@ const prospectSchema = z.object({
   source: z.enum(["google-maps", "instagram", "linkedin", "website", "referral", "call", "other"]).default("other"),
   notes: z.string().trim().max(5000).optional(),
   nextAction: z.string().trim().max(500).optional(),
-  followUpAt: z.union([z.iso.date(), z.literal("")]).optional(),
+  followUpAt: z.coerce.date().nullable().optional(),
 }).refine((value) => Boolean(value.name || value.url), { message: "Add a name or URL." })
   .refine((value) => !value.url || Boolean(normalizeProspectUrl(value.url)), { message: "Enter a valid website URL." });
 
@@ -29,7 +30,9 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, Number(params.get("page")) || 1);
     const status = params.get("status");
     const source = params.get("source");
-    const archived = params.get("archived") === "true";
+    const archive = parseArchiveFilter(
+      params.get("archive") ?? (params.get("archived") === "true" ? "archived" : null),
+    );
     const query = params.get("q")?.trim().slice(0, 100);
     const filter: {
       status?: ProspectStatus;
@@ -38,13 +41,11 @@ export async function GET(request: NextRequest) {
       followUpAt?: { $exists: true; $lt: Date };
       $or?: Array<Partial<Record<"name" | "url" | "notes" | "nextAction", RegExp>>>;
     } = {};
-    filter.deletedAt = { $exists: archived };
+    if (archive !== "all") filter.deletedAt = { $exists: archive === "archived" };
     if (status && ["to-review", "ready-to-contact", "contacted", "responded", "converted", "not-a-fit"].includes(status)) filter.status = status as ProspectStatus;
     if (source && ["google-maps", "instagram", "linkedin", "website", "referral", "call", "other"].includes(source)) filter.source = source as ProspectSource;
     if (params.get("followUp") === "due") {
-      const tomorrow = new Date();
-      tomorrow.setUTCHours(24, 0, 0, 0);
-      filter.followUpAt = { $exists: true, $lt: tomorrow };
+      filter.followUpAt = { $exists: true, $lt: new Date() };
     }
     if (query) {
       const regex = new RegExp(escapeRegex(query), "i");
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       name: data.name || undefined,
       notes: data.notes || undefined,
       nextAction: data.nextAction || undefined,
-      followUpAt: data.followUpAt ? new Date(`${data.followUpAt}T00:00:00.000Z`) : undefined,
+      followUpAt: data.followUpAt ?? undefined,
       status: "to-review",
     });
     await ProspectActivity.create({

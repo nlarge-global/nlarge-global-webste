@@ -10,6 +10,23 @@ import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 
 const linkSchema = z.object({ clientId: z.string().regex(/^[a-f\d]{24}$/i).nullable() });
 
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await requireAdminSession();
+    const { id } = await params;
+    await connectToDatabase();
+    if (!await Inquiry.exists({ _id: id })) return NextResponse.json({ error: "Inquiry not found." }, { status: 404 });
+    const clients = await Client.find().select("_id name").sort({ name: 1 }).lean();
+    return NextResponse.json({
+      clients: clients.map((client) => ({ _id: String(client._id), name: client.name })),
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    console.error("Inquiry client options failed:", error);
+    return NextResponse.json({ error: getDisplayErrorMessage(error, "Unable to load clients.") }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await requireAdminSession();

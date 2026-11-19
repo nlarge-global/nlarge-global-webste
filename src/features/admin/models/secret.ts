@@ -11,7 +11,7 @@ export type SecretDocument = Document & {
   iv: string;
   authTag: string;
   keyVersion: string;
-  expiresAt?: Date;
+  expiresAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };

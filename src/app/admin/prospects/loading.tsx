@@ -1,6 +1,6 @@
 export default function ProspectsLoading() {
   return (
-    <div aria-busy="true" aria-label="Loading prospects" className="mx-auto max-w-6xl animate-pulse space-y-6">
+    <div aria-busy="true" aria-label="Loading prospects" className="mx-auto animate-pulse space-y-6">
       <div className="h-10 w-48 rounded-lg bg-black/10" />
       <div className="h-5 max-w-xl rounded bg-black/10" />
       <div className="h-14 rounded-xl bg-black/10" />
