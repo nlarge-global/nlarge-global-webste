@@ -3,7 +3,7 @@
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowUpRight } from "react-icons/fi";
 import { getDisplayErrorMessage } from "@/lib/error-message";
@@ -51,6 +51,7 @@ export default function ContactForm({
   >("idle");
   const [submitError, setSubmitError] = useState("");
   const submissionRef = useRef<{ key: string; payload: string } | null>(null);
+  const statusDialogRef = useRef<HTMLDialogElement>(null);
   const {
     register,
     handleSubmit,
@@ -61,6 +62,11 @@ export default function ContactForm({
     mode: "onChange",
     defaultValues: { marketingConsent: false },
   });
+
+  useEffect(() => {
+    const dialog = statusDialogRef.current;
+    if (submitStatus !== "idle" && dialog && !dialog.open) dialog.showModal();
+  }, [submitStatus]);
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("idle");
@@ -97,13 +103,16 @@ export default function ContactForm({
     } catch (error) {
       console.error("Contact form error:", error);
       setSubmitError(
-        getDisplayErrorMessage(error, "Something went wrong. Please try again."),
+        getDisplayErrorMessage(
+          error,
+          "Something went wrong. Please try again.",
+        ),
       );
       setSubmitStatus("error");
     }
   };
   const fieldClass =
-    "w-full border-0 border-b border-black/20 bg-transparent px-0 py-4 text-base outline-none transition-colors placeholder:text-black/60 focus:border-[#602329] focus:ring-0";
+    "mt-2 min-h-12 w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-base outline-none transition-[border-color,box-shadow] placeholder:text-black/45 focus-visible:border-[#602329] focus-visible:ring-2 focus-visible:ring-[#602329]/20";
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -142,15 +151,26 @@ export default function ContactForm({
 
             <div className="bg-[#f1efea] px-6 py-8 sm:px-10 lg:px-12 lg:py-12">
               <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                <div className="grid gap-8 sm:grid-cols-2">
+                <header className="mb-8 border-b border-black/10 pb-6">
+                  <h2 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+                    Tell us about it
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-black/65">
+                    Complete the required fields and acknowledge the Privacy Policy to send your inquiry.
+                  </p>
+                </header>
+
+                <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="name" className="text-sm font-semibold">
-                      Your name
+                    <label htmlFor="name" className="flex items-center justify-between gap-3 text-sm font-semibold">
+                      <span>Your name</span>
+                      <span className="text-xs font-medium text-black/50">Required</span>
                     </label>
                     <input
                       id="name"
                       autoComplete="name"
                       placeholder="Jane Smith"
+                      aria-required="true"
                       aria-invalid={Boolean(errors.name)}
                       aria-describedby={errors.name ? "name-error" : undefined}
                       {...register("name")}
@@ -167,14 +187,16 @@ export default function ContactForm({
                     )}
                   </div>
                   <div>
-                    <label htmlFor="email" className="text-sm font-semibold">
-                      Email address
+                    <label htmlFor="email" className="flex items-center justify-between gap-3 text-sm font-semibold">
+                      <span>Email address</span>
+                      <span className="text-xs font-medium text-black/50">Required</span>
                     </label>
                     <input
                       id="email"
                       type="email"
                       autoComplete="email"
                       placeholder="jane@company.com"
+                      aria-required="true"
                       aria-invalid={Boolean(errors.email)}
                       aria-describedby={
                         errors.email ? "email-error" : undefined
@@ -194,16 +216,18 @@ export default function ContactForm({
                   </div>
                 </div>
 
-                <div className="mt-8 grid gap-8 sm:grid-cols-2">
+                <div className="mt-6 grid gap-x-6 gap-y-6 sm:grid-cols-2">
                   <div>
                     <label
                       htmlFor="queryType"
-                      className="text-sm font-semibold"
+                      className="flex items-center justify-between gap-3 text-sm font-semibold"
                     >
-                      What can we help with?
+                      <span>What can we help with?</span>
+                      <span className="text-xs font-medium text-black/50">Required</span>
                     </label>
                     <select
                       id="queryType"
+                      aria-required="true"
                       aria-invalid={Boolean(errors.queryType)}
                       aria-describedby={
                         errors.queryType ? "queryType-error" : undefined
@@ -229,12 +253,14 @@ export default function ContactForm({
                     )}
                   </div>
                   <div>
-                    <label htmlFor="subject" className="text-sm font-semibold">
-                      Subject
+                    <label htmlFor="subject" className="flex items-center justify-between gap-3 text-sm font-semibold">
+                      <span>Subject</span>
+                      <span className="text-xs font-medium text-black/50">Required</span>
                     </label>
                     <input
                       id="subject"
                       placeholder="A short summary"
+                      aria-required="true"
                       aria-invalid={Boolean(errors.subject)}
                       aria-describedby={
                         errors.subject ? "subject-error" : undefined
@@ -254,20 +280,22 @@ export default function ContactForm({
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <label htmlFor="message" className="text-sm font-semibold">
-                    Your message
+                <div className="mt-6">
+                  <label htmlFor="message" className="flex items-center justify-between gap-3 text-sm font-semibold">
+                    <span>Your message</span>
+                    <span className="text-xs font-medium text-black/50">Required</span>
                   </label>
                   <textarea
                     id="message"
                     rows={6}
                     placeholder="What would you like to ask or tell us?"
+                    aria-required="true"
                     aria-invalid={Boolean(errors.message)}
                     aria-describedby={
                       errors.message ? "message-error" : undefined
                     }
                     {...register("message")}
-                    className={`${fieldClass} resize-none`}
+                    className={`${fieldClass} min-h-36 resize-y`}
                   />
                   {errors.message && (
                     <p
@@ -280,9 +308,9 @@ export default function ContactForm({
                   )}
                 </div>
 
-                <div className="mt-8 space-y-5">
+                <div className="mt-7 space-y-4">
                   <div>
-                    <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-black/15 bg-white/70 p-4 text-sm leading-6 text-black/75 transition-colors hover:border-[#602329]/50 has-[:checked]:border-[#602329] has-[:checked]:bg-[#602329]/[0.04]">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/15 bg-white/75 p-4 text-sm leading-6 text-black/75 transition-colors hover:border-[#602329]/50 has-[:checked]:border-[#602329] has-[:checked]:bg-[#602329]/[0.04]">
                       <input
                         type="checkbox"
                         required
@@ -296,9 +324,6 @@ export default function ContactForm({
                         {...register("privacyAcknowledgement")}
                       />
                       <span>
-                        <span className="ml-1 text-xl font-semibold uppercase tracking-wide text-[#602329]">
-                          *
-                        </span>
                         {privacyAcknowledgement.map((segment, index) =>
                           segment.href ? (
                             <a
@@ -312,6 +337,9 @@ export default function ContactForm({
                             <span key={index}>{segment.text}</span>
                           ),
                         )}
+                        <span className="ml-2 inline-block text-xs font-semibold text-black/55">
+                          Required
+                        </span>
                       </span>
                     </label>
                     {errors.privacyAcknowledgement && (
@@ -324,7 +352,7 @@ export default function ContactForm({
                       </p>
                     )}
                   </div>
-                  <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-black/15 bg-white/70 p-4 text-sm leading-6 text-black/75 transition-colors hover:border-[#602329]/50 has-[:checked]:border-[#602329] has-[:checked]:bg-[#602329]/[0.04]">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/15 bg-white/75 p-4 text-sm leading-6 text-black/75 transition-colors hover:border-[#602329]/50 has-[:checked]:border-[#602329] has-[:checked]:bg-[#602329]/[0.04]">
                     <input
                       type="checkbox"
                       className="mt-1 size-5 shrink-0 cursor-pointer accent-[#602329] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329]"
@@ -332,7 +360,7 @@ export default function ContactForm({
                     />
                     <span>{marketingConsentText}</span>
                   </label>
-                  <p className="mt-3 text-sm leading-6 text-black/65">
+                  <p className="pt-1 text-sm leading-6 text-black/65">
                     Submitting this form saves your inquiry in our Admin
                     dashboard; it does not send an email. See our{" "}
                     <a
@@ -356,47 +384,61 @@ export default function ContactForm({
                   <button
                     type="submit"
                     disabled={!isValid || isSubmitting}
-                    className="group inline-flex items-center gap-8 rounded-full bg-[#602329] py-4 pl-6 pr-4 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-[#d7d4cf] disabled:text-black/70 disabled:hover:bg-[#d7d4cf]"
+                    className="group inline-flex min-h-14 w-full items-center justify-between gap-8 rounded-full bg-[#602329] py-2 pl-6 pr-2 text-sm font-semibold text-white transition-colors hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] disabled:cursor-not-allowed disabled:bg-[#d7d4cf] disabled:text-black/70 disabled:hover:bg-[#d7d4cf] sm:w-auto cursor-pointer"
                   >
                     {isSubmitting ? "Submitting…" : "Submit inquiry"}
                     <span className="grid size-9 place-items-center rounded-full bg-white text-[#602329] transition-transform group-hover:rotate-45 group-disabled:bg-white/70 group-disabled:text-black/40">
                       <FiArrowUpRight aria-hidden="true" />
                     </span>
                   </button>
-                  {!isValid && (
-                    <p className="text-sm text-black/60">
-                      Complete the required fields and acknowledge the Privacy
-                      Policy to send.
-                    </p>
-                  )}
-                  {submitStatus === "success" && (
-                    <p
-                      className="text-sm font-semibold text-[#602329]"
-                      role="status"
-                    >
-                      Thanks for your message. We’ve received it and will get
-                      back to you as soon as possible.
-                    </p>
-                  )}
-                  {submitStatus === "error" && (
-                    <p
-                      className="text-sm font-semibold text-[#602329]"
-                      role="alert"
-                    >
-                      {submitError || "Something went wrong. Please try again."}
-                    </p>
-                  )}
-                  {submitStatus === "stale" && (
-                    <p
-                      className="text-sm font-semibold text-[#602329]"
-                      role="alert"
-                    >
-                      The policy or consent wording has changed. Reload this
-                      page to review the current wording, then submit again.
-                    </p>
-                  )}
                 </div>
               </form>
+
+              <dialog
+                ref={statusDialogRef}
+                aria-labelledby="contact-status-title"
+                aria-describedby="contact-status-description"
+                onClose={() => setSubmitStatus("idle")}
+                className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-black/10 bg-[#fffdfb] p-0 text-black shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop:bg-black/50"
+              >
+                <div className="p-6 sm:p-8">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#602329]/70">
+                    {submitStatus === "success" ? "Inquiry sent" : "Submission update"}
+                  </p>
+                  <h2 id="contact-status-title" className="mt-3 text-2xl font-semibold tracking-[-0.03em]">
+                    {submitStatus === "success"
+                      ? "Thanks for getting in touch."
+                      : submitStatus === "stale"
+                        ? "Please review the latest policy."
+                        : "We couldn’t send your inquiry."}
+                  </h2>
+                  <p id="contact-status-description" className="mt-3 text-sm leading-6 text-black/70">
+                    {submitStatus === "success"
+                      ? "We’ve received your message and will get back to you as soon as possible."
+                      : submitStatus === "stale"
+                        ? "The policy or consent wording has changed. Reload this page to review the current wording, then submit again."
+                        : submitError || "Something went wrong. Please try again."}
+                  </p>
+                  <div className="mt-7 flex flex-wrap justify-end gap-3">
+                    {submitStatus === "stale" && (
+                      <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="min-h-11 rounded-full bg-[#602329] px-5 text-sm font-semibold text-white transition-colors hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] cursor-pointer"
+                      >
+                        Reload page
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => statusDialogRef.current?.close()}
+                      className="min-h-11 rounded-full border border-black/20 px-5 text-sm font-semibold transition-colors hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] cursor-pointer"
+                    >
+                      {submitStatus === "success" ? "Done" : "Close"}
+                    </button>
+                  </div>
+                </div>
+              </dialog>
             </div>
           </div>
         </section>
