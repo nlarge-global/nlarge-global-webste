@@ -40,9 +40,9 @@ export default function Navigation() {
         aria-label="Main navigation"
         className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-full border border-black/10 bg-white px-3 shadow-[0_12px_40px_rgba(0,0,0,0.10)] sm:px-4"
       >
-        <Link href="/" aria-label="NLarge Global" className="flex min-w-0 items-center">
+        <Link href="/" className="flex min-w-0 items-center">
           <span className="relative block h-12 w-16 shrink-0">
-            <Image src="/logo-transparent.png" alt="" fill sizes="96px" priority className="object-contain object-left" />
+            <Image src="/logo-transparent.png" alt="" fill sizes="64px" priority className="object-contain object-left" />
           </span>
           <div className="flex flex-col items-start leading-none">
             <span className="text-lg font-bold sm:text-xl">NLarge</span>

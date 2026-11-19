@@ -101,7 +101,7 @@ export default function OperationsLogPage() {
           Operations log
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-black/60">
-          Unexpected failures and security signals. Sensitive request contents are not recorded; entries expire after 90 days.
+          Unexpected failures and security signals. Sensitive request contents are not recorded; entries are automatically deleted after 10 days.
         </p>
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
           <span className="rounded-full bg-red-100 flex items-center justify-center px-4 font-semibold text-red-900">

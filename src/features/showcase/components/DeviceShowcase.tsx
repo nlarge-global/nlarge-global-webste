@@ -72,6 +72,8 @@ export default function DeviceShowcase() {
           fill
           sizes="(max-width: 1023px) 100vw, 58vw"
           unoptimized
+          loading="eager"
+          fetchPriority="high"
           className={`pointer-events-none object-contain transition-opacity duration-200 ${
             imageLoaded ? "opacity-0" : "opacity-100"
           }`}

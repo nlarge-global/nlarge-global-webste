@@ -22,7 +22,7 @@ const auditEventSchema = new Schema<AuditEventDocument>({
   metadata: { type: Schema.Types.Mixed, default: {} },
 }, { timestamps: { createdAt: true, updatedAt: false }, strict: true });
 
-auditEventSchema.index({ createdAt: -1 });
+auditEventSchema.index({ createdAt: -1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 auditEventSchema.index({ resourceType: 1, resourceId: 1, createdAt: -1 });
 
 export const AuditEvent = getOrCreateModel<AuditEventDocument>("AuditEvent", auditEventSchema);

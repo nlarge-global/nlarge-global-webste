@@ -448,13 +448,13 @@ export async function POST(request: NextRequest) {
       dateRange = parseExportDateRange(
         data.from!,
         data.to!,
-        data.exportType === "operations" ? 90 : 365,
+        data.exportType === "operations" ? 10 : 30,
       ) ?? undefined;
       if (!dateRange) {
         return NextResponse.json({
           error: data.exportType === "operations"
-            ? "Choose a valid date range of up to 90 days."
-            : "Choose a valid date range of up to 365 days.",
+            ? "Choose a valid date range of up to 10 days."
+            : "Choose a valid date range of up to 30 days.",
         }, { status: 400 });
       }
     }

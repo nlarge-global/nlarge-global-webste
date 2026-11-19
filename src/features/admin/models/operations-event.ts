@@ -58,7 +58,7 @@ const operationsEventSchema = new Schema<OperationsEventDocument>({
 
 operationsEventSchema.index({ severity: 1, createdAt: -1 });
 operationsEventSchema.index({ category: 1, createdAt: -1 });
-operationsEventSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
+operationsEventSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 10 });
 operationsEventSchema.index(
   { groupKey: 1, groupBucket: 1 },
   { unique: true, partialFilterExpression: { groupKey: { $exists: true } } },

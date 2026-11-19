@@ -20,10 +20,12 @@ globalWithMongoose.__nlargeMongoose = cache;
 export async function connectToDatabase() {
   if (cache.connection) return cache.connection;
   if (!cache.promise) {
-    cache.promise = mongoose.connect(getMongoUri(), {
-      serverSelectionTimeoutMS: 5_000,
-      maxPoolSize: 10,
-    }).catch((error) => {
+    cache.promise = (async () => {
+      return mongoose.connect(getMongoUri(), {
+        serverSelectionTimeoutMS: 5_000,
+        maxPoolSize: 10,
+      });
+    })().catch((error) => {
       cache.promise = null;
       throw new Error(`MongoDB connection failed: ${error instanceof Error ? error.message : "unknown error"}`);
     });

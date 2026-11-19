@@ -226,8 +226,8 @@ export default function ExportManager({
             </label>
             <p className="text-xs leading-5 text-black/55 sm:col-span-2">
               {exportType === "operations"
-                ? "Operational logs are retained for 90 days; each export is limited to 90 days."
-                : "Audit exports are limited to a 365-day window."}
+                ? "Operational logs are deleted after 10 days; exports can cover up to 10 days."
+                : "Audit logs are deleted after 30 days; exports can cover up to 30 days."}
             </p>
           </fieldset>
         )}
