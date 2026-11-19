@@ -10,7 +10,7 @@ import { organizationId, socialPreviewImage } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Website Maintenance & Software Development",
   description:
-    "Based in Rajasthan, India, NLarge Global provides website maintenance, bug fixes, speed improvements, redesigns and new features, plus custom software, web and app development worldwide.",
+    "Based in Rajasthan, India, NLarge Global provides website maintenance, bug fixes, speed improvements, redesigns and new features, plus custom software.",
   keywords: [
     "website maintenance services",
     "website support",

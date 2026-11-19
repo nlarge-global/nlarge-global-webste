@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | NLarge Global",
   },
   description:
-    "Based in Rajasthan, NLarge Global builds custom software, websites and apps for small businesses, and helps improve and maintain existing platforms in India and worldwide.",
+    "Based in Rajasthan, NLarge Global builds custom software, websites and apps for small businesses and maintains existing platforms in India and worldwide.",
   keywords: [
     "custom software development",
     "custom software for small business",
