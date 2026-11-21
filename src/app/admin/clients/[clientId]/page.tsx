@@ -147,7 +147,7 @@ export default async function ClientDetailPage({
             return (
               <Link
                 key={String(project._id)}
-                href={`/admin/clients/${client._id}/projects/${project._id}`}
+                href={`/admin/clients/${client._id}/projects/${project._id}?archive=${archive}`}
                 className="flex items-center justify-between gap-3 py-4 hover:text-[#602329]"
               >
                 <span>
@@ -215,7 +215,7 @@ export default async function ClientDetailPage({
           {clientTasks.map((task) => (
             <Link
               key={String(task._id)}
-              href={`/admin/clients/${client._id}/projects/${task.projectId}`}
+              href={`/admin/clients/${client._id}/projects/${task.projectId}?archive=${archive}`}
               className="block py-4 hover:text-[#602329]"
             >
               <p className="font-medium">{task.title}</p>

@@ -22,19 +22,20 @@ export default async function ProjectDocumentsPage({
   if (!isValidObjectId(clientId) || !isValidObjectId(projectId)) notFound();
 
   await connectToDatabase();
-  if (!(await Project.exists({ _id: projectId, clientId }))) notFound();
-
   const query = await searchParams;
   const parsedPage = Number(query.page);
   const page =
     Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const archive = parseArchiveFilter(query.archive);
+  if (!(await Project.exists({ _id: projectId, clientId }).setOptions({
+    includeDeleted: includesArchived(archive),
+  }))) notFound();
   const filter = { clientId, projectId, ...getArchiveQuery(archive) };
   const options = { includeDeleted: includesArchived(archive) };
   const [documents, total] = await Promise.all([
     ClientDocument.find(filter)
       .setOptions(options)
-      .select("filename contentType createdAt")
+      .select("filename contentType createdAt deletedAt")
       .sort({ createdAt: -1 })
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
@@ -51,6 +52,9 @@ export default async function ProjectDocumentsPage({
         filename: document.filename,
         contentType: document.contentType,
         createdAt: new Date(document.createdAt).toISOString(),
+        ...(document.deletedAt
+          ? { deletedAt: new Date(document.deletedAt).toISOString() }
+          : {}),
         ...(document.updatedAt
           ? { updatedAt: new Date(document.updatedAt).toISOString() }
           : {}),

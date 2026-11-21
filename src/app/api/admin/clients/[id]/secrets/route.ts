@@ -30,7 +30,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const archive = searchParams.get("archive");
     const type = searchParams.get("type");
     const includeDeleted = archive === "archived" || archive === "all";
-    if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    if (projectId && !await Project.exists({ _id: projectId, clientId: id }).setOptions({ includeDeleted })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const filter: Record<string, unknown> = {
       clientId: id,
       ...(projectId ? { projectId } : {}),
@@ -39,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       ...(archive === "archived" ? { deletedAt: { $exists: true } } : {}),
     };
     const [secrets, total] = await Promise.all([
-      Secret.find(filter).setOptions({ includeDeleted }).select("label type expiresAt").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      Secret.find(filter).setOptions({ includeDeleted }).select("label type expiresAt deletedAt").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
       Secret.countDocuments(filter).setOptions({ includeDeleted }),
     ]);
     return NextResponse.json({ secrets, pagination: { page, limit, total, hasNext: page * limit < total } });

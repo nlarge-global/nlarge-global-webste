@@ -9,15 +9,21 @@ import { FiArrowUpRight, FiKey } from "react-icons/fi";
 
 export default async function ProjectSecretsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ clientId: string; projectId: string }>;
+  searchParams: Promise<{ archive?: string }>;
 }) {
   if (!(await getCurrentAdminSession())) redirect("/admin/login");
   const { clientId, projectId } = await params;
+  const { archive } = await searchParams;
   await connectToDatabase();
   const [client, project] = await Promise.all([
     Client.findById(clientId).select("_id name").lean(),
-    Project.findOne({ _id: projectId, clientId }).select("_id name").lean(),
+    Project.findOne({ _id: projectId, clientId })
+      .setOptions({ includeDeleted: archive === "archived" || archive === "all" })
+      .select("_id name")
+      .lean(),
   ]);
   if (!client || !project) notFound();
   return (

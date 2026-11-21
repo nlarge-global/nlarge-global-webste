@@ -19,6 +19,7 @@ export type TaskRecord = {
   createdAt?: string;
   updatedAt?: string;
   completedAt?: string | null;
+  deletedAt?: string;
 };
 
 export type TaskFormValues = Pick<

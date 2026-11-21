@@ -120,7 +120,9 @@ export async function DELETE(
         { status: 400 },
       );
     await connectToDatabase();
-    const client = await Client.findById(id);
+    const client = await Client.findById(id).setOptions({
+      includeDeleted: mode === "permanent",
+    });
     if (!client)
       return NextResponse.json({ error: "Client not found." }, { status: 404 });
     if (mode === "permanent") {
@@ -176,16 +178,37 @@ export async function DELETE(
     const projects = await Project.find({ clientId: id }).select("_id").lean();
     const projectIds = projects.map((project) => project._id);
     await Promise.all([
-      Project.updateMany({ clientId: id }, { $set: { deletedAt } }),
-      Task.updateMany(
-        { $or: [{ clientId: id }, { projectId: { $in: projectIds } }] },
+      Project.updateMany(
+        { clientId: id, deletedAt: { $exists: false } },
         { $set: { deletedAt } },
       ),
-      Secret.updateMany({ clientId: id }, { $set: { deletedAt } }),
-      ClientDocument.updateMany({ clientId: id }, { $set: { deletedAt } }),
-      PaymentRecord.updateMany({ clientId: id }, { $set: { deletedAt } }),
-      Inquiry.updateMany({ clientId: id }, { $set: { deletedAt } }),
-      Client.updateOne({ _id: id }, { $set: { deletedAt } }),
+      Task.updateMany(
+        {
+          $or: [{ clientId: id }, { projectId: { $in: projectIds } }],
+          deletedAt: { $exists: false },
+        },
+        { $set: { deletedAt } },
+      ),
+      Secret.updateMany(
+        { clientId: id, deletedAt: { $exists: false } },
+        { $set: { deletedAt } },
+      ),
+      ClientDocument.updateMany(
+        { clientId: id, deletedAt: { $exists: false } },
+        { $set: { deletedAt } },
+      ),
+      PaymentRecord.updateMany(
+        { clientId: id, deletedAt: { $exists: false } },
+        { $set: { deletedAt } },
+      ),
+      Inquiry.updateMany(
+        { clientId: id, deletedAt: { $exists: false } },
+        { $set: { deletedAt } },
+      ),
+      Client.updateOne(
+        { _id: id, deletedAt: { $exists: false } },
+        { $set: { deletedAt } },
+      ),
     ]);
     await writeAuditEvent({
       actor: "admin",

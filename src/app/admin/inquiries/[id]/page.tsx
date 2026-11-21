@@ -23,7 +23,7 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
     ConversationEntry.find({ inquiryId: inquiry._id })
       .sort({ occurredAt: -1, _id: -1 })
       .limit(TIMELINE_PAGE_SIZE + 1)
-      .select("_id channel direction content occurredAt")
+      .select("_id channel direction content occurredAt deletedAt")
       .lean(),
     inquiry.clientId
       ? Client.findById(inquiry.clientId).select("_id name").lean()
@@ -70,6 +70,7 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
           direction: entry.direction,
           content: entry.content,
           occurredAt: entry.occurredAt.toISOString(),
+          deletedAt: entry.deletedAt?.toISOString(),
           }))} />
       </div>
     </div>

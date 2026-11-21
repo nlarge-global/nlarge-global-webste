@@ -6,6 +6,7 @@ import {
   FiEye,
   FiInfo,
   FiMoreVertical,
+  FiRotateCcw,
   FiTrash2,
 } from "react-icons/fi";
 
@@ -19,6 +20,7 @@ export default function RecordActionsMenu({
   edit,
   details,
   reveal,
+  restore,
   detailsLabel = "Show more details",
   revealLabel = "Reveal",
   delete: deleteAction,
@@ -27,6 +29,7 @@ export default function RecordActionsMenu({
   edit?: Action;
   details?: Action;
   reveal?: Action;
+  restore?: Action;
   detailsLabel?: string;
   revealLabel?: string;
   delete?: Action;
@@ -48,7 +51,7 @@ export default function RecordActionsMenu({
             onClick={(event) => event.stopPropagation()}
             className="z-[70] min-w-48 rounded-xl border border-black/10 bg-[#fffdfb] p-1.5 shadow-xl outline-none"
           >
-            {edit && (
+            {edit && !restore && (
               <Menu.Item
                 title={edit.title ?? `Edit ${label}`}
                 onClick={(event) => {
@@ -61,7 +64,7 @@ export default function RecordActionsMenu({
                 Edit
               </Menu.Item>
             )}
-            {details && (
+            {details && !restore && (
               <Menu.Item
                 title={details.title ?? `${detailsLabel} for ${label}`}
                 onClick={(event) => {
@@ -74,7 +77,7 @@ export default function RecordActionsMenu({
                 {detailsLabel}
               </Menu.Item>
             )}
-            {reveal && (
+            {reveal && !restore && (
               <Menu.Item
                 title={reveal.title ?? `${revealLabel} ${label}`}
                 onClick={(event) => {
@@ -87,7 +90,20 @@ export default function RecordActionsMenu({
                 {revealLabel}
               </Menu.Item>
             )}
-            {deleteAction && (edit || details || reveal) && (
+            {restore && (
+              <Menu.Item
+                title={restore.title ?? `Restore ${label}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  restore.onSelect();
+                }}
+                className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm text-black/80 outline-none data-[highlighted]:bg-[#f5f3f0] data-[highlighted]:text-[#602329]"
+              >
+                <FiRotateCcw aria-hidden="true" className="size-4" />
+                Restore
+              </Menu.Item>
+            )}
+            {deleteAction && (edit || details || reveal || restore) && (
               <Menu.Separator className="my-1 h-px bg-black/10" />
             )}
             {deleteAction && (

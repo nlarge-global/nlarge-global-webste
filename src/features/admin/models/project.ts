@@ -17,6 +17,7 @@ export type ProjectDocument = Document & {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 };
 
 const projectSchema = new Schema<ProjectDocument>({

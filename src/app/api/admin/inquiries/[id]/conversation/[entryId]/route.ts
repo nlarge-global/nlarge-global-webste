@@ -6,7 +6,7 @@ import { Inquiry } from "@/features/admin/models/inquiry";
 import { requireAdminSession, validateCsrfToken } from "@/features/admin/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
-import { getDeleteMode } from "@/features/admin/services/delete-mode";
+import { getRecordActionMode } from "@/features/admin/services/delete-mode";
 
 const idSchema = z.string().regex(/^[a-f\d]{24}$/i);
 const entrySchema = z.object({
@@ -101,28 +101,34 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (request.headers.get("x-confirm-delete") !== entryId) {
       return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
     }
-    const mode = getDeleteMode(request);
+    const mode = getRecordActionMode(request);
     if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
-    const filter = { _id: entryId, inquiryId: id, deletedAt: { $exists: false } };
-    const entry = mode === "permanent"
-      ? await ConversationEntry.findOneAndDelete(filter)
-      : await ConversationEntry.findOneAndUpdate(
-          filter,
-          { $set: { deletedAt: new Date() } },
+    const filter = { _id: entryId, inquiryId: id };
+    const entry = mode === "restore"
+      ? await ConversationEntry.findOneAndUpdate(
+          { ...filter, deletedAt: { $exists: true } },
+          { $unset: { deletedAt: 1 } },
           { returnDocument: "after" },
-        );
+        )
+      : mode === "permanent"
+        ? await ConversationEntry.findOneAndDelete(filter)
+        : await ConversationEntry.findOneAndUpdate(
+            { ...filter, deletedAt: { $exists: false } },
+            { $set: { deletedAt: new Date() } },
+            { returnDocument: "after" },
+          );
     if (!entry) return NextResponse.json({ error: "Conversation entry not found." }, { status: 404 });
     await writeAuditEvent({
       actor: "admin",
-      action: "conversation.deleted",
+      action: mode === "restore" ? "conversation.restored" : "conversation.deleted",
       resourceType: "inquiry",
       resourceId: id,
       resourceLabel: entry.channel,
       requestId: getRequestId(request),
-      metadata: { entryId, channel: entry.channel, direction: entry.direction, [mode === "permanent" ? "permanentDelete" : "softDelete"]: true },
+      metadata: { entryId, channel: entry.channel, direction: entry.direction, [mode === "permanent" ? "permanentDelete" : mode === "restore" ? "restored" : "softDelete"]: true },
     });
-    return NextResponse.json({ message: mode === "permanent" ? "Conversation entry permanently deleted." : "Conversation entry archived." });
+    return NextResponse.json({ message: mode === "permanent" ? "Conversation entry permanently deleted." : mode === "restore" ? "Conversation entry restored." : "Conversation entry archived." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });

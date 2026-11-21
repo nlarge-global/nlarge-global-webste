@@ -6,7 +6,7 @@ import { PaymentRecord } from "@/features/admin/models/payment";
 import { ClientDocument } from "@/features/admin/models/document";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
-import { getDeleteMode } from "@/features/admin/services/delete-mode";
+import { getRecordActionMode } from "@/features/admin/services/delete-mode";
 
 const schema = z.object({
   amount: z.coerce.number().positive().max(1_000_000_000),
@@ -83,16 +83,26 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await validateCsrfToken(request, session);
     const { id, paymentId } = await params;
     if (request.headers.get("x-confirm-delete") !== paymentId) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
-    const mode = getDeleteMode(request);
+    const mode = getRecordActionMode(request);
     if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
-    const filter = { _id: paymentId, clientId: id, deletedAt: { $exists: false } };
-    const payment = mode === "permanent"
-      ? await PaymentRecord.findOneAndDelete(filter)
-      : await PaymentRecord.findOneAndUpdate(filter, { $set: { deletedAt: new Date() } }, { returnDocument: "after" });
+    const filter = { _id: paymentId, clientId: id };
+    const payment = mode === "restore"
+      ? await PaymentRecord.findOneAndUpdate(
+          { ...filter, deletedAt: { $exists: true } },
+          { $unset: { deletedAt: 1 } },
+          { returnDocument: "after" },
+        )
+      : mode === "permanent"
+        ? await PaymentRecord.findOneAndDelete(filter)
+        : await PaymentRecord.findOneAndUpdate(
+            { ...filter, deletedAt: { $exists: false } },
+            { $set: { deletedAt: new Date() } },
+            { returnDocument: "after" },
+          );
     if (!payment) return NextResponse.json({ error: "Payment not found." }, { status: 404 });
-    await writeAuditEvent({ actor: "admin", action: "payment.deleted", resourceType: "payment", resourceId: paymentId, resourceLabel: `${payment.currency} payment`, requestId: getRequestId(request), metadata: { clientId: id, currency: payment.currency, status: payment.status, [mode === "permanent" ? "permanentDelete" : "softDelete"]: true } });
-    return NextResponse.json({ message: mode === "permanent" ? "Payment permanently deleted." : "Payment archived." });
+    await writeAuditEvent({ actor: "admin", action: mode === "restore" ? "payment.restored" : "payment.deleted", resourceType: "payment", resourceId: paymentId, resourceLabel: `${payment.currency} payment`, requestId: getRequestId(request), metadata: { clientId: id, currency: payment.currency, status: payment.status, [mode === "permanent" ? "permanentDelete" : mode === "restore" ? "restored" : "softDelete"]: true } });
+    return NextResponse.json({ message: mode === "permanent" ? "Payment permanently deleted." : mode === "restore" ? "Payment restored." : "Payment archived." });
   } catch (error) {
     if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });

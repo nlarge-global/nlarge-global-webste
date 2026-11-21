@@ -46,7 +46,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)));
     const archive = searchParams.get("archive");
     const includeDeleted = archive === "archived" || archive === "all";
-    if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    if (projectId && !await Project.exists({ _id: projectId, clientId: id }).setOptions({ includeDeleted })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const filter = {
       clientId: id,
       ...(projectId ? { projectId } : {}),

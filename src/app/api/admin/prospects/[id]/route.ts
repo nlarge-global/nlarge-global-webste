@@ -109,7 +109,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const mode = getDeleteMode(request);
     if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
-    const prospect = await Prospect.findById(id);
+    const prospect = await Prospect.findById(id).setOptions({
+      includeDeleted: mode === "permanent",
+    });
     if (!prospect) return NextResponse.json({ error: "Prospect not found." }, { status: 404 });
     if (mode === "permanent") {
       await ProspectActivity.deleteMany({ prospectId: id });

@@ -12,7 +12,11 @@ import { useDialogEscape } from "./useDialogEscape";
 import RecordActionsMenu from "./RecordActionsMenu";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import { showOptimisticRecoveryToast } from "./showOptimisticRecoveryToast";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  restoreAdminRecord,
+  type DeleteMode,
+} from "./admin-delete";
 import type { TimelineEntryValues } from "./TimelineEntryForm";
 import type { ConversationEntryDetails } from "./ConversationEntryDetailsDialog";
 
@@ -22,6 +26,7 @@ export type TimelineEntry = {
   direction: string;
   content: string;
   occurredAt: string;
+  deletedAt?: string;
 };
 
 const PAGE_SIZE = 30;
@@ -279,6 +284,22 @@ export default function ConversationTimeline({
     }
   }
 
+  async function restoreEntry(entry: TimelineEntry) {
+    try {
+      await restoreAdminRecord(
+        `/api/admin/inquiries/${inquiryId}/conversation/${entry._id}`,
+        entry._id,
+        "Unable to restore conversation entry.",
+      );
+      setRefreshKey((current) => current + 1);
+      toast.success("Conversation entry restored.");
+    } catch (cause) {
+      toast.error(
+        getDisplayErrorMessage(cause, "Unable to restore conversation entry."),
+      );
+    }
+  }
+
   function savedReply() {
     setDialog(null);
     setRefreshKey((current) => current + 1);
@@ -395,6 +416,11 @@ export default function ConversationTimeline({
                 label="conversation entry"
                 edit={{ onSelect: () => void editEntry(entry._id) }}
                 details={{ onSelect: () => void showDetails(entry._id) }}
+                restore={
+                  entry.deletedAt
+                    ? { onSelect: () => void restoreEntry(entry) }
+                    : undefined
+                }
                 delete={{ onSelect: () => setDeleteEntry(entry) }}
               />
             </li>
@@ -454,6 +480,7 @@ export default function ConversationTimeline({
           label="conversation entry"
           description="Delete this conversation entry? It will be removed from the timeline but can be retained in the audit history."
           onConfirm={deleteSelectedEntry}
+          modeOptions={deleteEntry.deletedAt ? "permanent-only" : "soft-and-permanent"}
           onRecovery={() => setDeleteEntry(deleteEntry)}
           open
           onOpenChange={(open) => { if (!open) setDeleteEntry(null); }}

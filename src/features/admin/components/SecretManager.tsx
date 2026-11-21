@@ -18,7 +18,11 @@ import {
   fromDateTimeLocal,
   toDateTimeLocal,
 } from "@/features/admin/services/date-time";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  restoreAdminRecord,
+  type DeleteMode,
+} from "./admin-delete";
 import AdminListFilters from "./AdminListFilters";
 
 type Secret = {
@@ -28,6 +32,7 @@ type Secret = {
   expiresAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  deletedAt?: string;
 };
 type SecretFormValues = {
   label: string;
@@ -231,7 +236,6 @@ export default function SecretManager({
           ? "Secret permanently deleted."
           : "Secret archived.",
       );
-      setDeleteTarget(null);
       const nextTotal = Math.max(0, total - 1);
       const nextPage = Math.min(
         page,
@@ -252,6 +256,38 @@ export default function SecretManager({
         "Unable to delete secret.",
       );
       throw new Error(message);
+    }
+  }
+
+  async function restore(secret: Secret) {
+    try {
+      await restoreAdminRecord(
+        `/api/admin/clients/${clientId}/secrets/${secret._id}`,
+        secret._id,
+        "Unable to restore secret.",
+      );
+      if (archive === "archived") {
+        setSecrets((current) =>
+          current.filter((item) => item._id !== secret._id),
+        );
+        const nextTotal = Math.max(0, total - 1);
+        setTotal(nextTotal);
+        const nextPage = Math.min(
+          page,
+          Math.max(1, Math.ceil(nextTotal / pageSize)),
+        );
+        if (nextPage !== page) setPage(nextPage);
+      } else {
+        setSecrets((current) =>
+          current.map((item) =>
+            item._id === secret._id ? { ...item, deletedAt: undefined } : item,
+          ),
+        );
+      }
+      toast.success("Secret restored.");
+      router.refresh();
+    } catch (reason) {
+      toast.error(getDisplayErrorMessage(reason, "Unable to restore secret."));
     }
   }
 
@@ -447,6 +483,11 @@ export default function SecretManager({
                     }}
                     details={{ onSelect: () => void showDetails(secret) }}
                     edit={{ onSelect: () => setFormSecret(secret) }}
+                    restore={
+                      secret.deletedAt
+                        ? { onSelect: () => void restore(secret) }
+                        : undefined
+                    }
                     delete={{ onSelect: () => setDeleteTarget(secret) }}
                   />
                 )}
@@ -509,6 +550,7 @@ export default function SecretManager({
           label={`Delete ${deleteTarget.label}`}
           description="Delete this encrypted secret from active records."
           onConfirm={(mode) => remove(deleteTarget._id, mode)}
+          modeOptions={deleteTarget.deletedAt ? "permanent-only" : "soft-and-permanent"}
           onRecovery={() => setDeleteTarget(deleteTarget)}
           open
           onOpenChange={(open) => {

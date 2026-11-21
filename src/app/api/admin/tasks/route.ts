@@ -7,7 +7,7 @@ import { Project } from "@/features/admin/models/project";
 import { Task } from "@/features/admin/models/task";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
-import { getDeleteMode } from "@/features/admin/services/delete-mode";
+import { getRecordActionMode } from "@/features/admin/services/delete-mode";
 
 const taskSchema = z.object({
   projectId: z.string().regex(/^[a-f\d]{24}$/i),
@@ -122,15 +122,21 @@ export async function DELETE(request: NextRequest) {
       await validateCsrfToken(request, session);
       const taskId = z.string().regex(/^[a-f\d]{24}$/i).parse(new URL(request.url).searchParams.get("taskId"));
       if (request.headers.get("x-confirm-delete") !== taskId) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
-      const mode = getDeleteMode(request);
+      const mode = getRecordActionMode(request);
       if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
       await connectToDatabase();
-      const task = mode === "permanent"
-        ? await Task.findOneAndDelete({ _id: taskId, deletedAt: { $exists: false } }).lean()
-        : await Task.findOneAndUpdate({ _id: taskId, deletedAt: { $exists: false } }, { $set: { deletedAt: new Date() } }, { returnDocument: "after" }).lean();
+      const task = mode === "restore"
+        ? await Task.findOneAndUpdate(
+            { _id: taskId, deletedAt: { $exists: true } },
+            { $unset: { deletedAt: 1 } },
+            { returnDocument: "after" },
+          ).lean()
+        : mode === "permanent"
+          ? await Task.findOneAndDelete({ _id: taskId }).lean()
+          : await Task.findOneAndUpdate({ _id: taskId, deletedAt: { $exists: false } }, { $set: { deletedAt: new Date() } }, { returnDocument: "after" }).lean();
       if (!task) return NextResponse.json({ error: "Task not found." }, { status: 404 });
-      await writeAuditEvent({ actor: "admin", action: "task.deleted", resourceType: "task", resourceId: taskId, resourceLabel: task.title, requestId: getRequestId(request), metadata: { [mode === "permanent" ? "permanentDelete" : "softDelete"]: true, status: task.status } });
-      return NextResponse.json({ message: mode === "permanent" ? "Task permanently deleted." : "Task archived." });
+      await writeAuditEvent({ actor: "admin", action: mode === "restore" ? "task.restored" : "task.deleted", resourceType: "task", resourceId: taskId, resourceLabel: task.title, requestId: getRequestId(request), metadata: { [mode === "permanent" ? "permanentDelete" : mode === "restore" ? "restored" : "softDelete"]: true, status: task.status } });
+      return NextResponse.json({ message: mode === "permanent" ? "Task permanently deleted." : mode === "restore" ? "Task restored." : "Task archived." });
     } catch (error) {
       if (error instanceof Error && error.message === "ADMIN_UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       if (error instanceof Error && error.message.startsWith("CSRF_")) return NextResponse.json({ error: "Security check failed. Refresh and try again." }, { status: 403 });

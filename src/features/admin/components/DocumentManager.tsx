@@ -11,7 +11,11 @@ import { getDisplayErrorMessage } from "@/lib/error-message";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import RecordActionsMenu from "./RecordActionsMenu";
 import { Button } from "./ui/Button";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  restoreAdminRecord,
+  type DeleteMode,
+} from "./admin-delete";
 import AdminListFilters from "./AdminListFilters";
 import type { ArchiveFilter } from "@/features/admin/services/archive-filter";
 
@@ -24,6 +28,7 @@ export type DocumentRecord = {
   size?: number;
   createdAt: string;
   updatedAt?: string;
+  deletedAt?: string;
 };
 
 const DocumentFormDialog = dynamic(() => import("./DocumentFormDialog"), {
@@ -295,7 +300,6 @@ export default function DocumentManager({
         mode,
         "Unable to delete document.",
       );
-      setDeleteDocument(null);
       toast.success(
         mode === "permanent"
           ? "Document permanently deleted."
@@ -314,6 +318,34 @@ export default function DocumentManager({
         "Unable to delete document.",
       );
       throw new Error(message);
+    }
+  }
+
+  async function restore(document: DocumentRecord) {
+    try {
+      await restoreAdminRecord(
+        `/api/admin/clients/${clientId}/documents/${document._id}`,
+        document._id,
+        "Unable to restore document.",
+      );
+      if (archive === "archived") {
+        setDocuments((current) =>
+          current.filter((item) => item._id !== document._id),
+        );
+        setDocumentCount((count) => Math.max(0, count - 1));
+      } else {
+        setDocuments((current) =>
+          current.map((item) =>
+            item._id === document._id
+              ? { ...item, deletedAt: undefined }
+              : item,
+          ),
+        );
+      }
+      toast.success("Document restored.");
+      router.refresh();
+    } catch (reason) {
+      toast.error(getDisplayErrorMessage(reason, "Unable to restore document."));
     }
   }
 
@@ -416,6 +448,11 @@ export default function DocumentManager({
                       revealLabel="Open file"
                       details={{ onSelect: () => void loadDetails(document) }}
                       edit={{ onSelect: () => void editDocument(document) }}
+                      restore={
+                        document.deletedAt
+                          ? { onSelect: () => void restore(document) }
+                          : undefined
+                      }
                       delete={{ onSelect: () => setDeleteDocument(document) }}
                     />
                   )}
@@ -467,6 +504,7 @@ export default function DocumentManager({
           label={`Delete ${deleteDocument.filename}`}
           description="Archive this document while retaining its private object for troubleshooting."
           onConfirm={(mode) => remove(deleteDocument, mode)}
+          modeOptions={deleteDocument.deletedAt ? "permanent-only" : "soft-and-permanent"}
           onRecovery={() => setDeleteDocument(deleteDocument)}
           open
           onOpenChange={(open) => {

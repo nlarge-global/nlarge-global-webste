@@ -16,7 +16,12 @@ import TaskForm, { type TaskFormValues, type TaskRecord } from "./TaskForm";
 import { useDialogEscape } from "./useDialogEscape";
 import RecordBadge from "./RecordBadge";
 import { showOptimisticRecoveryToast } from "./showOptimisticRecoveryToast";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  restoreAdminRecord,
+  waitForDeleteFeedback,
+  type DeleteMode,
+} from "./admin-delete";
 
 type Task = TaskRecord;
 type TaskChanges = TaskFormValues;
@@ -144,6 +149,7 @@ export default function TaskList({
 
   const deleteTask = useCallback(
     async (taskId: string, mode: DeleteMode) => {
+      const startedAt = Date.now();
       setPendingDeletes((current) => new Set(current).add(taskId));
       try {
         await deleteAdminRecord(
@@ -152,6 +158,7 @@ export default function TaskList({
           mode,
           "Unable to delete task.",
         );
+        await waitForDeleteFeedback(startedAt);
         setTasks((current) => current.filter((task) => task._id !== taskId));
         router.refresh();
         toast.success(mode === "permanent" ? "Task permanently deleted." : "Task archived.");
@@ -169,6 +176,23 @@ export default function TaskList({
           next.delete(taskId);
           return next;
         });
+      }
+    },
+    [router],
+  );
+
+  const restoreTask = useCallback(
+    async (taskId: string) => {
+      try {
+        await restoreAdminRecord(
+          `/api/admin/tasks?taskId=${taskId}`,
+          taskId,
+          "Unable to restore task.",
+        );
+        router.refresh();
+        toast.success("Task restored.");
+      } catch (error) {
+        toast.error(getDisplayErrorMessage(error, "Unable to restore task."));
       }
     },
     [router],
@@ -208,6 +232,7 @@ export default function TaskList({
             hidden={pendingDeletes.has(task._id)}
             onSave={saveTask}
             onDelete={(mode) => deleteTask(task._id, mode)}
+            onRestore={() => restoreTask(task._id)}
           />
         ))}
       </div>
@@ -220,6 +245,7 @@ function TaskItem({
   hidden,
   onSave,
   onDelete,
+  onRestore,
 }: {
   task: Task;
   hidden: boolean;
@@ -229,6 +255,7 @@ function TaskItem({
     onRecover?: () => void,
   ) => Promise<string | null>;
   onDelete: (mode: DeleteMode) => Promise<void>;
+  onRestore: () => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [action, setAction] = useState<TaskAction>(null);
@@ -400,6 +427,11 @@ function TaskItem({
             edit={{ onSelect: () => void openDialog("edit") }}
             details={{ onSelect: () => void openDialog("details") }}
             detailsLabel="Details"
+            restore={
+              task.deletedAt
+                ? { onSelect: () => void onRestore() }
+                : undefined
+            }
             delete={{ onSelect: () => setAction("delete") }}
           />
         )}
@@ -436,6 +468,7 @@ function TaskItem({
           label={`Delete ${task.title}`}
           description="Archive this task from the project."
           onConfirm={onDelete}
+          modeOptions={task.deletedAt ? "permanent-only" : "soft-and-permanent"}
           onRecovery={() => setAction("delete")}
           open
           onOpenChange={(open) => {

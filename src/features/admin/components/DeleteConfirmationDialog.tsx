@@ -15,7 +15,10 @@ import { FiCheck, FiTrash2, FiX } from "react-icons/fi";
 import { Button } from "./ui/Button";
 import { useDialogEscape } from "./useDialogEscape";
 import { showOptimisticRecoveryToast } from "./showOptimisticRecoveryToast";
-import type { DeleteMode } from "./admin-delete";
+import {
+  DELETE_FEEDBACK_MS,
+  type DeleteMode,
+} from "./admin-delete";
 
 const HOLD_MS = 1600;
 
@@ -42,7 +45,6 @@ export default function DeleteConfirmationDialog({
   const [holding, setHolding] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState("");
   const [mode, setMode] = useState<DeleteMode>(
     modeOptions === "permanent-only" ? "permanent" : "soft",
   );
@@ -59,7 +61,6 @@ export default function DeleteConfirmationDialog({
     if (open && !wasOpen.current) {
       setMode(modeOptions === "permanent-only" ? "permanent" : "soft");
       setDeleted(false);
-      setError("");
     }
     wasOpen.current = open;
   }, [open, modeOptions]);
@@ -76,33 +77,26 @@ export default function DeleteConfirmationDialog({
 
   useEffect(() => {
     if (!holding) return;
-    const timer = window.setTimeout(async () => {
+    const timer = window.setTimeout(() => {
       setHolding(false);
       setConfirming(true);
-      setError("");
       setDeleted(true);
-      const minimumFeedbackTime = new Promise<void>((resolve) => {
-        window.setTimeout(resolve, 450);
-      });
-      try {
-        await Promise.all([onConfirmRef.current(modeRef.current), minimumFeedbackTime]);
-      } catch (reason) {
-        await minimumFeedbackTime;
-        const message = getDisplayErrorMessage(
-          reason,
-          "Unable to complete this action.",
-        );
-        if (onRecoveryRef.current) {
-          showOptimisticRecoveryToast(message, onRecoveryRef.current);
-        } else {
-          setDeleted(false);
-          setError(message);
-          return;
-        }
-      } finally {
+      void Promise.resolve()
+        .then(() => onConfirmRef.current(modeRef.current))
+        .catch((reason) => {
+          const message = getDisplayErrorMessage(
+            reason,
+            "Unable to complete this action.",
+          );
+          showOptimisticRecoveryToast(
+            message,
+            onRecoveryRef.current ?? (() => setOpen(true)),
+          );
+        });
+      window.setTimeout(() => {
         setConfirming(false);
-      }
-      setOpen(false);
+        setOpen(false);
+      }, DELETE_FEEDBACK_MS);
     }, HOLD_MS);
     return () => window.clearTimeout(timer);
   }, [holding, controlledOpen, modeOptions]);
@@ -116,7 +110,6 @@ export default function DeleteConfirmationDialog({
   ) {
     if (event && "button" in event && event.button !== 0) return;
     if (!deleted && !confirming) {
-      setError("");
       setHolding(true);
     }
   }
@@ -187,7 +180,6 @@ export default function DeleteConfirmationDialog({
                         onClick={() => {
                           setMode(value);
                           setHolding(false);
-                          setError("");
                         }}
                         className={`rounded-xl border p-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#602329]/40 disabled:cursor-not-allowed cursor-pointer ${
                           mode === value
@@ -203,11 +195,6 @@ export default function DeleteConfirmationDialog({
                     ))}
                   </div>
                 </fieldset>
-              )}
-              {error && (
-                <p role="alert" className="mt-4 text-sm text-red-700">
-                  {error}
-                </p>
               )}
               <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
                 <Button

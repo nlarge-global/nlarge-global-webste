@@ -9,7 +9,7 @@ import { readDocumentContent } from "@/features/admin/services/document-storage"
 import { z } from "zod";
 import { writeOperationsEvent } from "@/features/admin/services/operations";
 import { deletePrivateObject } from "@/lib/r2";
-import { getDeleteMode } from "@/features/admin/services/delete-mode";
+import { getRecordActionMode } from "@/features/admin/services/delete-mode";
 
 const updateSchema = z.object({
   filename: z.string().trim().min(1).max(200),
@@ -106,10 +106,24 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await validateCsrfToken(request, session);
     const { id, documentId } = await params;
     if (request.headers.get("x-confirm-delete") !== documentId) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
-    const mode = getDeleteMode(request);
+    const mode = getRecordActionMode(request);
     if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
-    const document = await ClientDocument.findOne({ _id: documentId, clientId: id });
+    const filter = { _id: documentId, clientId: id };
+    if (mode === "restore") {
+      const restored = await ClientDocument.findOneAndUpdate(
+        { ...filter, deletedAt: { $exists: true } },
+        { $unset: { deletedAt: 1 } },
+        { returnDocument: "after" },
+      );
+      if (!restored) return NextResponse.json({ error: "Document not found." }, { status: 404 });
+      await writeAuditEvent({ actor: "admin", action: "document.restored", resourceType: "document", resourceId: documentId, resourceLabel: restored.filename, requestId: getRequestId(request), metadata: { clientId: id, restored: true } });
+      return NextResponse.json({ message: "Document restored." });
+    }
+    const document = await ClientDocument.findOne({
+      ...filter,
+      ...(mode === "soft" ? { deletedAt: { $exists: false } } : {}),
+    }).setOptions({ includeDeleted: mode === "permanent" });
     if (!document) return NextResponse.json({ error: "Document not found." }, { status: 404 });
     if (mode === "permanent") {
       await deletePrivateObject(document.objectKey);

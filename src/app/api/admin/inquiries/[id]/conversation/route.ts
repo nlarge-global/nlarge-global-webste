@@ -64,7 +64,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .setOptions({ includeDeleted })
       .sort({ occurredAt: -1, _id: -1 })
       .limit(PAGE_SIZE + 1)
-      .select("_id channel direction content occurredAt")
+      .select("_id channel direction content occurredAt deletedAt")
       .lean();
     const hasMore = page.length > PAGE_SIZE;
     const entries = page.slice(0, PAGE_SIZE);

@@ -14,7 +14,11 @@ import PaymentForm, {
 } from "./PaymentForm";
 import RecordBadge from "./RecordBadge";
 import { formatCurrency } from "@/features/admin/services/currency";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  restoreAdminRecord,
+  type DeleteMode,
+} from "./admin-delete";
 import AdminListFilters from "./AdminListFilters";
 import { useSearchParams } from "next/navigation";
 
@@ -31,6 +35,7 @@ type Payment = {
   proofDocumentId?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  deletedAt?: string;
 };
 type PaymentAction = "edit" | "details" | "delete" | null;
 const pageSize = 10;
@@ -184,6 +189,40 @@ export default function PaymentManager({
     }
   }
 
+  async function restore(payment: Payment) {
+    try {
+      await restoreAdminRecord(
+        `/api/admin/clients/${clientId}/payments/${payment._id}`,
+        payment._id,
+        "Unable to restore payment.",
+      );
+      if (archive === "archived") {
+        setPayments((current) =>
+          current.filter((item) => item._id !== payment._id),
+        );
+        const nextTotal = Math.max(0, total - 1);
+        setTotal(nextTotal);
+        const nextPage = Math.min(
+          page,
+          Math.max(1, Math.ceil(nextTotal / pageSize)),
+        );
+        if (nextPage !== page) setPage(nextPage);
+      } else {
+        setPayments((current) =>
+          current.map((item) =>
+            item._id === payment._id
+              ? { ...item, deletedAt: undefined }
+              : item,
+          ),
+        );
+      }
+      toast.success("Payment restored.");
+      router.refresh();
+    } catch (reason) {
+      toast.error(getDisplayErrorMessage(reason, "Unable to restore payment."));
+    }
+  }
+
   async function showAction(payment: Payment, nextAction: PaymentAction) {
     setActivePayment(payment);
     setAction(nextAction);
@@ -329,6 +368,11 @@ export default function PaymentManager({
                     edit={{ onSelect: () => void showAction(payment, "edit") }}
                     details={{ onSelect: () => void showAction(payment, "details") }}
                     detailsLabel="Details"
+                    restore={
+                      payment.deletedAt
+                        ? { onSelect: () => void restore(payment) }
+                        : undefined
+                    }
                     delete={{ onSelect: () => void showAction(payment, "delete") }}
                   />
                 )}
@@ -408,6 +452,7 @@ export default function PaymentManager({
           label={`Delete payment ${activePayment.currency} ${activePayment.amount}`}
           description="Archive this payment from active records."
           onConfirm={(mode) => remove(activePayment._id, mode)}
+          modeOptions={activePayment.deletedAt ? "permanent-only" : "soft-and-permanent"}
           onRecovery={() => setAction("delete")}
           open
           onOpenChange={(open) => {

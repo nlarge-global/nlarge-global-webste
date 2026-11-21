@@ -15,6 +15,7 @@ export type PaymentRecordDocument = Document & {
   proofDocumentId?: string;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 };
 
 const paymentSchema = new Schema<PaymentRecordDocument>({

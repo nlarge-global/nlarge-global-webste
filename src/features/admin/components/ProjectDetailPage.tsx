@@ -91,7 +91,9 @@ export default async function ProjectDetailPage({
   archive?: string;
 }) {
   await connectToDatabase();
-  const project = await Project.findById(projectId).lean();
+  const project = await Project.findById(projectId)
+    .setOptions({ includeDeleted: true })
+    .lean();
   if (!project) notFound();
   const archive = parseArchiveFilter(archiveParam);
   const archiveQuery = getArchiveQuery(archive);
@@ -101,7 +103,7 @@ export default async function ProjectDetailPage({
       Client.findById(project.clientId).select("_id name"),
       Task.find({ projectId: project._id, ...archiveQuery })
         .setOptions(archiveOptions)
-        .select("title status priority dueDate completedAt notes")
+        .select("title status priority dueDate completedAt notes deletedAt")
         .sort({ status: 1, dueDate: 1 })
         .lean(),
       Secret.countDocuments({
@@ -192,20 +194,6 @@ export default async function ProjectDetailPage({
           </div>
         </div>
         <div className="flex sm:flex-col items-end gap-3 flex-row">
-          <AdminListFilters
-            fields={[
-              {
-                name: "archive",
-                label: "Records",
-                value: archive,
-                options: [
-                  { value: "active", label: "Active" },
-                  { value: "archived", label: "Archived" },
-                  { value: "all", label: "All records" },
-                ],
-              },
-            ]}
-          />
           <ProjectActions
             client={{ _id: clientId, name: client.name }}
             project={{
@@ -222,6 +210,7 @@ export default async function ProjectDetailPage({
               productionUrl: project.productionUrl ?? undefined,
               stagingUrl: project.stagingUrl ?? undefined,
               notes: project.notes ?? undefined,
+              deletedAt: project.deletedAt?.toISOString(),
             }}
           />
         </div>
@@ -277,9 +266,26 @@ export default async function ProjectDetailPage({
           <ProjectDetail label="Notes" value={project.notes} />
         </dl>
       </section>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-black/50">Filter information</p>
+        <AdminListFilters
+          fields={[
+            {
+              name: "archive",
+              label: "Records",
+              value: archive,
+              options: [
+                { value: "active", label: "Active" },
+                { value: "archived", label: "Archived" },
+                { value: "all", label: "All records" },
+              ],
+            },
+          ]}
+        />
+      </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <Link
-          href={`${canonicalPath}/secrets`}
+          href={`${canonicalPath}/secrets?archive=${archive}`}
           className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"
         >
           <FiKey aria-hidden="true" className="text-[#602329]" />
@@ -287,7 +293,7 @@ export default async function ProjectDetailPage({
           <p className="text-sm text-black/50">Secrets</p>
         </Link>
         <Link
-          href={`${canonicalPath}/documents`}
+          href={`${canonicalPath}/documents?archive=${archive}`}
           className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"
         >
           <FiFileText aria-hidden="true" className="text-[#602329]" />
@@ -295,7 +301,7 @@ export default async function ProjectDetailPage({
           <p className="text-sm text-black/50">Documents</p>
         </Link>
         <Link
-          href={`${canonicalPath}/payments`}
+          href={`${canonicalPath}/payments?archive=${archive}`}
           className="rounded-2xl border border-black/10 bg-white p-5 hover:border-[#602329]"
         >
           <FiCreditCard aria-hidden="true" className="text-[#602329]" />
@@ -315,6 +321,7 @@ export default async function ProjectDetailPage({
             notesPreview:
               task.notes?.replace(/\s+/g, " ").trim().slice(0, 120) ?? "",
             completedAt: task.completedAt?.toISOString() ?? null,
+            deletedAt: task.deletedAt?.toISOString(),
           }))}
         />
       </div>

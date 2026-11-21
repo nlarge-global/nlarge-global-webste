@@ -12,6 +12,7 @@ export type TaskDocument = Document & {
   priority: "low" | "normal" | "high";
   notes?: string;
   completedAt?: Date;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 };

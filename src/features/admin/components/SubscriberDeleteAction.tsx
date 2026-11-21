@@ -2,18 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
-import { deleteAdminRecord } from "./admin-delete";
+import { deleteAdminRecord, waitForDeleteFeedback } from "./admin-delete";
 
 export default function SubscriberDeleteAction({ id }: { id: string }) {
   const router = useRouter();
 
   async function remove(mode: "soft" | "permanent") {
+    const startedAt = Date.now();
     await deleteAdminRecord(
       `/api/admin/subscribers/${id}`,
       id,
       mode,
       "Unable to permanently delete subscriber.",
     );
+    await waitForDeleteFeedback(startedAt);
     router.refresh();
   }
 

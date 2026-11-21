@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
-import { deleteAdminRecord, type DeleteMode } from "./admin-delete";
+import {
+  deleteAdminRecord,
+  waitForDeleteFeedback,
+  type DeleteMode,
+} from "./admin-delete";
 
 export default function DeleteRowAction({
   endpoint,
@@ -12,6 +16,8 @@ export default function DeleteRowAction({
   redirectTo,
   open,
   onOpenChange,
+  onRecovery,
+  modeOptions,
   trigger,
 }: {
   endpoint: string;
@@ -20,12 +26,16 @@ export default function DeleteRowAction({
   redirectTo?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onRecovery?: () => void;
+  modeOptions?: "soft-and-permanent" | "permanent-only";
   trigger?: ReactNode;
 }) {
   const router = useRouter();
   async function remove(mode: DeleteMode) {
+    const startedAt = Date.now();
     const confirmation = new URL(endpoint, window.location.origin).searchParams.get("taskId") ?? endpoint.split("/").pop() ?? "";
     await deleteAdminRecord(endpoint, confirmation, mode, `Unable to complete ${label} action.`);
+    await waitForDeleteFeedback(startedAt);
     if (redirectTo) router.push(redirectTo);
     else router.refresh();
   }
@@ -34,8 +44,10 @@ export default function DeleteRowAction({
       label={label}
       description={description}
       onConfirm={remove}
+      modeOptions={modeOptions}
       open={open}
       onOpenChange={onOpenChange}
+      onRecovery={onRecovery}
       trigger={trigger}
     />
   );

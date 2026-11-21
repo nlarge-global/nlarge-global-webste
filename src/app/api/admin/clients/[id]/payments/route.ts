@@ -32,7 +32,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") || 10)));
     const archive = searchParams.get("archive");
     const includeDeleted = archive === "archived" || archive === "all";
-    if (projectId && !await Project.exists({ _id: projectId, clientId: id })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    if (projectId && !await Project.exists({ _id: projectId, clientId: id }).setOptions({ includeDeleted })) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const filter = {
       clientId: id,
       ...(projectId ? { projectId } : {}),
@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       ...(archive === "archived" ? { deletedAt: { $exists: true } } : {}),
     };
     const [payments, total] = await Promise.all([
-      PaymentRecord.find(filter).setOptions({ includeDeleted }).select("amount currency method status paidAt").sort({ paidAt: 1, createdAt: 1 }).skip((page - 1) * limit).limit(limit).lean(),
+      PaymentRecord.find(filter).setOptions({ includeDeleted }).select("amount currency method status paidAt deletedAt").sort({ paidAt: 1, createdAt: 1 }).skip((page - 1) * limit).limit(limit).lean(),
       PaymentRecord.countDocuments(filter).setOptions({ includeDeleted }),
     ]);
     return NextResponse.json({ payments, pagination: { page, limit, total, hasNext: page * limit < total } });

@@ -8,7 +8,7 @@ import { Secret } from "@/features/admin/models/secret";
 import { ClientDocument } from "@/features/admin/models/document";
 import { PaymentRecord } from "@/features/admin/models/payment";
 import { deletePrivateObject } from "@/lib/r2";
-import { getDeleteMode } from "@/features/admin/services/delete-mode";
+import { getRecordActionMode } from "@/features/admin/services/delete-mode";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestId, writeAuditEvent } from "@/features/admin/services/audit";
 
@@ -92,11 +92,31 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       await validateCsrfToken(request, session);
       const { id } = await params;
       if (request.headers.get("x-confirm-delete") !== id) return NextResponse.json({ error: "Explicit delete confirmation is required." }, { status: 400 });
-      const mode = getDeleteMode(request);
+      const mode = getRecordActionMode(request);
       if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
       await connectToDatabase();
-      const project = await Project.findById(id);
+      const project = await Project.findOne({
+        _id: id,
+        ...(mode === "soft"
+          ? { deletedAt: { $exists: false } }
+          : mode === "restore"
+            ? { deletedAt: { $exists: true } }
+            : {}),
+      }).setOptions({ includeDeleted: true });
       if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+      if (mode === "restore") {
+        const deletedAt = project.deletedAt;
+        if (!deletedAt) return NextResponse.json({ error: "Project not found." }, { status: 404 });
+        await Promise.all([
+          Task.updateMany({ projectId: id, deletedAt }, { $unset: { deletedAt: 1 } }),
+          Secret.updateMany({ projectId: id, deletedAt }, { $unset: { deletedAt: 1 } }),
+          ClientDocument.updateMany({ projectId: id, deletedAt }, { $unset: { deletedAt: 1 } }),
+          PaymentRecord.updateMany({ projectId: id, deletedAt }, { $unset: { deletedAt: 1 } }),
+          Project.updateOne({ _id: id, deletedAt }, { $unset: { deletedAt: 1 } }),
+        ]);
+        await writeAuditEvent({ actor: "admin", action: "project.restored", resourceType: "project", resourceId: id, resourceLabel: project.name, requestId: getRequestId(request), metadata: { cascade: true, restored: true } });
+        return NextResponse.json({ message: "Project restored." });
+      }
       if (mode === "permanent") {
         const documents = await ClientDocument.find({ projectId: id })
           .select("objectKey")
@@ -115,10 +135,22 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }
       const deletedAt = new Date();
       await Promise.all([
-        Task.updateMany({ projectId: id }, { $set: { deletedAt } }),
-        Secret.updateMany({ projectId: id }, { $set: { deletedAt } }),
-        ClientDocument.updateMany({ projectId: id }, { $set: { deletedAt } }),
-        PaymentRecord.updateMany({ projectId: id }, { $set: { deletedAt } }),
+        Task.updateMany(
+          { projectId: id, deletedAt: { $exists: false } },
+          { $set: { deletedAt } },
+        ),
+        Secret.updateMany(
+          { projectId: id, deletedAt: { $exists: false } },
+          { $set: { deletedAt } },
+        ),
+        ClientDocument.updateMany(
+          { projectId: id, deletedAt: { $exists: false } },
+          { $set: { deletedAt } },
+        ),
+        PaymentRecord.updateMany(
+          { projectId: id, deletedAt: { $exists: false } },
+          { $set: { deletedAt } },
+        ),
         Project.updateOne({ _id: id }, { $set: { deletedAt } }),
       ]);
       await writeAuditEvent({ actor: "admin", action: "project.deleted", resourceType: "project", resourceId: id, resourceLabel: project.name, requestId: getRequestId(request), metadata: { cascade: true, softDelete: true } });

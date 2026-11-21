@@ -14,6 +14,7 @@ export type SecretDocument = Document & {
   expiresAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 };
 
 const secretSchema = new Schema<SecretDocument>({

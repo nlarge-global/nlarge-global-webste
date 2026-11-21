@@ -52,7 +52,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (!mode) return NextResponse.json({ error: "Choose archive or permanent deletion." }, { status: 400 });
     await connectToDatabase();
     const inquiry = mode === "permanent"
-      ? await Inquiry.findById(id)
+      ? await Inquiry.findById(id).setOptions({ includeDeleted: true })
       : await Inquiry.findOneAndUpdate({ _id: id, deletedAt: { $exists: false } }, { $set: { deletedAt: new Date() } }, { returnDocument: "after" });
     if (!inquiry) return NextResponse.json({ error: "Inquiry not found." }, { status: 404 });
     if (mode === "permanent") {
