@@ -3,7 +3,6 @@ import { getDisplayErrorMessage } from "@/lib/error-message";
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   getDueDateState,
@@ -22,6 +21,7 @@ import {
   waitForDeleteFeedback,
   type DeleteMode,
 } from "./admin-delete";
+import type { ArchiveFilter } from "@/features/admin/services/archive-filter";
 
 type Task = TaskRecord;
 type TaskChanges = TaskFormValues;
@@ -49,13 +49,14 @@ const TaskDetailsDialog = dynamic(() => import("./TaskDetailsDialog"), {
 export default function TaskList({
   projectId,
   initialTasks,
+  archive,
 }: {
   projectId: string;
   initialTasks: Task[];
+  archive: ArchiveFilter;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
-  const router = useRouter();
 
   useEffect(() => setTasks(initialTasks), [initialTasks]);
 
@@ -132,7 +133,6 @@ export default function TaskList({
         throw new Error(result.error ?? "Unable to update task.");
       }
       updateTask(taskId, result.task);
-      router.refresh();
       toast.success("Task updated.");
       return null;
     } catch (error) {
@@ -160,7 +160,6 @@ export default function TaskList({
         );
         await waitForDeleteFeedback(startedAt);
         setTasks((current) => current.filter((task) => task._id !== taskId));
-        router.refresh();
         toast.success(mode === "permanent" ? "Task permanently deleted." : "Task archived.");
       } catch (error) {
         setPendingDeletes((current) => {
@@ -178,7 +177,7 @@ export default function TaskList({
         });
       }
     },
-    [router],
+    [],
   );
 
   const restoreTask = useCallback(
@@ -189,13 +188,21 @@ export default function TaskList({
           taskId,
           "Unable to restore task.",
         );
-        router.refresh();
+        setTasks((current) =>
+          archive === "archived"
+            ? current.filter((task) => task._id !== taskId)
+            : current.map((task) =>
+                task._id === taskId
+                  ? { ...task, deletedAt: undefined }
+                  : task,
+              ),
+        );
         toast.success("Task restored.");
       } catch (error) {
         toast.error(getDisplayErrorMessage(error, "Unable to restore task."));
       }
     },
-    [router],
+    [archive],
   );
 
   return (

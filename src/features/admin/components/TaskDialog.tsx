@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/Button";
 import DialogDraft from "./DialogDraft";
@@ -33,7 +32,6 @@ export default function TaskDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const router = useRouter();
   const dialogRef = useDialogEscape(open, () => setOpen(false));
   return (
     <>
@@ -80,7 +78,6 @@ export default function TaskDialog({
                   onCreated(temporaryId, task);
                   setOpen(false);
                   setMounted(false);
-                  router.refresh();
                 }}
               />
             </DialogDraft>

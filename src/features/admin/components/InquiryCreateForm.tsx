@@ -34,7 +34,6 @@ export default function InquiryCreateForm({ onCreated }: { onCreated: () => void
       }
       onCreated();
       router.push(`/admin/inquiries/${result.id}`);
-      router.refresh();
     } catch (error) {
       setError(getDisplayErrorMessage(error, "Unable to create inquiry. Check your connection and try again."));
     } finally {

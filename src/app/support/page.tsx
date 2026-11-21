@@ -154,18 +154,18 @@ export default function SupportPage() {
               <p>
                 Retention depends on the type of information and why we hold it.
                 See the{" "}
-                <a className={linkClass} href="/privacy-policy">
+                <Link className={linkClass} href="/privacy-policy">
                   Privacy Policy
-                </a>{" "}
+                </Link>{" "}
                 for current details.
               </p>
             </section>
 
             <p>
               Read our{" "}
-              <a className={linkClass} href="/privacy-policy">
+              <Link className={linkClass} href="/privacy-policy">
                 Privacy Policy
-              </a>{" "}
+              </Link>{" "}
               for more about the information we handle and how we use it.
             </p>
           </div>

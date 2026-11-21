@@ -26,7 +26,6 @@ export default function RestoreProspectButton({ id }: { id: string }) {
         return;
       }
       router.replace("/admin/prospects");
-      router.refresh();
     } catch (error) {
       setError(getDisplayErrorMessage(error, "Unable to restore this prospect. Check your connection and try again."));
     } finally {

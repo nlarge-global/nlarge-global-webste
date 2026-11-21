@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FiFileText, FiImage } from "react-icons/fi";
 import { AdminPagination } from "@/components/ui/pagination";
@@ -83,8 +82,6 @@ export default function DocumentManager({
   const [deleteDocument, setDeleteDocument] = useState<DocumentRecord | null>(
     null,
   );
-  const router = useRouter();
-
   useEffect(() => setDocuments(initialDocuments), [initialDocuments]);
   useEffect(() => setDocumentCount(total), [total]);
 
@@ -192,7 +189,6 @@ export default function DocumentManager({
 
       setFormDocument(null);
       toast.success(document ? "Document updated." : "Document uploaded.");
-      router.refresh();
       return null;
     } catch (reason) {
       if (temporaryId) {
@@ -305,7 +301,6 @@ export default function DocumentManager({
           ? "Document permanently deleted."
           : "Document archived.",
       );
-      router.refresh();
     } catch (reason) {
       setDocuments((current) => {
         const restored = [...current];
@@ -343,7 +338,6 @@ export default function DocumentManager({
         );
       }
       toast.success("Document restored.");
-      router.refresh();
     } catch (reason) {
       toast.error(getDisplayErrorMessage(reason, "Unable to restore document."));
     }

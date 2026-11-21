@@ -145,13 +145,24 @@ export default function LegalDocumentPage({
                       ? paragraph
                       : paragraph.map((segment, segmentIndex) =>
                           segment.href ? (
-                            <a
-                              key={`${segment.href}-${segmentIndex}`}
-                              className={linkClass}
-                              href={segment.href}
-                            >
-                              {segment.text}
-                            </a>
+                            segment.href.startsWith("/") &&
+                            !segment.href.startsWith("//") ? (
+                              <Link
+                                key={`${segment.href}-${segmentIndex}`}
+                                className={linkClass}
+                                href={segment.href}
+                              >
+                                {segment.text}
+                              </Link>
+                            ) : (
+                              <a
+                                key={`${segment.href}-${segmentIndex}`}
+                                className={linkClass}
+                                href={segment.href}
+                              >
+                                {segment.text}
+                              </a>
+                            )
                           ) : (
                             <span key={segmentIndex}>{segment.text}</span>
                           ),

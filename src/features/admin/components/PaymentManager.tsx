@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getDisplayErrorMessage } from "@/lib/error-message";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
@@ -64,8 +63,6 @@ export default function PaymentManager({
     searchParams.get("archive") === "archived" || searchParams.get("archive") === "all"
       ? searchParams.get("archive")!
       : "active";
-  const router = useRouter();
-
   async function load(requestedPage = page) {
     setIsLoading(true);
     setError("");
@@ -142,7 +139,6 @@ export default function PaymentManager({
       toast.success("Payment added.");
       setError("");
       if (page === 1) await load(1);
-      router.refresh();
       return null;
     } catch (reason) {
       setPayments((current) =>
@@ -174,7 +170,6 @@ export default function PaymentManager({
       if (nextPage !== page) setPage(nextPage);
       toast.success(mode === "permanent" ? "Payment permanently deleted." : "Payment archived.");
       if (nextPage === page) await load(nextPage);
-      router.refresh();
     } catch (reason) {
       setPayments((current) => {
         const restored = [...current];
@@ -217,7 +212,6 @@ export default function PaymentManager({
         );
       }
       toast.success("Payment restored.");
-      router.refresh();
     } catch (reason) {
       toast.error(getDisplayErrorMessage(reason, "Unable to restore payment."));
     }
@@ -435,7 +429,6 @@ export default function PaymentManager({
             onSaved={(saved) => {
               updatePayment(saved);
               setAction(null);
-              router.refresh();
             }}
           />
         )

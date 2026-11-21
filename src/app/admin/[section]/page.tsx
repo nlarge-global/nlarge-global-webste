@@ -23,6 +23,7 @@ import Pagination from "@/features/admin/components/Pagination";
 import { sanitizeAuditMetadata } from "@/features/admin/services/audit";
 import { escapeAuditSearch, parseAuditDate } from "@/features/admin/services/audit-filters";
 import { Button } from "@/components/ui/button";
+import AdminQueryForm from "@/features/admin/components/AdminQueryForm";
 import HealthDashboard from "@/features/admin/components/HealthDashboard";
 import OperationsLogPage from "@/features/admin/components/OperationsLogPage";
 
@@ -149,9 +150,8 @@ export default async function AdminSectionPage({
             </p>
           </div>
         </header>
-        <form
-          method="get"
-          action="/admin/audit"
+        <AdminQueryForm
+          key={JSON.stringify([search, actor, resourceType, from, to])}
           className="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-black/10 bg-[#f7f4f1] p-4 sm:grid-cols-2 lg:grid-cols-5"
         >
           <label className="text-sm font-medium">
@@ -222,7 +222,7 @@ export default async function AdminSectionPage({
               Clear filters
             </Link>
           </div>
-        </form>
+        </AdminQueryForm>
         <p className="mb-3 text-sm text-black/55" aria-live="polite">
           {total} {total === 1 ? "event" : "events"} found
         </p>

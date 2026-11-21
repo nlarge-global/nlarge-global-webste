@@ -312,6 +312,7 @@ export default async function ProjectDetailPage({
       <div className="mt-6">
         <TaskList
           projectId={String(project._id)}
+          archive={archive}
           initialTasks={tasks.map((task) => ({
             _id: String(task._id),
             title: task.title,

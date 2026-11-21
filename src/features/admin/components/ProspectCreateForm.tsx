@@ -40,7 +40,6 @@ export default function ProspectCreateForm({ onCreated }: { onCreated: () => voi
       }
       onCreated();
       router.push(`/admin/prospects/${result.id}`);
-      router.refresh();
     } catch (error) {
       setError(getDisplayErrorMessage(error, "Unable to add this prospect. Check your connection and try again."));
     } finally {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { getDisplayErrorMessage } from "@/lib/error-message";
@@ -34,7 +33,7 @@ export default function ProjectActions({
   client: { _id: string; name: string };
 }) {
   const [action, setAction] = useState<"edit" | "delete" | null>(null);
-  const router = useRouter();
+  const [archived, setArchived] = useState(Boolean(project.deletedAt));
 
   async function restoreProject() {
     try {
@@ -43,8 +42,8 @@ export default function ProjectActions({
         project._id,
         "Unable to restore project.",
       );
+      setArchived(false);
       toast.success("Project restored.");
-      router.replace(`/admin/clients/${project.clientId}/projects/${project._id}`);
     } catch (error) {
       toast.error(getDisplayErrorMessage(error, "Unable to restore project."));
     }
@@ -54,9 +53,9 @@ export default function ProjectActions({
     <>
       <RecordActionsMenu
         label={`project ${project.name}`}
-        edit={!project.deletedAt ? { onSelect: () => setAction("edit") } : undefined}
+        edit={!archived ? { onSelect: () => setAction("edit") } : undefined}
         restore={
-          project.deletedAt
+          archived
             ? { onSelect: () => void restoreProject() }
             : undefined
         }
@@ -75,14 +74,14 @@ export default function ProjectActions({
         endpoint={`/api/admin/projects/${project._id}`}
         label={`Delete ${project.name}`}
         description={
-          project.deletedAt
+          archived
             ? "Permanently delete this archived project and its related records."
             : "Archive this project and all of its tasks, secrets, documents, and payments."
         }
         redirectTo={`/admin/clients/${project.clientId}`}
         open={action === "delete"}
         onRecovery={() => setAction("delete")}
-        modeOptions={project.deletedAt ? "permanent-only" : "soft-and-permanent"}
+        modeOptions={archived ? "permanent-only" : "soft-and-permanent"}
         onOpenChange={(open) => {
           if (!open) setAction(null);
         }}

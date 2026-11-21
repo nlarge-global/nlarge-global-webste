@@ -16,6 +16,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { formatDateTime } from "@/features/admin/services/date-time";
 import RecordBadge from "@/features/admin/components/RecordBadge";
 import ProspectSearchInput from "@/features/admin/components/ProspectSearchInput";
+import AdminQueryForm from "@/features/admin/components/AdminQueryForm";
 import { parseArchiveFilter } from "@/features/admin/services/archive-filter";
 import { Button } from "@/components/ui/button";
 
@@ -178,8 +179,8 @@ export default async function ProspectsPage({
             </p>
           </div>
         </div>
-        <form
-          method="get"
+        <AdminQueryForm
+          key={JSON.stringify([query, status, source, followUp, archive])}
           className="grid gap-3 border-b border-[#eee8e2] bg-[#fffdfb] p-4 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_12rem_12rem_12rem_12rem_auto]"
         >
           <label className="text-sm font-medium">
@@ -254,7 +255,7 @@ export default async function ProspectsPage({
               </Link>
             )}
           </div>
-        </form>
+        </AdminQueryForm>
 
         {prospects.length === 0 ? (
           <div className="px-5 py-12 text-center">

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { FiCheck, FiX } from "react-icons/fi";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
@@ -92,7 +92,6 @@ export default function SecretManager({
   const [revealPassword, setRevealPassword] = useState("");
   const [revealError, setRevealError] = useState("");
   const [copied, setCopied] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   useEffect(() => {
     setArchive(
@@ -207,7 +206,6 @@ export default function SecretManager({
       setError("");
       setFormSecret(null);
       if (!editing) setPage(1);
-      router.refresh();
       return null;
     } catch (reason) {
       setSecrets(previousSecrets);
@@ -242,7 +240,6 @@ export default function SecretManager({
         Math.max(1, Math.ceil(nextTotal / pageSize)),
       );
       setPage(nextPage);
-      router.refresh();
     } catch (reason) {
       setSecrets((current) => {
         const restored = [...current];
@@ -285,7 +282,6 @@ export default function SecretManager({
         );
       }
       toast.success("Secret restored.");
-      router.refresh();
     } catch (reason) {
       toast.error(getDisplayErrorMessage(reason, "Unable to restore secret."));
     }

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Footer from "@/components/layout/Footer";
 import Navigation from "@/components/layout/Navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,6 +54,7 @@ export default function ContactForm({
   const [submitError, setSubmitError] = useState("");
   const submissionRef = useRef<{ key: string; payload: string } | null>(null);
   const statusDialogRef = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -326,13 +329,24 @@ export default function ContactForm({
                       <span>
                         {privacyAcknowledgement.map((segment, index) =>
                           segment.href ? (
-                            <a
-                              key={`${segment.href}-${index}`}
-                              href={segment.href}
-                              className="font-semibold text-[#602329] underline underline-offset-4"
-                            >
-                              {segment.text}
-                            </a>
+                            segment.href.startsWith("/") &&
+                            !segment.href.startsWith("//") ? (
+                              <Link
+                                key={`${segment.href}-${index}`}
+                                href={segment.href}
+                                className="font-semibold text-[#602329] underline underline-offset-4"
+                              >
+                                {segment.text}
+                              </Link>
+                            ) : (
+                              <a
+                                key={`${segment.href}-${index}`}
+                                href={segment.href}
+                                className="font-semibold text-[#602329] underline underline-offset-4"
+                              >
+                                {segment.text}
+                              </a>
+                            )
                           ) : (
                             <span key={index}>{segment.text}</span>
                           ),
@@ -363,19 +377,19 @@ export default function ContactForm({
                   <p className="pt-1 text-sm leading-6 text-black/65">
                     Submitting this form saves your inquiry in our Admin
                     dashboard; it does not send an email. See our{" "}
-                    <a
+                    <Link
                       href="/terms-of-service"
                       className="font-semibold text-[#602329] underline underline-offset-4"
                     >
                       Terms of Service
-                    </a>{" "}
+                    </Link>{" "}
                     or visit{" "}
-                    <a
+                    <Link
                       href="/support"
                       className="font-semibold text-[#602329] underline underline-offset-4"
                     >
                       Support
-                    </a>{" "}
+                    </Link>{" "}
                     to email us or submit a privacy request.
                   </p>
                 </div>
@@ -416,17 +430,24 @@ export default function ContactForm({
                     {submitStatus === "success"
                       ? "We’ve received your message and will get back to you as soon as possible."
                       : submitStatus === "stale"
-                        ? "The policy or consent wording has changed. Reload this page to review the current wording, then submit again."
+                        ? "The policy or consent wording has changed. Refresh this page to review the current wording, then submit again."
                         : submitError || "Something went wrong. Please try again."}
                   </p>
                   <div className="mt-7 flex flex-wrap justify-end gap-3">
                     {submitStatus === "stale" && (
                       <button
                         type="button"
-                        onClick={() => window.location.reload()}
+                        onClick={() => {
+                          statusDialogRef.current?.close();
+                          setSubmitStatus("idle");
+                          setSubmitError("");
+                          submissionRef.current = null;
+                          reset();
+                          router.refresh();
+                        }}
                         className="min-h-11 rounded-full bg-[#602329] px-5 text-sm font-semibold text-white transition-colors hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#602329] cursor-pointer"
                       >
-                        Reload page
+                        Refresh page
                       </button>
                     )}
                     <button

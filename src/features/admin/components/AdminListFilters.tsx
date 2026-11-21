@@ -1,4 +1,5 @@
 import { Button } from "./ui/Button";
+import AdminQueryForm from "./AdminQueryForm";
 import ClearAdminFiltersButton from "./ClearAdminFiltersButton";
 import {
   getActiveFilters,
@@ -17,7 +18,10 @@ export default function AdminListFilters({
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <form method="get" className="flex flex-wrap items-end justify-end gap-3">
+      <AdminQueryForm
+        key={fields.map((field) => `${field.name}:${field.value}`).join("|")}
+        className="flex flex-wrap items-end justify-end gap-3"
+      >
         {Object.entries(preserve).map(([name, value]) =>
           value && !fieldNames.has(name) ? (
             <input key={name} type="hidden" name={name} value={value} />
@@ -42,7 +46,7 @@ export default function AdminListFilters({
           </label>
         ))}
         <Button type="submit">Apply</Button>
-      </form>
+      </AdminQueryForm>
       {activeFilters.length > 0 && (
         <div
           role="status"
